@@ -132,3 +132,11 @@ svg {
 *:after {
   box-sizing: border-box;
 }
+
+/* მობილურის ვერსიისთვის (როცა ეკრანი 768px-ზე პატარაა) */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}

@@ -39,47 +39,37 @@ export default function App() {
       >
         {/* ნავიგაციის ჰედერი */}
         <nav
+          className="nav-container"
           style={{
             display: "flex",
-            flexDirection: "column", // მობილურზე ელემენტები სვეტად ჩამოლაგდება
+            flexDirection: "row", // კომპიუტერზე იქნება მკაცრად ერთ ხაზზე
+            justifyContent: "space-between",
             alignItems: "center",
-            gap: "12px",
-            padding: "15px 20px",
+            padding: "20px 40px",
             backgroundColor: "#ffffff",
             boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
             boxSizing: "border-box",
             width: "100%",
           }}
         >
-          <div
+          <Link
+            to="/"
             style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "center", // ლოგო იქნება ცენტრში (ან შეგიძლიათ შეცვალოთ "flex-start"-ზე სურვილისამებრ)
-              alignItems: "center",
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              color: "#2c3e50",
+              textDecoration: "none",
             }}
           >
-            <Link
-              to="/"
-              style={{
-                fontSize: "1.4rem",
-                fontWeight: "bold",
-                color: "#2c3e50",
-                textDecoration: "none",
-              }}
-            >
-              🕹️ RetroStore
-            </Link>
-          </div>
+            🕹️ RetroStore
+          </Link>
 
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
+              gap: "12px",
               flexWrap: "wrap",
-              width: "100%",
             }}
           >
             <Link
@@ -87,11 +77,11 @@ export default function App() {
               style={{
                 backgroundColor: "#3498db",
                 color: "white",
-                padding: "6px 12px",
+                padding: "8px 16px",
                 borderRadius: "8px",
                 textDecoration: "none",
                 fontWeight: "600",
-                fontSize: "0.85rem",
+                fontSize: "0.95rem",
               }}
             >
               კალათა 🛒 ({totalItems})
@@ -104,11 +94,11 @@ export default function App() {
                   backgroundColor: "#e74c3c",
                   color: "white",
                   border: "none",
-                  padding: "6px 12px",
+                  padding: "8px 16px",
                   borderRadius: "8px",
                   cursor: "pointer",
                   fontWeight: "600",
-                  fontSize: "0.85rem",
+                  fontSize: "0.95rem",
                 }}
               >
                 გასვლა
@@ -121,8 +111,8 @@ export default function App() {
                     color: "#2c3e50",
                     textDecoration: "none",
                     fontWeight: "600",
-                    padding: "6px 10px",
-                    fontSize: "0.85rem",
+                    padding: "8px 12px",
+                    fontSize: "0.95rem",
                   }}
                 >
                   შესვლა
@@ -132,11 +122,11 @@ export default function App() {
                   style={{
                     backgroundColor: "#2ecc71",
                     color: "white",
-                    padding: "6px 12px",
+                    padding: "8px 16px",
                     borderRadius: "8px",
                     textDecoration: "none",
                     fontWeight: "600",
-                    fontSize: "0.85rem",
+                    fontSize: "0.95rem",
                   }}
                 >
                   რეგისტრაცია
