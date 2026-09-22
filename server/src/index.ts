@@ -12,8 +12,19 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "";
 
-// Middleware
-app.use(cors());
+// Middleware - აქ ჩავსვით CORS-ის სწორი პარამეტრები
+app.use(
+  cors({
+    origin: [
+      "https://retrobit.ge",
+      "https://www.retrobit.ge",
+      "http://localhost:5173",
+      "http://localhost:5000",
+    ],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 // Routes
