@@ -1,14 +1,14 @@
 import axios from "axios";
 
-// ვქმნით axios-ის ინსტანსს ჩვენი ბექენდის ძირითადი URL-ით
+// ვქმნით axios-ის ინსტანსს ბექენდის ძირითადი URL-ით (გადართულია Render-ის ლაივ სერვერზე)
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // მიუთითე შენი ბექენდის პორტი, თუ განსხვავებულია
+  baseURL: "https://retro-store.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// (სურვილისამებრ) ტოკენის ავტომატურად მიმაგრება მოთხოვნებზე, როცა იუზერი გაივლის ავტორიზაციას
+// ტოკენის ავტომატურად მიმაგრება მოთხოვნებზე
 API.interceptors.request.use((config) => {
   const userInfo = localStorage.getItem("userInfo");
   if (userInfo) {
