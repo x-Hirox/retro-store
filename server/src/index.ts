@@ -41,6 +41,6 @@ mongoose
   .then(() => console.log("🍃 MongoDB Atlas ბაზასთან კავშირი დამყარებულია!"))
   .catch((err) => console.error("❌ MongoDB კავშირის შეცდომა:", err));
 
-app.listen(PORT, () => {
-  console.log(`🚀 სერვერი გაეშვა: http://localhost:${PORT}`);
+app.listen(Number(PORT), "0.0.0.0", () => {
+  console.log(`🚀 სერვერი გაეშვა პორტზე: ${PORT}`);
 });
