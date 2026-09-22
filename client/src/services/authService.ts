@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/auth"; // შეიცვალე შენი ბექენდის პორტის მიხედვით თუ საჭიროა
+import API from "./api"; // 🟢 ვტვირთავთ უკვე გამართულ API ინსტანსს api.ts-იდან
 
 export interface IAuthResponse {
   token: string;
@@ -17,7 +15,8 @@ export const registerUser = async (userData: {
   password: string;
   name?: string;
 }) => {
-  const response = await axios.post(`${API_URL}/register`, userData);
+  // 🟢 /auth/register ავტომატურად დაემატება https://retro-store.onrender.com/api-ს
+  const response = await API.post("/auth/register", userData);
   return response.data;
 };
 
@@ -26,6 +25,6 @@ export const loginUser = async (userData: {
   email: string;
   password: string;
 }) => {
-  const response = await axios.post(`${API_URL}/login`, userData);
+  const response = await API.post("/auth/login", userData);
   return response.data;
 };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import axios from "axios";
+import API from "../services/api"; // 🟢 ვიყენებთ უკვე გამართულ API ინსტანსს
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
@@ -35,7 +35,7 @@ export default function Checkout() {
       return;
     }
 
-    // 🟢 აქ დაემატა ტელეფონის ნომრის ვალიდაცია (უშვებს როგორც უცხოურ, ისე ქართულ ნომრებს პლუსით ან მის გარეშე)
+    // 🟢 ტელეფონის ნომრის ვალიდაცია
     const phoneRegex = /^\+?[0-9]{9,15}$/;
     if (!phoneRegex.test(formData.phone)) {
       alert(
@@ -73,11 +73,8 @@ export default function Checkout() {
         totalPrice: totalAmount,
       };
 
-      await axios.post("http://localhost:5000/api/orders", orderData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // 🟢 ვიყენებთ API.post-ს (რომელიც ავტომატურად მიმართავს Render-ის ლაივ სერვერს)
+      await API.post("/orders", orderData);
 
       if (formData.paymentMethod === "card") {
         alert(
