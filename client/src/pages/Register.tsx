@@ -45,16 +45,19 @@ export default function Register() {
         alignItems: "center",
         minHeight: "80vh",
         backgroundColor: "#f8f9fa",
+        padding: "16px", // დამატებულია მობილურისთვის, რომ კიდეებს არ მიეკრას
+        boxSizing: "border-box",
       }}
     >
       <div
         style={{
           backgroundColor: "white",
-          padding: "40px",
+          padding: "30px 20px", // ოპტიმიზებულია მობილური ეკრანებისთვის
           borderRadius: "16px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           width: "100%",
           maxWidth: "400px",
+          boxSizing: "border-box",
         }}
       >
         <h2
@@ -107,6 +110,7 @@ export default function Register() {
                 borderRadius: "8px",
                 border: "1px solid #ced4da",
                 fontSize: "1rem",
+                boxSizing: "border-box",
               }}
             />
           </div>
@@ -132,6 +136,7 @@ export default function Register() {
                 borderRadius: "8px",
                 border: "1px solid #ced4da",
                 fontSize: "1rem",
+                boxSizing: "border-box",
               }}
             />
           </div>
@@ -157,6 +162,7 @@ export default function Register() {
                 borderRadius: "8px",
                 border: "1px solid #ced4da",
                 fontSize: "1rem",
+                boxSizing: "border-box",
               }}
             />
           </div>
@@ -183,6 +189,7 @@ export default function Register() {
                 borderRadius: "8px",
                 border: "1px solid #ced4da",
                 fontSize: "1rem",
+                boxSizing: "border-box",
               }}
             />
 
