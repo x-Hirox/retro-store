@@ -41,35 +41,45 @@ export default function App() {
         <nav
           style={{
             display: "flex",
-            justifyContent: "space-between",
+            flexDirection: "column", // მობილურზე ელემენტები სვეტად ჩამოლაგდება
             alignItems: "center",
-            flexWrap: "wrap", // <--- მთავარი ცვლილება: მობილურზე თუ არ ჩაევევა, ქვემოთ ჩამოიტანს
             gap: "12px",
-            padding: "15px 20px", // შევამცირეთ პედინგები მობილურისთვის ოპტიმალურად
+            padding: "15px 20px",
             backgroundColor: "#ffffff",
             boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
             boxSizing: "border-box",
             width: "100%",
           }}
         >
-          <Link
-            to="/"
+          <div
             style={{
-              fontSize: "1.3rem",
-              fontWeight: "bold",
-              color: "#2c3e50",
-              textDecoration: "none",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center", // ლოგო იქნება ცენტრში (ან შეგიძლიათ შეცვალოთ "flex-start"-ზე სურვილისამებრ)
+              alignItems: "center",
             }}
           >
-            🕹️ RetroStore
-          </Link>
+            <Link
+              to="/"
+              style={{
+                fontSize: "1.4rem",
+                fontWeight: "bold",
+                color: "#2c3e50",
+                textDecoration: "none",
+              }}
+            >
+              🕹️ RetroStore
+            </Link>
+          </div>
 
           <div
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: "8px",
-              flexWrap: "wrap", // <--- ღილაკებიც რომ თავისუფლად განაწილდეს
+              flexWrap: "wrap",
+              width: "100%",
             }}
           >
             <Link
@@ -111,7 +121,7 @@ export default function App() {
                     color: "#2c3e50",
                     textDecoration: "none",
                     fontWeight: "600",
-                    padding: "6px 8px",
+                    padding: "6px 10px",
                     fontSize: "0.85rem",
                   }}
                 >
