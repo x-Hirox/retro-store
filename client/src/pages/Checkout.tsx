@@ -11,8 +11,9 @@ export default function Checkout() {
     fullName: "",
     address: "",
     city: "თბილისი",
+    customCity: "", // დამატებულია სხვა რეგიონისთვის
     phone: "",
-    paymentMethod: "card", // card (TBC/BOG) ან cash (ნაღდი ანგარიშსწორება)
+    paymentMethod: "card",
   });
 
   const totalAmount = cart.reduce(
@@ -34,8 +35,30 @@ export default function Checkout() {
       return;
     }
 
+    // 🟢 აქ დაემატა ტელეფონის ნომრის ვალიდაცია (უშვებს როგორც უცხოურ, ისე ქართულ ნომრებს პლუსით ან მის გარეშე)
+    const phoneRegex = /^\+?[0-9]{9,15}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      alert(
+        "გთხოვთ მიუთითოთ ტელეფონის სწორი ნომერი (მაგ: +995599123456 ან 599123456)",
+      );
+      return;
+    }
+
+    // ვამოწმებთ არის თუ არა ტოკენი სანამ მოთხოვნას გავაგზავნით
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("გთხოვთ გაიაროთ ავტორიზაცია თავიდან!");
+      navigate("/login");
+      return;
+    }
+
     try {
-      // ვამზადებთ შეკვეთის მონაცემებს ბექენდის სქემის მიხედვით
+      // საბოლოო ქალაქი: თუ არჩეულია "სხვა რეგიონები", ვიღებთ customCity-ს მნიშვნელობას
+      const finalCity =
+        formData.city === "სხვა რეგიონები"
+          ? formData.customCity
+          : formData.city;
+
       const orderData = {
         orderItems: cart.map((item) => ({
           product: item._id,
@@ -43,17 +66,13 @@ export default function Checkout() {
         })),
         shippingAddress: {
           address: formData.address,
-          city: formData.city,
+          city: finalCity,
           postalCode: "0100",
           phone: formData.phone,
         },
         totalPrice: totalAmount,
       };
 
-      // ვკითხულობთ ტოკენს localStorage-დან ავტორიზაციისთვის
-      const token = localStorage.getItem("token");
-
-      // ვგზავნით მონაცემებს ბექენდის როუტზე axios-ის გამოყენებით
       await axios.post("http://localhost:5000/api/orders", orderData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -168,6 +187,35 @@ export default function Checkout() {
                 <option value="სხვა რეგიონები">სხვა რეგიონები</option>
               </select>
             </div>
+
+            {/* თუ არჩეულია სხვა რეგიონები, გამოჩნდება ტექსტური ველი */}
+            {formData.city === "სხვა რეგიონები" && (
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    color: "#7f8c8d",
+                    marginBottom: "5px",
+                  }}
+                >
+                  მიუთითეთ რეგიონი / ქალაქი
+                </label>
+                <input
+                  type="text"
+                  name="customCity"
+                  value={formData.customCity}
+                  onChange={handleChange}
+                  required
+                  placeholder="მაგ: გორი, ფოთი, თელავი..."
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    border: "1px solid #ced4da",
+                  }}
+                />
+              </div>
+            )}
 
             <div>
               <label

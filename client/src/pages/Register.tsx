@@ -7,6 +7,7 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // დამატებულია
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -14,7 +15,13 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    // ვამოწმებთ პაროლის სირთულეს სერვერზე გაგზავნამდე
+    // 1. ვამოწმებთ ემთხვევა თუ არა პაროლები ერთმანეთს
+    if (password !== confirmPassword) {
+      setError("პაროლები არ ემთხვევა ერთმანეთს!");
+      return;
+    }
+
+    // 2. ვამოწმებთ პაროლის სირთულეს სერვერზე გაგზავნამდე
     const passwordError = validatePassword(password);
     if (passwordError) {
       setError(passwordError);
@@ -143,6 +150,32 @@ export default function Register() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1px solid #ced4da",
+                fontSize: "1rem",
+              }}
+            />
+          </div>
+
+          {/* პაროლის გამეორების ველი */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                color: "#7f8c8d",
+                marginBottom: "5px",
+              }}
+            >
+              გაიმეორეთ პაროლი
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
               style={{
                 width: "100%",
