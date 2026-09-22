@@ -6,14 +6,14 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { useCart } from "./context/CartContext";
 import { useEffect, useState } from "react";
-import Checkout from "./pages/Checkout"; // <--- Checkout გვერდის იმპორტი
-import ForgotPassword from "./pages/ForgotPassword"; // <--- ForgotPassword გვერდის იმპორტი
+import Checkout from "./pages/Checkout";
+import ForgotPassword from "./pages/ForgotPassword";
+
 export default function App() {
   const { cart } = useCart();
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [token, setToken] = useState<string | null>(null);
 
-  // ვამოწმებთ ტოკენს localStorage-დან
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
@@ -28,22 +28,34 @@ export default function App() {
 
   return (
     <Router>
-      <div style={{ minHeight: "100vh", backgroundColor: "#f8f9fa" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#f8f9fa",
+          width: "100%",
+          boxSizing: "border-box",
+          overflowX: "hidden",
+        }}
+      >
         {/* ნავიგაციის ჰედერი */}
         <nav
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "20px 40px",
+            flexWrap: "wrap", // <--- მთავარი ცვლილება: მობილურზე თუ არ ჩაევევა, ქვემოთ ჩამოიტანს
+            gap: "12px",
+            padding: "15px 20px", // შევამცირეთ პედინგები მობილურისთვის ოპტიმალურად
             backgroundColor: "#ffffff",
             boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+            boxSizing: "border-box",
+            width: "100%",
           }}
         >
           <Link
             to="/"
             style={{
-              fontSize: "1.5rem",
+              fontSize: "1.3rem",
               fontWeight: "bold",
               color: "#2c3e50",
               textDecoration: "none",
@@ -52,17 +64,24 @@ export default function App() {
             🕹️ RetroStore
           </Link>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              flexWrap: "wrap", // <--- ღილაკებიც რომ თავისუფლად განაწილდეს
+            }}
+          >
             <Link
               to="/cart"
               style={{
                 backgroundColor: "#3498db",
                 color: "white",
-                padding: "8px 16px",
+                padding: "6px 12px",
                 borderRadius: "8px",
                 textDecoration: "none",
                 fontWeight: "600",
-                fontSize: "0.95rem",
+                fontSize: "0.85rem",
               }}
             >
               კალათა 🛒 ({totalItems})
@@ -75,14 +94,14 @@ export default function App() {
                   backgroundColor: "#e74c3c",
                   color: "white",
                   border: "none",
-                  padding: "8px 16px",
+                  padding: "6px 12px",
                   borderRadius: "8px",
                   cursor: "pointer",
                   fontWeight: "600",
-                  fontSize: "0.95rem",
+                  fontSize: "0.85rem",
                 }}
               >
-                გასვლა (Logout)
+                გასვლა
               </button>
             ) : (
               <>
@@ -92,8 +111,8 @@ export default function App() {
                     color: "#2c3e50",
                     textDecoration: "none",
                     fontWeight: "600",
-                    padding: "8px 12px",
-                    fontSize: "0.95rem",
+                    padding: "6px 8px",
+                    fontSize: "0.85rem",
                   }}
                 >
                   შესვლა
@@ -103,11 +122,11 @@ export default function App() {
                   style={{
                     backgroundColor: "#2ecc71",
                     color: "white",
-                    padding: "8px 16px",
+                    padding: "6px 12px",
                     borderRadius: "8px",
                     textDecoration: "none",
                     fontWeight: "600",
-                    fontSize: "0.95rem",
+                    fontSize: "0.85rem",
                   }}
                 >
                   რეგისტრაცია
