@@ -55,15 +55,15 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden; /* ბლოკავს ჰორიზონტალურ სქროლსა და შავ ზოლებს */
-  overflow-y: auto; /* უზრუნველყოფს ვერტიკალურ სქროლს და გვერდის სრიალს */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #root {
   width: 100%;
   max-width: 1126px;
   margin: 0 auto;
-  text-align: center;
+  /* ამოღებულია text-align: center, რომ თავიდან ავიცილოთ ნავბარის დაზიანება */
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
@@ -137,6 +137,18 @@ svg {
 @media (max-width: 768px) {
   .nav-container {
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 15px !important;
+    padding: 15px 20px !important;
+    text-align: center !important;
+  }
+  .nav-links {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+  .nav-links a,
+  .nav-links button {
+    width: 100% !important;
+    text-align: center !important;
   }
 }

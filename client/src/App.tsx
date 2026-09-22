@@ -42,14 +42,14 @@ export default function App() {
           className="nav-container"
           style={{
             display: "flex",
-            flexDirection: "row", // კომპიუტერზე იქნება მკაცრად ერთ ხაზზე
             justifyContent: "space-between",
             alignItems: "center",
+            width: "100%",
             padding: "20px 40px",
             backgroundColor: "#ffffff",
             boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
             boxSizing: "border-box",
-            width: "100%",
+            textAlign: "left", // ვუუქმებთ გლობალურ ცენტრში გასწორებას
           }}
         >
           <Link
@@ -65,11 +65,11 @@ export default function App() {
           </Link>
 
           <div
+            className="nav-links"
             style={{
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              flexWrap: "wrap",
             }}
           >
             <Link
