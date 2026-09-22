@@ -116,3 +116,19 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ყველა სურათი, ვიდეო და ბლოკი ავტომატურად მოერგება ეკრანს */
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* გამორიცხავს ელემენტების მიერ ეკრანის გაფართოებას */
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
