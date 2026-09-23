@@ -25,21 +25,51 @@ export default function Home() {
       style={{
         minHeight: "100vh",
         backgroundColor: "#f8f9fa",
-        padding: "40px 20px",
+        paddingBottom: "60px",
       }}
     >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* სათაური */}
-        <header style={{ marginBottom: "30px", textAlign: "center" }}>
-          <h1
-            style={{ color: "#2c3e50", fontSize: "2.5rem", fontWeight: "bold" }}
+      {/* Hero სარეკლამო ბანერი */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #111111 0%, #2c3e50 100%)",
+          color: "#fff",
+          padding: "50px 20px",
+          textAlign: "center",
+          marginBottom: "40px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "2.3rem",
+            marginBottom: "15px",
+            fontWeight: "bold",
+          }}
+        >
+          დაუბრუნდი ბავშვობის საუკეთესო მომენტებს! 🎮
+        </h1>
+        <p
+          style={{
+            fontSize: "1.1rem",
+            color: "#cbd5e1",
+            maxWidth: "600px",
+            margin: "0 auto",
+          }}
+        >
+          აღმოაჩინე ლეგენდარული რეტრო კონსოლები, ორიგინალური თამაშები და
+          აქსესუარები.
+        </p>
+      </div>
+
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
+        {/* კატალოგის სათაური */}
+        <div style={{ marginBottom: "25px", textAlign: "left" }}>
+          <h2
+            style={{ color: "#2c3e50", fontSize: "1.8rem", fontWeight: "bold" }}
           >
-            🕹️ რეტრო მაღაზია - კოლექცია
-          </h1>
-          <p style={{ color: "#7f8c8d", fontSize: "1.1rem" }}>
-            აღმოაჩინე ლეგენდარული კონსოლები და თამაშები
-          </p>
-        </header>
+            🔥 პოპულარული კოლექცია
+          </h2>
+        </div>
 
         {/* იტვირთება ინდიკატორი */}
         {loading ? (
@@ -52,6 +82,19 @@ export default function Home() {
             }}
           >
             იტვირთება რეტრო სამყარო...
+          </div>
+        ) : products.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "40px",
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+            }}
+          >
+            <p style={{ color: "#7f8c8d", fontSize: "1.1rem" }}>
+              პროდუქტები ამჟამად არ მოიძებნება.
+            </p>
           </div>
         ) : (
           /* Grid ბადე პროდუქტებისთვის */
@@ -74,6 +117,7 @@ export default function Home() {
                   flexDirection: "column",
                   transition: "transform 0.2s ease, box-shadow 0.2s ease",
                   cursor: "pointer",
+                  border: "1px solid #e2e8f0",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-5px)";
@@ -86,19 +130,30 @@ export default function Home() {
                     "0 4px 15px rgba(0,0,0,0.05)";
                 }}
               >
-                {/* სურათის ადგილი */}
+                {/* სურათი ან ფოლბექი (imageUrl გამოყენებულია) */}
                 <div
                   style={{
-                    height: "200px",
-                    backgroundColor: "#e9ecef",
+                    height: "190px",
+                    backgroundColor: "#f1f5f9",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#adb5bd",
-                    fontSize: "0.9rem",
+                    overflow: "hidden",
                   }}
                 >
-                  სურათი არ არის
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: "3rem" }}>🕹️</span>
+                  )}
                 </div>
 
                 {/* კონტენტი */}
@@ -113,8 +168,9 @@ export default function Home() {
                   <h3
                     style={{
                       margin: "0 0 10px 0",
-                      color: "#343d46",
-                      fontSize: "1.25rem",
+                      color: "#1e293b",
+                      fontSize: "1.2rem",
+                      fontWeight: "bold",
                     }}
                   >
                     {product.title}
@@ -122,10 +178,14 @@ export default function Home() {
                   <p
                     style={{
                       margin: "0 0 20px 0",
-                      color: "#656d78",
+                      color: "#64748b",
                       fontSize: "0.95rem",
                       lineHeight: "1.5",
                       flex: 1,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
                     }}
                   >
                     {product.description}
@@ -141,30 +201,30 @@ export default function Home() {
                   >
                     <span
                       style={{
-                        fontSize: "1.4rem",
+                        fontSize: "1.3rem",
                         fontWeight: "bold",
-                        color: "#e74c3c",
+                        color: "#ff6600",
                       }}
                     >
-                      ${product.price}
+                      {product.price} ₾
                     </span>
                     <button
                       onClick={() => navigate(`/product/${product._id}`)}
                       style={{
-                        backgroundColor: "#3498db",
+                        backgroundColor: "#3b82f6",
                         color: "white",
                         border: "none",
-                        padding: "10px 18px",
+                        padding: "8px 16px",
                         borderRadius: "8px",
                         cursor: "pointer",
                         fontWeight: "600",
                         transition: "background-color 0.2s",
                       }}
                       onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#2980b9")
+                        (e.currentTarget.style.backgroundColor = "#2563eb")
                       }
                       onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#3498db")
+                        (e.currentTarget.style.backgroundColor = "#3b82f6")
                       }
                     >
                       დეტალები

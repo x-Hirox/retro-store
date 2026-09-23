@@ -11,7 +11,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 
 export default function App() {
   const { cart } = useCart();
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = cart.reduce(
+    (sum: number, item: { quantity: number }) => sum + item.quantity,
+    0,
+  );
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,104 +40,181 @@ export default function App() {
           overflowX: "hidden",
         }}
       >
-        {/* ნავიგაციის ჰედერი */}
-        <nav
-          className="nav-container"
+        {/* პროფესიონალური ჰედერი */}
+        <header
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
             width: "100%",
-            padding: "20px 40px",
             backgroundColor: "#ffffff",
             boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-            boxSizing: "border-box",
-            textAlign: "left", // ვუუქმებთ გლობალურ ცენტრში გასწორებას
           }}
         >
-          <Link
-            to="/"
+          {/* ზედა თხელი საინფორმაციო ზოლი */}
+          <div
             style={{
-              fontSize: "1.5rem",
-              fontWeight: "bold",
-              color: "#2c3e50",
-              textDecoration: "none",
+              backgroundColor: "#ff6600",
+              color: "#fff",
+              fontSize: "0.85rem",
+              padding: "6px 20px",
+              textAlign: "center",
+              fontWeight: "500",
             }}
           >
-            🕹️ RetroStore
-          </Link>
+            🔥 უფასო მიწოდება და 1 წლიანი გარანტია ყველა რეტრო კონსოლზე!
+          </div>
 
+          {/* მთავარი ნავბარი */}
           <div
-            className="nav-links"
+            className="nav-container"
             style={{
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              gap: "12px",
+              width: "100%",
+              padding: "15px 40px",
+              boxSizing: "border-box",
+              textAlign: "left",
             }}
           >
+            {/* ლოგო */}
             <Link
-              to="/cart"
+              to="/"
               style={{
-                backgroundColor: "#3498db",
-                color: "white",
-                padding: "8px 16px",
-                borderRadius: "8px",
+                fontSize: "1.6rem",
+                fontWeight: "bold",
+                color: "#2c3e50",
                 textDecoration: "none",
-                fontWeight: "600",
-                fontSize: "0.95rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
               }}
             >
-              კალათა 🛒 ({totalItems})
+              🕹️ RetroStore
             </Link>
 
-            {token ? (
-              <button
-                onClick={handleLogout}
+            {/* ძებნის ველი */}
+            <div style={{ flex: 1, maxWidth: "450px", margin: "0 20px" }}>
+              <input
+                type="text"
+                placeholder="მოძებნე თამაშები და კონსოლები..."
                 style={{
-                  backgroundColor: "#e74c3c",
+                  width: "100%",
+                  padding: "10px 16px",
+                  borderRadius: "20px",
+                  border: "1px solid #ddd",
+                  outline: "none",
+                  fontSize: "0.95rem",
+                  backgroundColor: "#f9f9f9",
+                }}
+              />
+            </div>
+
+            {/* ღილაკები */}
+            <div
+              className="nav-links"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <Link
+                to="/cart"
+                style={{
+                  backgroundColor: "#3498db",
                   color: "white",
-                  border: "none",
                   padding: "8px 16px",
                   borderRadius: "8px",
-                  cursor: "pointer",
+                  textDecoration: "none",
                   fontWeight: "600",
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                 }}
               >
-                გასვლა
-              </button>
-            ) : (
-              <>
-                <Link
-                  to="/login"
+                კალათა 🛒 ({totalItems})
+              </Link>
+
+              {token ? (
+                <button
+                  onClick={handleLogout}
                   style={{
-                    color: "#2c3e50",
-                    textDecoration: "none",
-                    fontWeight: "600",
-                    padding: "8px 12px",
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  შესვლა
-                </Link>
-                <Link
-                  to="/register"
-                  style={{
-                    backgroundColor: "#2ecc71",
+                    backgroundColor: "#e74c3c",
                     color: "white",
+                    border: "none",
                     padding: "8px 16px",
                     borderRadius: "8px",
-                    textDecoration: "none",
+                    cursor: "pointer",
                     fontWeight: "600",
-                    fontSize: "0.95rem",
+                    fontSize: "0.9rem",
                   }}
                 >
-                  რეგისტრაცია
-                </Link>
-              </>
-            )}
+                  გასვლა
+                </button>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    style={{
+                      color: "#2c3e50",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                      padding: "8px 12px",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    შესვლა
+                  </Link>
+                  <Link
+                    to="/register"
+                    style={{
+                      backgroundColor: "#2ecc71",
+                      color: "white",
+                      padding: "8px 16px",
+                      borderRadius: "8px",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    რეგისტრაცია
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
-        </nav>
+
+          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ */}
+          <nav
+            style={{
+              backgroundColor: "#111",
+              padding: "10px 40px",
+              display: "flex",
+              gap: "25px",
+              overflowX: "auto",
+            }}
+          >
+            {[
+              "Nintendo",
+              "PlayStation",
+              "Xbox",
+              "Sega",
+              "Atari & More",
+              "Bundles",
+              "Sell Your Games",
+            ].map((cat, index) => (
+              <span
+                key={index}
+                style={{
+                  color: "#fff",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  fontWeight: "500",
+                }}
+              >
+                {cat}
+              </span>
+            ))}
+          </nav>
+        </header>
 
         {/* როუტები */}
         <Routes>
