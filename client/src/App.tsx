@@ -8,6 +8,7 @@ import { useCart } from "./context/CartContext";
 import { useEffect, useState } from "react";
 import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
+import Admin from "./pages/Admin";
 
 export default function App() {
   const { cart } = useCart();
@@ -104,6 +105,7 @@ export default function App() {
                   outline: "none",
                   fontSize: "0.95rem",
                   backgroundColor: "#f9f9f9",
+                  color: "#000", // დაემატა ტექსტის მკაფიო შავი ფერი
                 }}
               />
             </div>
@@ -225,6 +227,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
     </Router>
