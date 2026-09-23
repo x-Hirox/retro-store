@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProductById } from "../services/productService";
-import { useCart } from "../context/CartContext"; // <--- 1. შემოვიტანეთ useCart
+import { useCart } from "../context/CartContext";
 import type { IProduct } from "../types";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart } = useCart(); // <--- 2. ამოვღეთ addToCart ფუნქცია
+  const { addToCart } = useCart();
   const [product, setProduct] = useState<IProduct | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,20 +107,31 @@ export default function ProductDetail() {
             alignItems: "center",
           }}
         >
-          {/* სურათის ადგილი */}
+          {/* სურათის დინამიური გამოტანა ბაზიდან */}
           <div
             style={{
               height: "350px",
-              backgroundColor: "#e9ecef",
               borderRadius: "12px",
+              overflow: "hidden",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#adb5bd",
-              fontSize: "1.1rem",
+              backgroundColor: "#e9ecef",
             }}
           >
-            სურათი არ არის
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt={product.title}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <span style={{ color: "#adb5bd" }}>სურათი არ არის</span>
+            )}
           </div>
 
           {/* პროდუქტის ინფორმაცია */}
@@ -175,7 +186,7 @@ export default function ProductDetail() {
                 (e.currentTarget.style.backgroundColor = "#2ecc71")
               }
               onClick={() => {
-                addToCart(product); // <--- 3. გამოვიყენეთ ჩვენი კონტექსტის ფუნქცია
+                addToCart(product);
                 alert("პროდუქტი წარმატებით დაემატა კალათაში! 🛒");
               }}
             >
