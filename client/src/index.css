@@ -61,7 +61,6 @@ body {
 
 #root {
   width: 100%;
-  /* მოიხსნა max-width და border-inline, რომ სრულ ეკრანზე გაიშალოს */
   margin: 0;
   min-height: 100svh;
   display: flex;
@@ -143,22 +142,46 @@ svg {
   color: #fff !important;
 }
 
-/* მობილურის ვერსიისთვის (როცა ეკრანი 768px-ზე პატარაა) */
+/* ==========================================
+   მობილურის ვერსიის სრულყოფილი გასწორება
+   ========================================== */
 @media (max-width: 768px) {
   .nav-container {
     flex-direction: column !important;
-    gap: 15px !important;
-    padding: 15px 20px !important;
+    gap: 12px !important;
+    padding: 12px 15px !important;
     text-align: center !important;
-  }
-  .nav-links {
-    flex-direction: column !important;
     width: 100% !important;
-    gap: 10px !important;
   }
+
+  /* ძებნის ველი მობილურზე რომ სრულად ჩანდეს */
+  .nav-container > div:nth-child(2) {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .nav-links {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
   .nav-links a,
   .nav-links button {
-    width: 100% !important;
-    text-align: center !important;
+    width: auto !important;
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* კატეგორიების ზოლის ჰორიზონტალური გადახვევა მობილურზე */
+  nav[style*="background-color: #111"] {
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding: 10px 15px !important;
+    justify-content: flex-start !important;
+    gap: 20px !important;
   }
 }
