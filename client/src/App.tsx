@@ -100,8 +100,8 @@ export default function App() {
             style={{
               backgroundColor: "#ff6600",
               color: "#fff",
-              fontSize: "0.8rem",
-              padding: "8px 15px",
+              fontSize: "0.85rem",
+              padding: "8px 20px",
               textAlign: "center",
               fontWeight: "500",
               width: "100%",
@@ -118,18 +118,16 @@ export default function App() {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              flexWrap: "wrap", // მობილურზე ელემენტები ავტომატურად ჩამოვა ქვემოთ
               width: "100%",
-              padding: "15px 20px",
+              padding: "15px 40px",
               boxSizing: "border-box",
-              gap: "15px",
             }}
           >
             {/* ლოგო */}
             <Link
               to="/"
               style={{
-                fontSize: "1.5rem",
+                fontSize: "1.6rem",
                 fontWeight: "bold",
                 color: "#2c3e50",
                 textDecoration: "none",
@@ -142,13 +140,7 @@ export default function App() {
             </Link>
 
             {/* ძებნის ველი */}
-            <div
-              style={{
-                flex: "1 1 280px",
-                maxWidth: "100%",
-                boxSizing: "border-box",
-              }}
-            >
+            <div style={{ flex: 1, maxWidth: "550px", margin: "0 30px" }}>
               <input
                 type="text"
                 placeholder="მოძებნე თამაშები და კონსოლები..."
@@ -163,7 +155,6 @@ export default function App() {
                   fontSize: "0.95rem",
                   backgroundColor: "#f9f9f9",
                   color: "#000",
-                  boxSizing: "border-box",
                 }}
               />
             </div>
@@ -174,8 +165,7 @@ export default function App() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                flexWrap: "wrap",
-                gap: "10px",
+                gap: "12px",
               }}
             >
               <Link
@@ -183,7 +173,7 @@ export default function App() {
                 style={{
                   backgroundColor: "#3498db",
                   color: "white",
-                  padding: "8px 14px",
+                  padding: "8px 16px",
                   borderRadius: "8px",
                   textDecoration: "none",
                   fontWeight: "600",
@@ -200,7 +190,7 @@ export default function App() {
                     backgroundColor: "#e74c3c",
                     color: "white",
                     border: "none",
-                    padding: "8px 14px",
+                    padding: "8px 16px",
                     borderRadius: "8px",
                     cursor: "pointer",
                     fontWeight: "600",
@@ -217,7 +207,7 @@ export default function App() {
                       color: "#2c3e50",
                       textDecoration: "none",
                       fontWeight: "600",
-                      padding: "8px 10px",
+                      padding: "8px 12px",
                       fontSize: "0.9rem",
                     }}
                   >
@@ -228,7 +218,7 @@ export default function App() {
                     style={{
                       backgroundColor: "#2ecc71",
                       color: "white",
-                      padding: "8px 14px",
+                      padding: "8px 16px",
                       borderRadius: "8px",
                       textDecoration: "none",
                       fontWeight: "600",
@@ -242,17 +232,15 @@ export default function App() {
             </div>
           </div>
 
-          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ (სქროლვადი მობილურზე) */}
+          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ (ჩამოსაშლელი ლოგიკით) */}
           <nav
             style={{
               backgroundColor: "#111",
-              padding: "0 20px",
+              padding: "0 40px",
               display: "flex",
-              gap: "25px",
+              gap: "30px",
               width: "100%",
               boxSizing: "border-box",
-              overflowX: "auto",
-              whiteSpace: "nowrap",
               position: "relative",
             }}
           >
@@ -260,18 +248,15 @@ export default function App() {
               <div
                 key={index}
                 className="dropdown-parent"
-                style={{
-                  position: "relative",
-                  padding: "12px 0",
-                  flexShrink: 0,
-                }}
+                style={{ position: "relative", padding: "12px 0" }}
               >
                 <Link
                   to={`/?category=${cat.name === "All" ? "" : cat.name}`}
                   style={{
                     color: "#fff",
-                    fontSize: "0.9rem",
+                    fontSize: "0.95rem",
                     cursor: "pointer",
+                    whiteSpace: "nowrap",
                     fontWeight: "500",
                     textDecoration: "none",
                     display: "block",
@@ -280,7 +265,7 @@ export default function App() {
                   {cat.name} {cat.sub.length > 0 && "▾"}
                 </Link>
 
-                {/* ქვე-კატეგორიების ჩამოშლა */}
+                {/* თუ ქვე-კატეგორიები არსებობს, ვუზრუნველყოფთ ჩამოშლას */}
                 {cat.sub.length > 0 && (
                   <div
                     className="dropdown-content"
@@ -307,7 +292,7 @@ export default function App() {
                           padding: "10px 15px",
                           textDecoration: "none",
                           display: "block",
-                          fontSize: "0.85rem",
+                          fontSize: "0.9rem",
                           borderBottom: "1px solid #222",
                           whiteSpace: "nowrap",
                         }}
