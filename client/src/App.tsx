@@ -87,6 +87,38 @@ export default function App() {
           overflowX: "hidden",
         }}
       >
+        {/* ინლაინ სტილები ჩამოსაშლელი მენიუს ჰოვერისთვის მობილურზე/დესკტოპზე */}
+        <style>
+          {`
+            .dropdown-parent:hover .dropdown-content {
+              display: block !important;
+            }
+            @media (max-width: 768px) {
+              .nav-container {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 10px 15px !important;
+                gap: 12px;
+              }
+              .search-box-wrapper {
+                max-width: 100% !important;
+                margin: 0 !important;
+                order: 3;
+              }
+              .nav-links-wrapper {
+                justify-content: flex-end;
+                width: 100%;
+              }
+              .main-nav-bar {
+                overflow-x: auto;
+                padding: 0 15px !important;
+                gap: 20px !important;
+                white-space: nowrap;
+              }
+            }
+          `}
+        </style>
+
         {/* პროფესიონალური ჰედერი - სრულ სიგანეზე */}
         <header
           style={{
@@ -140,7 +172,15 @@ export default function App() {
             </Link>
 
             {/* ძებნის ველი */}
-            <div style={{ flex: 1, maxWidth: "550px", margin: "0 30px" }}>
+            <div
+              className="search-box-wrapper"
+              style={{
+                flex: 1,
+                maxWidth: "550px",
+                margin: "0 30px",
+                boxSizing: "border-box",
+              }}
+            >
               <input
                 type="text"
                 placeholder="მოძებნე თამაშები და კონსოლები..."
@@ -155,17 +195,19 @@ export default function App() {
                   fontSize: "0.95rem",
                   backgroundColor: "#f9f9f9",
                   color: "#000",
+                  boxSizing: "border-box",
                 }}
               />
             </div>
 
             {/* ღილაკები */}
             <div
-              className="nav-links"
+              className="nav-links-wrapper"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
+                flexWrap: "wrap",
               }}
             >
               <Link
@@ -234,6 +276,7 @@ export default function App() {
 
           {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ (ჩამოსაშლელი ლოგიკით) */}
           <nav
+            className="main-nav-bar"
             style={{
               backgroundColor: "#111",
               padding: "0 40px",
