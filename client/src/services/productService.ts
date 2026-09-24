@@ -12,3 +12,16 @@ export const getProductById = async (id: string): Promise<IProduct> => {
   const response = await API.get(`/products/${id}`);
   return response.data;
 };
+
+// ახალი პროდუქტის ან ბანერის შექმნა (დაამატე ეს)
+export const createProduct = async (
+  productData: Omit<IProduct, "_id">,
+): Promise<IProduct> => {
+  const response = await API.post("/products", productData);
+  return response.data;
+};
+
+// პროდუქტის ან ბანერის წაშლა ID-ით (დაამატე ესეც)
+export const deleteProduct = async (id: string): Promise<void> => {
+  await API.delete(`/products/${id}`);
+};

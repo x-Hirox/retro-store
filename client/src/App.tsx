@@ -10,6 +10,49 @@ import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
 
+// კატეგორიები და მათი ქვე-კატეგორიები ჩამოსაშლელი მენიუსთვის
+const categoriesData = [
+  { name: "All", sub: [] },
+  {
+    name: "Nintendo",
+    sub: [
+      "Nintendo NES - 1985",
+      "Super Nintendo - 1991",
+      "Nintendo 64 - 1996",
+      "Nintendo Switch",
+    ],
+  },
+  {
+    name: "PlayStation",
+    sub: [
+      "PlayStation 1",
+      "PlayStation 2",
+      "PlayStation 3",
+      "PlayStation 4",
+      "PlayStation 5",
+      "PlayStation Portable",
+      "PlayStation Vita",
+    ],
+  },
+  { name: "Xbox", sub: ["Original Xbox", "Xbox 360", "Xbox One"] },
+  {
+    name: "Sega",
+    sub: ["Master System", "Sega Genesis", "Sega Saturn", "Sega Dreamcast"],
+  },
+  {
+    name: "Chinese Consoles",
+    sub: ["Anbernic", "Miyoo Mini", "PowKiddy", "Retroid Pocket"],
+  },
+  {
+    name: "Bundles",
+    sub: ["Console + Games Bundle", "Starter Pack", "Collector's Bundle"],
+  },
+  {
+    name: "Atari & More",
+    sub: ["Atari 2600", "ColecoVision", "TurboGrafx-16"],
+  },
+];
+
 export default function App() {
   const { cart } = useCart();
   const totalItems = cart.reduce(
@@ -17,6 +60,7 @@ export default function App() {
     0,
   );
   const [token, setToken] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -37,11 +81,13 @@ export default function App() {
           minHeight: "100vh",
           backgroundColor: "#f8f9fa",
           width: "100%",
+          margin: 0,
+          padding: 0,
           boxSizing: "border-box",
           overflowX: "hidden",
         }}
       >
-        {/* პროფესიონალური ჰედერი */}
+        {/* პროფესიონალური ჰედერი - სრულ სიგანეზე */}
         <header
           style={{
             width: "100%",
@@ -55,9 +101,11 @@ export default function App() {
               backgroundColor: "#ff6600",
               color: "#fff",
               fontSize: "0.85rem",
-              padding: "6px 20px",
+              padding: "8px 20px",
               textAlign: "center",
               fontWeight: "500",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             🔥 უფასო მიწოდება და 1 წლიანი გარანტია ყველა რეტრო კონსოლზე!
@@ -73,7 +121,6 @@ export default function App() {
               width: "100%",
               padding: "15px 40px",
               boxSizing: "border-box",
-              textAlign: "left",
             }}
           >
             {/* ლოგო */}
@@ -93,19 +140,21 @@ export default function App() {
             </Link>
 
             {/* ძებნის ველი */}
-            <div style={{ flex: 1, maxWidth: "450px", margin: "0 20px" }}>
+            <div style={{ flex: 1, maxWidth: "550px", margin: "0 30px" }}>
               <input
                 type="text"
                 placeholder="მოძებნე თამაშები და კონსოლები..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "10px 16px",
+                  padding: "10px 18px",
                   borderRadius: "20px",
                   border: "1px solid #ddd",
                   outline: "none",
                   fontSize: "0.95rem",
                   backgroundColor: "#f9f9f9",
-                  color: "#000", // დაემატა ტექსტის მკაფიო შავი ფერი
+                  color: "#000",
                 }}
               />
             </div>
@@ -183,52 +232,94 @@ export default function App() {
             </div>
           </div>
 
-          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ */}
+          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ (ჩამოსაშლელი ლოგიკით) */}
           <nav
             style={{
               backgroundColor: "#111",
-              padding: "10px 40px",
+              padding: "0 40px",
               display: "flex",
-              gap: "25px",
-              overflowX: "auto",
+              gap: "30px",
+              width: "100%",
+              boxSizing: "border-box",
+              position: "relative",
             }}
           >
-            {[
-              "Nintendo",
-              "PlayStation",
-              "Xbox",
-              "Sega",
-              "Atari & More",
-              "Bundles",
-              "Sell Your Games",
-            ].map((cat, index) => (
-              <span
+            {categoriesData.map((cat, index) => (
+              <div
                 key={index}
-                style={{
-                  color: "#fff",
-                  fontSize: "0.9rem",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  fontWeight: "500",
-                }}
+                className="dropdown-parent"
+                style={{ position: "relative", padding: "12px 0" }}
               >
-                {cat}
-              </span>
+                <Link
+                  to={`/?category=${cat.name === "All" ? "" : cat.name}`}
+                  style={{
+                    color: "#fff",
+                    fontSize: "0.95rem",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    fontWeight: "500",
+                    textDecoration: "none",
+                    display: "block",
+                  }}
+                >
+                  {cat.name} {cat.sub.length > 0 && "▾"}
+                </Link>
+
+                {/* თუ ქვე-კატეგორიები არსებობს, ვუზრუნველყოფთ ჩამოშლას */}
+                {cat.sub.length > 0 && (
+                  <div
+                    className="dropdown-content"
+                    style={{
+                      display: "none",
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      backgroundColor: "#111",
+                      minWidth: "220px",
+                      boxShadow: "0px 8px 16px rgba(0,0,0,0.4)",
+                      zIndex: 100,
+                      borderRadius: "4px",
+                      overflow: "hidden",
+                      border: "1px solid #333",
+                    }}
+                  >
+                    {cat.sub.map((subItem, subIndex) => (
+                      <Link
+                        key={subIndex}
+                        to={`/?category=${subItem}`}
+                        style={{
+                          color: "#fff",
+                          padding: "10px 15px",
+                          textDecoration: "none",
+                          display: "block",
+                          fontSize: "0.9rem",
+                          borderBottom: "1px solid #222",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {subItem}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
         </header>
 
-        {/* როუტები */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
+        {/* როუტები / გვერდები */}
+        <div style={{ width: "100%", boxSizing: "border-box" }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/admin" element={<Admin />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   );

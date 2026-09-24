@@ -1,9 +1,10 @@
 export interface IProduct {
   _id: string;
-  title: string; // name-ის ნაცვლად
+  title: string;
   description: string;
   price: number;
-  imageUrl?: string; // image-ის ნაცვლად
+  imageUrl?: string;
   category: string;
-  stock: number; // countInStock-ის ნაცვლად
+  stock: number;
+  isHeroBanner?: boolean; // <-- აი ეს ველი დავამატოთ ბანერისთვის
 }

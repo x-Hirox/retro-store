@@ -20,48 +20,145 @@ export default function Home() {
       });
   }, []);
 
+  // სხვადასხვა ბანერების ძებნა ბაზიდან
+  const heroBanner = products.find(
+    (p) => p.category === "banner-hero" || p.isHeroBanner === true,
+  );
+  const middleBanner = products.find((p) => p.category === "banner-middle");
+  const bottomBanner = products.find((p) => p.category === "banner-bottom");
+
+  // დანარჩენი პროდუქტები (რომლებიც არ არის არცერთი ბანერი)
+  const regularProducts = products.filter(
+    (p) =>
+      p.category !== "banner-hero" &&
+      p.category !== "banner-middle" &&
+      p.category !== "banner-bottom" &&
+      !p.isHeroBanner,
+  );
+
   return (
     <div
       style={{
         minHeight: "100vh",
         backgroundColor: "#f8f9fa",
         paddingBottom: "60px",
+        overflowX: "hidden",
       }}
     >
-      {/* Hero სარეკლამო ბანერი */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #111111 0%, #2c3e50 100%)",
-          color: "#fff",
-          padding: "50px 20px",
-          textAlign: "center",
-          marginBottom: "40px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h1
+      {/* --- 1. მთავარი (Hero) ბანერი თავში --- */}
+      {heroBanner ? (
+        <div
           style={{
-            fontSize: "2.3rem",
-            marginBottom: "15px",
-            fontWeight: "bold",
+            backgroundImage: heroBanner.imageUrl
+              ? `url(${heroBanner.imageUrl})`
+              : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            background: heroBanner.imageUrl
+              ? undefined
+              : "linear-gradient(135deg, #111111 0%, #2c3e50 100%)",
+            color: "#fff",
+            padding: "80px 20px",
+            textAlign: "center",
+            marginBottom: "40px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            position: "relative",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
-          დაუბრუნდი ბავშვობის საუკეთესო მომენტებს! 🎮
-        </h1>
-        <p
+          <div
+            style={{
+              background: heroBanner.imageUrl
+                ? "rgba(0, 0, 0, 0.65)"
+                : "transparent",
+              padding: "30px",
+              borderRadius: "12px",
+              display: "inline-block",
+              maxWidth: "700px",
+              margin: "0 auto",
+            }}
+          >
+            <h1
+              style={{
+                fontSize: "2.5rem",
+                marginBottom: "15px",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+              }}
+            >
+              {heroBanner.title}
+            </h1>
+            <p
+              style={{
+                fontSize: "1.15rem",
+                color: "#cbd5e1",
+                maxWidth: "600px",
+                margin: "0 auto 20px auto",
+                lineHeight: "1.5",
+              }}
+            >
+              {heroBanner.description}
+            </p>
+            <button
+              onClick={() => navigate(`/product/${heroBanner._id}`)}
+              style={{
+                backgroundColor: "#ff6600",
+                color: "white",
+                border: "none",
+                padding: "12px 28px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "1rem",
+                boxShadow: "0 4px 12px rgba(255,102,0,0.4)",
+              }}
+            >
+              დეტალურად ნახვა 🎮
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* სტატიკური დეფოლტ ბანერი */
+        <div
           style={{
-            fontSize: "1.1rem",
-            color: "#cbd5e1",
-            maxWidth: "600px",
-            margin: "0 auto",
+            background: "linear-gradient(135deg, #111111 0%, #2c3e50 100%)",
+            color: "#fff",
+            padding: "50px 20px",
+            textAlign: "center",
+            marginBottom: "40px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
-          აღმოაჩინე ლეგენდარული რეტრო კონსოლები, ორიგინალური თამაშები და
-          აქსესუარები.
-        </p>
-      </div>
+          <h1
+            style={{
+              fontSize: "2.3rem",
+              marginBottom: "15px",
+              fontWeight: "bold",
+            }}
+          >
+            დაუბრუნდი ბავშვობის საუკეთესო მომენტებს! 🎮
+          </h1>
+          <p
+            style={{
+              fontSize: "1.1rem",
+              color: "#cbd5e1",
+              maxWidth: "600px",
+              margin: "0 auto",
+            }}
+          >
+            აღმოაჩინე ლეგენდარული რეტრო კონსოლები, ორიგინალური თამაშები და
+            აქსესუარები.
+          </p>
+        </div>
+      )}
 
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px" }}>
+      {/* მთავარი კონტენტი - სრულ სიგანეზე გაშლილი */}
+      <div
+        style={{ width: "100%", padding: "0 40px", boxSizing: "border-box" }}
+      >
         {/* კატალოგის სათაური */}
         <div style={{ marginBottom: "25px", textAlign: "left" }}>
           <h2
@@ -83,7 +180,7 @@ export default function Home() {
           >
             იტვირთება რეტრო სამყარო...
           </div>
-        ) : products.length === 0 ? (
+        ) : regularProducts.length === 0 ? (
           <div
             style={{
               textAlign: "center",
@@ -105,7 +202,7 @@ export default function Home() {
               gap: "24px",
             }}
           >
-            {products.map((product) => (
+            {regularProducts.map((product) => (
               <div
                 key={product._id}
                 style={{
@@ -129,8 +226,9 @@ export default function Home() {
                   e.currentTarget.style.boxShadow =
                     "0 4px 15px rgba(0,0,0,0.05)";
                 }}
+                onClick={() => navigate(`/product/${product._id}`)}
               >
-                {/* სურათი ან ფოლბექი (imageUrl გამოყენებულია) */}
+                {/* სურათი ან ფოლბექი */}
                 <div
                   style={{
                     height: "190px",
@@ -209,7 +307,10 @@ export default function Home() {
                       {product.price} ₾
                     </span>
                     <button
-                      onClick={() => navigate(`/product/${product._id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/product/${product._id}`);
+                      }}
                       style={{
                         backgroundColor: "#3b82f6",
                         color: "white",
@@ -236,6 +337,134 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* --- 2. შუა ბანერი (Middle Banner) - სრულ სიგანეზე --- */}
+      {middleBanner && (
+        <div
+          style={{
+            marginTop: "50px",
+            backgroundImage: middleBanner.imageUrl
+              ? `url(${middleBanner.imageUrl})`
+              : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            background: middleBanner.imageUrl
+              ? undefined
+              : "linear-gradient(135deg, #2c3e50 0%, #111 100%)",
+            color: "#fff",
+            padding: "60px 40px",
+            textAlign: "center",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              background: middleBanner.imageUrl
+                ? "rgba(0,0,0,0.6)"
+                : "transparent",
+              padding: "20px",
+              borderRadius: "8px",
+              display: "inline-block",
+              maxWidth: "800px",
+              margin: "0 auto",
+            }}
+          >
+            <h2 style={{ fontSize: "2rem", marginBottom: "10px" }}>
+              {middleBanner.title}
+            </h2>
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "#cbd5e1",
+                maxWidth: "600px",
+                margin: "0 auto 20px auto",
+              }}
+            >
+              {middleBanner.description}
+            </p>
+            <button
+              onClick={() => navigate(`/product/${middleBanner._id}`)}
+              style={{
+                backgroundColor: "#ff6600",
+                color: "white",
+                border: "none",
+                padding: "10px 24px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              ნახვა
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- 3. ქვედა ბანერი (Bottom Banner) - სრულ სიგანეზე --- */}
+      {bottomBanner && (
+        <div
+          style={{
+            marginTop: "30px",
+            backgroundImage: bottomBanner.imageUrl
+              ? `url(${bottomBanner.imageUrl})`
+              : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            background: bottomBanner.imageUrl
+              ? undefined
+              : "linear-gradient(135deg, #111 0%, #2c3e50 100%)",
+            color: "#fff",
+            padding: "60px 40px",
+            textAlign: "center",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              background: bottomBanner.imageUrl
+                ? "rgba(0,0,0,0.6)"
+                : "transparent",
+              padding: "20px",
+              borderRadius: "8px",
+              display: "inline-block",
+              maxWidth: "800px",
+              margin: "0 auto",
+            }}
+          >
+            <h2 style={{ fontSize: "2rem", marginBottom: "10px" }}>
+              {bottomBanner.title}
+            </h2>
+            <p
+              style={{
+                fontSize: "1.1rem",
+                color: "#cbd5e1",
+                maxWidth: "600px",
+                margin: "0 auto 20px auto",
+              }}
+            >
+              {bottomBanner.description}
+            </p>
+            <button
+              onClick={() => navigate(`/product/${bottomBanner._id}`)}
+              style={{
+                backgroundColor: "#ff6600",
+                color: "white",
+                border: "none",
+                padding: "10px 24px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              აღმოაჩინე
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

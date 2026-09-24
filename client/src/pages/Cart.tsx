@@ -1,87 +1,281 @@
-import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
+import { useState, useEffect } from "react";
+import {
+  getProducts,
+  createProduct,
+  deleteProduct,
+} from "../services/productService";
+import type { IProduct } from "../types";
 
-export default function Cart() {
-  const { cart, removeFromCart, clearCart } = useCart();
-  const navigate = useNavigate();
+export default function Admin() {
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // ჯამური თანხის გამოთვლა
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
+  // ფორმის ველები
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [category, setCategory] = useState("PlayStation");
+  const [isHeroBanner, setIsHeroBanner] = useState(false);
 
-  if (cart.length === 0) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "100px", padding: "20px" }}>
-        <h2 style={{ color: "#2c3e50", marginBottom: "20px" }}>
-          თქვენი კალათა ცარიელია 🛒
-        </h2>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            backgroundColor: "#3498db",
-            color: "white",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "600",
-          }}
-        >
-          პროდუქტების დათვალიერება
-        </button>
-      </div>
-    );
-  }
+  const fetchProducts = async () => {
+    try {
+      const data = await getProducts();
+      setProducts(data);
+    } catch (err) {
+      console.error("ვერ მოხერხდა პროდუქტების წამოღება", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // თუ ბანერია მონიშნული, ფასი და მარაგი ავტომატურად იყოს 0, რომ შევსება არ მოგთხოვოს
+      const finalPrice = isHeroBanner ? 0 : Number(price);
+      const finalStock = isHeroBanner ? 1 : Number(stock);
+      const finalCategory = isHeroBanner ? "banner-hero" : category;
+
+      await createProduct({
+        title,
+        description,
+        price: finalPrice,
+        stock: finalStock,
+        imageUrl,
+        category: finalCategory,
+        isHeroBanner,
+      });
+
+      // ფორმის გასუფთავება
+      setTitle("");
+      setDescription("");
+      setPrice("");
+      setStock("");
+      setImageUrl("");
+      setCategory("PlayStation");
+      setIsHeroBanner(false);
+
+      // სიის განახლება
+      fetchProducts();
+      alert("წარმატებით დაემატა!");
+    } catch (err) {
+      console.error("დამატების შეცდომა:", err);
+      alert("ვერ მოხერხდა დამატება");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("ნამდვილად გსურთ წაშლა?")) {
+      try {
+        await deleteProduct(id);
+        setProducts(products.filter((p) => p._id !== id));
+      } catch (err) {
+        console.error("წაშლის შეცდომა:", err);
+      }
+    }
+  };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
-        padding: "40px 20px",
-      }}
-    >
-      <div
+    <div style={{ maxWidth: "1000px", margin: "40px auto", padding: "0 20px" }}>
+      <h1
+        style={{ textAlign: "center", color: "#2c3e50", marginBottom: "30px" }}
+      >
+        🛠️ ადმინ პანელი (CRUD)
+      </h1>
+
+      {/* პროდუქტის / ბანერის დამატების ფორმა */}
+      <form
+        onSubmit={handleSubmit}
         style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-          backgroundColor: "#ffffff",
-          borderRadius: "16px",
+          backgroundColor: "#fff",
           padding: "30px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          borderRadius: "12px",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+          marginBottom: "40px",
+          border: "1px solid #e2e8f0",
         }}
       >
-        <h1 style={{ color: "#2c3e50", marginBottom: "30px" }}>
-          სავაჭრო კალათა 🛍️
-        </h1>
+        <h2
+          style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#1e293b" }}
+        >
+          ახალი პროდუქტის ან ბანერის დამატება ➕
+        </h2>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-          {cart.map((item) => (
+        <div style={{ display: "grid", gap: "15px" }}>
+          <input
+            type="text"
+            placeholder="სათაური"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <textarea
+            placeholder="აღწერა"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            rows={3}
+            style={{ ...inputStyle, resize: "vertical" }}
+          />
+
+          {/* თუ ბანერია, ფასი და მარაგი არ არის სავალდებულო */}
+          {!isHeroBanner && (
             <div
-              key={item._id}
               style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "15px",
+              }}
+            >
+              <input
+                type="number"
+                placeholder="ფასი (₾)"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required={!isHeroBanner}
+                style={inputStyle}
+              />
+              <input
+                type="number"
+                placeholder="მარაგი (რაოდენობა)"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                required={!isHeroBanner}
+                style={inputStyle}
+              />
+            </div>
+          )}
+
+          <input
+            type="text"
+            placeholder="სურათის ლინკი (URL)"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          {!isHeroBanner && (
+            <input
+              type="text"
+              placeholder="კატეგორია (მაგ: PlayStation, Nintendo...)"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              style={inputStyle}
+            />
+          )}
+
+          {/* ბანერის ჩექბოქსი */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginTop: "5px",
+            }}
+          >
+            <input
+              type="checkbox"
+              id="heroCheck"
+              checked={isHeroBanner}
+              onChange={(e) => setIsHeroBanner(e.target.checked)}
+              style={{ width: "18px", height: "18px", cursor: "pointer" }}
+            />
+            <label
+              htmlFor="heroCheck"
+              style={{ cursor: "pointer", fontWeight: "600", color: "#334155" }}
+            >
+              ⭐ მონიშვნა როგორც მთავარი ბანერი (Hero Banner)
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              backgroundColor: "#10b981",
+              color: "white",
+              border: "none",
+              padding: "12px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              marginTop: "10px",
+              transition: "background 0.2s",
+            }}
+          >
+            დამატება 🚀
+          </button>
+        </div>
+      </form>
+
+      {/* არსებული პროდუქტების სია */}
+      <h2
+        style={{ fontSize: "1.5rem", marginBottom: "20px", color: "#2c3e50" }}
+      >
+        არსებული პროდუქტები და ბანერები ({products.length})
+      </h2>
+
+      {loading ? (
+        <p>იტვირთება...</p>
+      ) : (
+        <div style={{ display: "grid", gap: "15px" }}>
+          {products.map((p) => (
+            <div
+              key={p._id}
+              style={{
+                backgroundColor: "#fff",
+                padding: "15px 20px",
+                borderRadius: "10px",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "15px",
-                borderBottom: "1px solid #e9ecef",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                border: "1px solid #e2e8f0",
               }}
             >
-              <div>
-                <h3 style={{ color: "#2c3e50", margin: "0 0 5px 0" }}>
-                  {item.title}
-                </h3>
-                <p style={{ color: "#e74c3c", fontWeight: "bold", margin: 0 }}>
-                  ${item.price} x {item.quantity}
-                </p>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "15px" }}
+              >
+                {p.imageUrl && (
+                  <img
+                    src={p.imageUrl}
+                    alt={p.title}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                      borderRadius: "6px",
+                    }}
+                  />
+                )}
+                <div>
+                  <h4 style={{ margin: "0 0 5px 0", color: "#1e293b" }}>
+                    {p.title} {p.isHeroBanner && "⭐ [ბანერი]"}
+                  </h4>
+                  <p
+                    style={{ margin: 0, color: "#64748b", fontSize: "0.9rem" }}
+                  >
+                    {p.isHeroBanner
+                      ? "სარეკლამო ბანერი"
+                      : `ფასი: ${p.price} ₾ | მარაგი: ${p.stock}`}
+                  </p>
+                </div>
               </div>
 
               <button
-                onClick={() => removeFromCart(item._id)}
+                onClick={() => handleDelete(p._id)}
                 style={{
-                  backgroundColor: "#e74c3c",
+                  backgroundColor: "#ef4444",
                   color: "white",
                   border: "none",
                   padding: "8px 14px",
@@ -90,63 +284,22 @@ export default function Cart() {
                   fontWeight: "600",
                 }}
               >
-                წაშლა 🗑️
+                წაშლა
               </button>
             </div>
           ))}
         </div>
-
-        {/* ქვედა ნაწილი: ჯამი და ღილაკები */}
-        <div
-          style={{
-            marginTop: "30px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <h2 style={{ color: "#2c3e50", margin: 0 }}>
-              სულ ჯამი:{" "}
-              <span style={{ color: "#e74c3c" }}>
-                ${totalAmount.toFixed(2)}
-              </span>
-            </h2>
-          </div>
-
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={clearCart}
-              style={{
-                backgroundColor: "#95a5a6",
-                color: "white",
-                border: "none",
-                padding: "10px 16px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
-            >
-              კალათის გასუფთავება
-            </button>
-
-            <button
-              onClick={() => navigate("/checkout")}
-              style={{
-                backgroundColor: "#2ecc71",
-                color: "white",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              შეკვეთის გაფორმება 🚀
-            </button>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
+
+const inputStyle = {
+  padding: "12px",
+  borderRadius: "8px",
+  border: "1px solid #cbd5e1",
+  fontSize: "1rem",
+  outline: "none",
+  width: "100%",
+  boxSizing: "border-box" as const,
+};
