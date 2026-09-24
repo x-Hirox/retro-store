@@ -147,21 +147,25 @@ svg {
    ========================================== */
 @media (max-width: 768px) {
   .nav-container {
+    display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    align-items: center !important;
+    gap: 15px !important;
     padding: 12px 15px !important;
     text-align: center !important;
     width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* ძებნის ველი მობილურზე რომ სრულად ჩანდეს */
-  .nav-container > div:nth-child(2) {
+  .nav-container > div {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
   }
 
   .nav-links {
+    display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
@@ -172,7 +176,7 @@ svg {
   .nav-links a,
   .nav-links button {
     width: auto !important;
-    padding: 6px 12px !important;
+    padding: 8px 14px !important;
     font-size: 0.85rem !important;
   }
 
