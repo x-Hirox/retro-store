@@ -1,6 +1,7 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import Product from "../models/Product.js";
+
 const router = Router();
 
 // ყველა პროდუქტის წამოღება (GET)
@@ -36,9 +37,9 @@ router.post("/", async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "არასწორი მონაცემები პროდუქტის დამატებისას" });
   }
-}); // <--- აქ მთავრდება POST მეთოდი სწორად!
+});
 
-// კონკრეტული პროდუქტის წამოღება ID-ით (GET) - უნდა იყოს გარეთ!
+// კონკრეტული პროდუქტის წამოღება ID-ით (GET)
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     console.log("მოთხოვნილი პროდუქტის ID:", req.params.id);
@@ -50,6 +51,38 @@ router.get("/:id", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("შეცდომა ძებნისას:", error);
     res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+});
+
+// პროდუქტის განახლება / რედაქტირება (PUT)
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true },
+    );
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
+    }
+    res.json(updatedProduct);
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "არასწორი მონაცემები პროდუქტის განახლებისას" });
+  }
+});
+
+// პროდუქტის წაშლა (DELETE)
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
+    }
+    res.json({ message: "პროდუქტი წარმატებით წაიშალა" });
+  } catch (error) {
+    res.status(500).json({ message: "სერვერის შეცდომა წაშლისას" });
   }
 });
 
