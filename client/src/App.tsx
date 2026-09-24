@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
+import CategoryView from "./pages/CategoryView"; // ახალი იმპორტი კატეგორიების სანახავად
 
 // კატეგორიები და მათი ქვე-კატეგორიები ჩამოსაშლელი მენიუსთვის
 const categoriesData = [
@@ -361,6 +362,8 @@ export default function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/category/:platform" element={<CategoryView />} />
+            <Route path="/category/:platform/:sub" element={<CategoryView />} />
           </Routes>
         </div>
       </div>

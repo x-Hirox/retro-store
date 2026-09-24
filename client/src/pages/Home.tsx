@@ -6,6 +6,7 @@ import type { IProduct } from "../types";
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // ნაგულისხმევად მუქი იასამნისფერი (რეტრო სტილი)
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") || "";
@@ -44,24 +45,62 @@ export default function Home() {
     return true;
   });
 
+  // დინამიკური ფერები რეტრო იასამნისფერი / ღია თემისთვის
+  const theme = {
+    bg: isDarkMode ? "#0d061a" : "#f8f9fa", // მუქი იასამნისფერი რეტრო ფონი
+    cardBg: isDarkMode ? "#1a102f" : "#ffffff",
+    textColor: isDarkMode ? "#f3e8ff" : "#1e293b",
+    subText: isDarkMode ? "#cbd5e1" : "#64748b",
+    accent: "#a855f7", // ნათელი იასამნისფერი (Neon Purple)
+    border: isDarkMode ? "#3b2064" : "#e2e8f0",
+  };
+
   return (
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: theme.bg,
+        color: theme.textColor,
         paddingBottom: "60px",
         overflowX: "hidden",
+        transition: "background-color 0.3s ease",
       }}
     >
-      {/* --- 1. მთავარი (Hero) ბანერი - სრულად გაშლილი სურათი კლიკით --- */}
+      {/* ფერის შეცვლის (Dark/Light Retro) ღილაკი */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          padding: "15px 40px",
+        }}
+      >
+        <button
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          style={{
+            backgroundColor: theme.accent,
+            color: "#ffffff",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            boxShadow: "0 0 12px rgba(168, 85, 247, 0.5)",
+            transition: "transform 0.2s",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "scale(1.05)")
+          }
+          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          {isDarkMode ? "☀️ ღია რეჟიმი" : "🟣 მუქი იასამნისფერი (რეტრო)"}
+        </button>
+      </div>
+
+      {/* --- 1. მთავარი (Hero) ბანერი - კლიკით გადადის PlayStation კატეგორიაში --- */}
       {heroBanner && heroBanner.imageUrl && (
         <div
           onClick={() => {
-            // ბანერზე დაჭერისას გადადის ყველა პროდუქტის კოლექციაზე
-            const element = document.getElementById("catalog-section");
-            if (element) {
-              element.scrollIntoView({ behavior: "smooth" });
-            }
+            navigate("/category/playstation");
           }}
           style={{
             width: "100%",
@@ -90,7 +129,14 @@ export default function Home() {
       >
         <div style={{ marginBottom: "25px", textAlign: "left" }}>
           <h2
-            style={{ color: "#2c3e50", fontSize: "1.8rem", fontWeight: "bold" }}
+            style={{
+              color: theme.textColor,
+              fontSize: "1.8rem",
+              fontWeight: "bold",
+              textShadow: isDarkMode
+                ? "0 0 8px rgba(168, 85, 247, 0.6)"
+                : "none",
+            }}
           >
             {selectedCategory ? `📂 ${selectedCategory}` : "🔥 ALL PRODUCTS"}
           </h2>
@@ -101,7 +147,7 @@ export default function Home() {
             style={{
               textAlign: "center",
               fontSize: "1.2rem",
-              color: "#95a5a6",
+              color: theme.subText,
               marginTop: "50px",
             }}
           >
@@ -112,11 +158,12 @@ export default function Home() {
             style={{
               textAlign: "center",
               padding: "40px",
-              backgroundColor: "#fff",
+              backgroundColor: theme.cardBg,
               borderRadius: "12px",
+              border: `1px solid ${theme.border}`,
             }}
           >
-            <p style={{ color: "#7f8c8d", fontSize: "1.1rem" }}>
+            <p style={{ color: theme.subText, fontSize: "1.1rem" }}>
               პროდუქტები ამჟამად არ მოიძებნება.
             </p>
           </div>
@@ -132,22 +179,30 @@ export default function Home() {
               <div
                 key={product._id}
                 style={{
-                  backgroundColor: "#ffffff",
+                  backgroundColor: theme.cardBg,
                   borderRadius: "12px",
-                  boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+                  boxShadow: isDarkMode
+                    ? "0 4px 20px rgba(13, 6, 26, 0.7)"
+                    : "0 4px 15px rgba(0,0,0,0.05)",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
                   transition: "transform 0.2s ease, box-shadow 0.2s ease",
                   cursor: "pointer",
-                  border: "1px solid #e2e8f0",
+                  border: `1px solid ${theme.border}`,
                 }}
                 onClick={() => navigate(`/product/${product._id}`)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-5px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
               >
                 <div
                   style={{
                     height: "190px",
-                    backgroundColor: "#f1f5f9",
+                    backgroundColor: isDarkMode ? "#261642" : "#f1f5f9",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -180,7 +235,7 @@ export default function Home() {
                   <h3
                     style={{
                       margin: "0 0 10px 0",
-                      color: "#1e293b",
+                      color: theme.textColor,
                       fontSize: "1.2rem",
                       fontWeight: "bold",
                     }}
@@ -190,7 +245,7 @@ export default function Home() {
                   <p
                     style={{
                       margin: "0 0 20px 0",
-                      color: "#64748b",
+                      color: theme.subText,
                       fontSize: "0.95rem",
                       lineHeight: "1.5",
                       flex: 1,
@@ -215,7 +270,7 @@ export default function Home() {
                       style={{
                         fontSize: "1.3rem",
                         fontWeight: "bold",
-                        color: "#ff6600",
+                        color: "#c084fc",
                       }}
                     >
                       {product.price} ₾
@@ -226,7 +281,7 @@ export default function Home() {
                         navigate(`/product/${product._id}`);
                       }}
                       style={{
-                        backgroundColor: "#3b82f6",
+                        backgroundColor: theme.accent,
                         color: "white",
                         border: "none",
                         padding: "8px 16px",
@@ -254,7 +309,7 @@ export default function Home() {
             cursor: "pointer",
           }}
           onClick={() => {
-            window.scrollTo({ top: 500, behavior: "smooth" });
+            navigate("/category/playstation");
           }}
         >
           <img
@@ -277,6 +332,9 @@ export default function Home() {
             width: "100%",
             marginTop: "30px",
             cursor: "pointer",
+          }}
+          onClick={() => {
+            navigate("/category/playstation");
           }}
         >
           <img
