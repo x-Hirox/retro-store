@@ -9,9 +9,8 @@ import { useEffect, useState } from "react";
 import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
-import CategoryView from "./pages/CategoryView"; // ახალი იმპორტი კატეგორიების სანახავად
+import CategoryView from "./pages/CategoryView";
 
-// კატეგორიები და მათი ქვე-კატეგორიები ჩამოსაშლელი მენიუსთვის
 const categoriesData = [
   { name: "All", sub: [] },
   {
@@ -75,6 +74,14 @@ export default function App() {
     window.location.href = "/";
   };
 
+  // ძებნის დამუშავება
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/?search=${encodeURIComponent(searchQuery.trim())}`;
+    }
+  };
+
   return (
     <Router>
       <div
@@ -88,11 +95,17 @@ export default function App() {
           overflowX: "hidden",
         }}
       >
-        {/* ინლაინ სტილები ჩამოსაშლელი მენიუს ჰოვერისთვის მობილურზე/დესკტოპზე */}
         <style>
           {`
             .dropdown-parent:hover .dropdown-content {
               display: block !important;
+            }
+            .neon-btn {
+              transition: all 0.3s ease;
+            }
+            .neon-btn:hover {
+              box-shadow: 0 0 12px rgba(155, 89, 182, 0.8);
+              transform: translateY(-1px);
             }
             @media (max-width: 768px) {
               .nav-container {
@@ -120,7 +133,7 @@ export default function App() {
           `}
         </style>
 
-        {/* პროფესიონალური ჰედერი - სრულ სიგანეზე */}
+        {/* პროფესიონალური ჰედერი */}
         <header
           style={{
             width: "100%",
@@ -172,7 +185,7 @@ export default function App() {
               🕹️ RetroStore
             </Link>
 
-            {/* ძებნის ველი */}
+            {/* ძებნის ველი (ფორმა ინფუთით და ლუპის ღილაკით) */}
             <div
               className="search-box-wrapper"
               style={{
@@ -182,26 +195,47 @@ export default function App() {
                 boxSizing: "border-box",
               }}
             >
-              <input
-                type="text"
-                placeholder="მოძებნე თამაშები და კონსოლები..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px 18px",
-                  borderRadius: "20px",
-                  border: "1px solid #ddd",
-                  outline: "none",
-                  fontSize: "0.95rem",
-                  backgroundColor: "#f9f9f9",
-                  color: "#000",
-                  boxSizing: "border-box",
-                }}
-              />
+              <form
+                onSubmit={handleSearchSubmit}
+                style={{ display: "flex", position: "relative", width: "100%" }}
+              >
+                <input
+                  type="text"
+                  placeholder="მოძებნე თამაშები და კონსოლები..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "10px 45px 10px 18px",
+                    borderRadius: "20px",
+                    border: "1px solid #ddd",
+                    outline: "none",
+                    fontSize: "0.95rem",
+                    backgroundColor: "#f9f9f9",
+                    color: "#000",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    position: "absolute",
+                    right: "5px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "1.1rem",
+                    padding: "5px 10px",
+                  }}
+                >
+                  🔍
+                </button>
+              </form>
             </div>
 
-            {/* ღილაკები */}
+            {/* ღილაკები რეტრო ნეონური სტილით */}
             <div
               className="nav-links-wrapper"
               style={{
@@ -213,22 +247,27 @@ export default function App() {
             >
               <Link
                 to="/cart"
+                className="neon-btn"
                 style={{
-                  backgroundColor: "#3498db",
+                  backgroundColor: "#9b59b6",
                   color: "white",
                   padding: "8px 16px",
                   borderRadius: "8px",
                   textDecoration: "none",
                   fontWeight: "600",
                   fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
                 }}
               >
-                კალათა 🛒 ({totalItems})
+                🛒 კალათა ({totalItems})
               </Link>
 
               {token ? (
                 <button
                   onClick={handleLogout}
+                  className="neon-btn"
                   style={{
                     backgroundColor: "#e74c3c",
                     color: "white",
@@ -240,26 +279,30 @@ export default function App() {
                     fontSize: "0.9rem",
                   }}
                 >
-                  გასვლა
+                  🚪 გასვლა
                 </button>
               ) : (
                 <>
                   <Link
                     to="/login"
+                    className="neon-btn"
                     style={{
-                      color: "#2c3e50",
+                      color: "#9b59b6",
                       textDecoration: "none",
                       fontWeight: "600",
                       padding: "8px 12px",
                       fontSize: "0.9rem",
+                      border: "1px solid #9b59b6",
+                      borderRadius: "8px",
                     }}
                   >
-                    შესვლა
+                    🔑 შესვლა
                   </Link>
                   <Link
                     to="/register"
+                    className="neon-btn"
                     style={{
-                      backgroundColor: "#2ecc71",
+                      backgroundColor: "#9b59b6",
                       color: "white",
                       padding: "8px 16px",
                       borderRadius: "8px",
@@ -268,14 +311,14 @@ export default function App() {
                       fontSize: "0.9rem",
                     }}
                   >
-                    რეგისტრაცია
+                    ⚡ რეგისტრაცია
                   </Link>
                 </>
               )}
             </div>
           </div>
 
-          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ (ჩამოსაშლელი ლოგიკით) */}
+          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ */}
           <nav
             className="main-nav-bar"
             style={{
@@ -309,7 +352,6 @@ export default function App() {
                   {cat.name} {cat.sub.length > 0 && "▾"}
                 </Link>
 
-                {/* თუ ქვე-კატეგორიები არსებობს, ვუზრუნველყოფთ ჩამოშლას */}
                 {cat.sub.length > 0 && (
                   <div
                     className="dropdown-content"

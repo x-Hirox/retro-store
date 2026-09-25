@@ -16,6 +16,27 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
+// პროდუქტების ძებნა (SEARCH) - აუცილებლად :id-მდე უნდა იდგას!
+router.get("/search", async (req: Request, res: Response) => {
+  try {
+    const query = req.query.q as string;
+    if (!query) {
+      return res.json([]);
+    }
+    // ვეძებთ პროდუქტის სათაურით (title) ან აღწერით (description)
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+      ],
+    });
+    res.json(products);
+  } catch (error) {
+    console.error("შეცდომა ძებნისას:", error);
+    res.status(500).json({ message: "სერვერის შეცდომა ძებნისას" });
+  }
+});
+
 // ახალი პროდუქტის დამატება (POST)
 router.post("/", async (req: Request, res: Response) => {
   try {

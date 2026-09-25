@@ -10,6 +10,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") || "";
+  const searchQuery = searchParams.get("search")?.toLowerCase() || ""; // ძებნის პარამეტრის წაკითხვა
 
   useEffect(() => {
     getProducts()
@@ -30,7 +31,7 @@ export default function Home() {
   const middleBanner = products.find((p) => p.category === "banner-middle");
   const bottomBanner = products.find((p) => p.category === "banner-bottom");
 
-  // ჩვეულებრივი პროდუქტები
+  // ჩვეულებრივი პროდუქტები (გაფილტრული კატეგორიით ან ძებნით)
   const regularProducts = products.filter((p) => {
     const isBanner =
       p.category === "banner-hero" ||
@@ -39,6 +40,16 @@ export default function Home() {
       p.isHeroBanner;
 
     if (isBanner) return false;
+
+    // თუ ძებნის სიტყვა გვაქვს
+    if (searchQuery) {
+      const matchesTitle = p.title?.toLowerCase().includes(searchQuery);
+      const matchesDesc = p.description?.toLowerCase().includes(searchQuery);
+      const matchesCat = p.category?.toLowerCase().includes(searchQuery);
+      return matchesTitle || matchesDesc || matchesCat;
+    }
+
+    // თუ კატეგორიაა არჩეული
     if (selectedCategory && selectedCategory !== "All") {
       return p.category === selectedCategory;
     }
@@ -97,7 +108,7 @@ export default function Home() {
       </div>
 
       {/* --- 1. მთავარი (Hero) ბანერი - კლიკით გადადის PlayStation კატეგორიაში --- */}
-      {heroBanner && heroBanner.imageUrl && (
+      {heroBanner && heroBanner.imageUrl && !searchQuery && (
         <div
           onClick={() => {
             navigate("/category/playstation");
@@ -138,7 +149,11 @@ export default function Home() {
                 : "none",
             }}
           >
-            {selectedCategory ? `📂 ${selectedCategory}` : "🔥 ALL PRODUCTS"}
+            {searchQuery
+              ? `🔍 ძებნის შედეგი: "${searchQuery}"`
+              : selectedCategory
+                ? `📂 ${selectedCategory}`
+                : "🔥 ALL PRODUCTS"}
           </h2>
         </div>
 
@@ -301,7 +316,7 @@ export default function Home() {
       </div>
 
       {/* --- 2. შუა ბანერი (Middle Banner) --- */}
-      {middleBanner && middleBanner.imageUrl && (
+      {middleBanner && middleBanner.imageUrl && !searchQuery && (
         <div
           style={{
             width: "100%",
@@ -326,7 +341,7 @@ export default function Home() {
       )}
 
       {/* --- 3. ქვედა ბანერი (Bottom Banner) --- */}
-      {bottomBanner && bottomBanner.imageUrl && (
+      {bottomBanner && bottomBanner.imageUrl && !searchQuery && (
         <div
           style={{
             width: "100%",
