@@ -79,7 +79,8 @@ export default function App() {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "#0f172a",
+          color: "#f8fafc",
           width: "100%",
           margin: 0,
           padding: 0,

@@ -32,7 +32,7 @@ export default function ProductDetail() {
         style={{
           textAlign: "center",
           fontSize: "1.2rem",
-          color: "#95a5a6",
+          color: "#c084fc",
           marginTop: "100px",
         }}
       >
@@ -44,12 +44,12 @@ export default function ProductDetail() {
   if (error || !product) {
     return (
       <div style={{ textAlign: "center", marginTop: "100px" }}>
-        <h2 style={{ color: "#e74c3c" }}>{error || "პროდუქტი არ არსებობს"}</h2>
+        <h2 style={{ color: "#ff6b6b" }}>{error || "პროდუქტი არ არსებობს"}</h2>
         <button
           onClick={() => navigate("/")}
           style={{
             marginTop: "20px",
-            backgroundColor: "#3498db",
+            backgroundColor: "#a855f7",
             color: "white",
             border: "none",
             padding: "10px 20px",
@@ -68,7 +68,7 @@ export default function ProductDetail() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "#1a102f", // მუქი რეტრო ფონი
         padding: "40px 20px",
       }}
     >
@@ -76,19 +76,20 @@ export default function ProductDetail() {
         style={{
           maxWidth: "900px",
           margin: "0 auto",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#161b22", // ბარათის მუქი ფონი
           borderRadius: "16px",
           padding: "40px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+          border: "1px solid #332244",
         }}
       >
         {/* უკან დასაბრუნებელი ღილაკი */}
         <button
           onClick={() => navigate("/")}
           style={{
-            backgroundColor: "#95a5a6",
-            color: "white",
-            border: "none",
+            backgroundColor: "#2a1b4e",
+            color: "#c084fc",
+            border: "1px solid #a855f7",
             padding: "8px 16px",
             borderRadius: "6px",
             cursor: "pointer",
@@ -116,7 +117,7 @@ export default function ProductDetail() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "#e9ecef",
+              backgroundColor: "#0d061a",
             }}
           >
             {product.imageUrl ? (
@@ -130,7 +131,7 @@ export default function ProductDetail() {
                 }}
               />
             ) : (
-              <span style={{ color: "#adb5bd" }}>სურათი არ არის</span>
+              <span style={{ color: "#7f8c8d" }}>სურათი არ არის</span>
             )}
           </div>
 
@@ -138,7 +139,7 @@ export default function ProductDetail() {
           <div>
             <h1
               style={{
-                color: "#2c3e50",
+                color: "#ffffff",
                 fontSize: "2rem",
                 marginBottom: "15px",
               }}
@@ -147,7 +148,7 @@ export default function ProductDetail() {
             </h1>
             <p
               style={{
-                color: "#7f8c8d",
+                color: "#b0b0b0",
                 fontSize: "1.1rem",
                 lineHeight: "1.6",
                 marginBottom: "25px",
@@ -159,7 +160,7 @@ export default function ProductDetail() {
               style={{
                 fontSize: "2rem",
                 fontWeight: "bold",
-                color: "#e74c3c",
+                color: "#38ef7d",
                 marginBottom: "30px",
               }}
             >
@@ -168,7 +169,7 @@ export default function ProductDetail() {
 
             <button
               style={{
-                backgroundColor: "#2ecc71",
+                backgroundColor: "#a855f7",
                 color: "white",
                 border: "none",
                 padding: "14px 28px",
@@ -177,13 +178,14 @@ export default function ProductDetail() {
                 fontSize: "1.1rem",
                 fontWeight: "bold",
                 width: "100%",
+                boxShadow: "0 0 12px rgba(168, 85, 247, 0.6)",
                 transition: "background-color 0.2s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#27ae60")
+                (e.currentTarget.style.backgroundColor = "#9333ea")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#2ecc71")
+                (e.currentTarget.style.backgroundColor = "#a855f7")
               }
               onClick={() => {
                 addToCart(product);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import {
   getProducts,
   createProduct,
@@ -18,7 +18,7 @@ export default function Admin() {
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("PlayStation");
 
-  // ბანერის ტიპის მართვა ჩექბოქსებით (ან რადიო ღილაკებით)
+  // ბანერის ტიპის მართვა რადიო ღილაკებით
   const [bannerType, setBannerType] = useState<
     "none" | "banner-hero" | "banner-middle" | "banner-bottom"
   >("none");
@@ -93,12 +93,13 @@ export default function Admin() {
         width: "100%",
         boxSizing: "border-box",
         padding: "40px 50px",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "#0f172a", // <--- შეცვლილია მუქ ფონზე
         minHeight: "calc(100vh - 130px)",
+        color: "#f8fafc",
       }}
     >
       <h1
-        style={{ textAlign: "center", color: "#2c3e50", marginBottom: "30px" }}
+        style={{ textAlign: "center", color: "#f8fafc", marginBottom: "30px" }}
       >
         🛠️ ადმინ პანელი (CRUD)
       </h1>
@@ -106,18 +107,18 @@ export default function Admin() {
       <form
         onSubmit={handleSubmit}
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "#1e293b", // <--- ფორმის მუქი ფონი
           padding: "30px",
           borderRadius: "12px",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
           marginBottom: "40px",
-          border: "1px solid #e2e8f0",
+          border: "1px solid #334155", // <--- მუქი კიდეები (border)
           width: "100%",
           boxSizing: "border-box",
         }}
       >
         <h2
-          style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#1e293b" }}
+          style={{ fontSize: "1.4rem", marginBottom: "20px", color: "#f8fafc" }}
         >
           ახალი პროდუქტის ან ბანერის დამატება ➕
         </h2>
@@ -144,10 +145,10 @@ export default function Admin() {
           {/* ბანერის არჩევის რადიო ღილაკები */}
           <div
             style={{
-              background: "#f8f9fa",
+              background: "#0f172a", // <--- მუქი ფონი შიდა ბლოკისთვის
               padding: "15px",
               borderRadius: "8px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid #334155",
               width: "100%",
               boxSizing: "border-box",
             }}
@@ -157,13 +158,18 @@ export default function Admin() {
                 display: "block",
                 marginBottom: "10px",
                 fontWeight: "bold",
-                color: "#334155",
+                color: "#e2e8f0",
               }}
             >
               ⭐ ელემენტის ტიპი:
             </label>
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                color: "#cbd5e1",
+              }}
             >
               <label
                 style={{
@@ -304,13 +310,13 @@ export default function Admin() {
       </form>
 
       <h2
-        style={{ fontSize: "1.5rem", marginBottom: "20px", color: "#2c3e50" }}
+        style={{ fontSize: "1.5rem", marginBottom: "20px", color: "#f8fafc" }}
       >
         არსებული პროდუქტები და ბანერები ({products.length})
       </h2>
 
       {loading ? (
-        <p>იტვირთება...</p>
+        <p style={{ color: "#cbd5e1" }}>იტვირთება...</p>
       ) : (
         <div style={{ display: "grid", gap: "15px", width: "100%" }}>
           {products.map((p) => {
@@ -320,14 +326,14 @@ export default function Admin() {
               <div
                 key={p._id}
                 style={{
-                  backgroundColor: "#fff",
+                  backgroundColor: "#1e293b", // <--- პროდუქტების სიის ელემენტის მუქი ფონი
                   padding: "15px 20px",
                   borderRadius: "10px",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-                  border: "1px solid #e2e8f0",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                  border: "1px solid #334155",
                   width: "100%",
                   boxSizing: "border-box",
                 }}
@@ -348,13 +354,13 @@ export default function Admin() {
                     />
                   )}
                   <div>
-                    <h4 style={{ margin: "0 0 5px 0", color: "#1e293b" }}>
+                    <h4 style={{ margin: "0 0 5px 0", color: "#f8fafc" }}>
                       {p.title} {isABanner && `⭐ [${p.category}]`}
                     </h4>
                     <p
                       style={{
                         margin: 0,
-                        color: "#64748b",
+                        color: "#94a3b8", // <--- შეცვლილი ტექსტის ფერი უკეთესი კითხველობისთვის
                         fontSize: "0.9rem",
                       }}
                     >
@@ -388,13 +394,15 @@ export default function Admin() {
   );
 }
 
-const inputStyle = {
+// ინპუტების სტილი გადაკეთდა მუქ თემაზე
+const inputStyle: CSSProperties = {
   padding: "12px",
   borderRadius: "8px",
-  border: "1px solid #cbd5e1",
+  border: "1px solid #475569",
   fontSize: "1rem",
   outline: "none",
   width: "100%",
-  boxSizing: "border-box" as const,
-  backgroundColor: "#fff",
+  boxSizing: "border-box",
+  backgroundColor: "#0f172a", // <--- ინპუტების მუქი ფონი
+  color: "#ffffff", // <--- აკრეფილი ტექსტი იქნება თეთრი
 };

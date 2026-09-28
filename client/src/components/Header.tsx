@@ -24,7 +24,6 @@ export default function Header({
     if (searchQuery.trim()) {
       window.location.href = `/?search=${encodeURIComponent(searchQuery.trim())}`;
     } else {
-      // თუ საძიებო ველი ცარიელია, გადავიდეს მთავარ გვერდზე და აჩვენოს ყველა პროდუქტი
       window.location.href = "/";
     }
   };
@@ -131,7 +130,7 @@ export default function Header({
           </form>
         </div>
 
-        {/* კომპაქტური რეტრო-ნეონული იკონები მარჯვენა კუთხეში */}
+        {/* მარჯვენა იკონები */}
         <div
           className="nav-links-wrapper"
           style={{
@@ -196,7 +195,6 @@ export default function Header({
             </button>
           ) : (
             <>
-              {/* შესვლა */}
               <Link
                 to="/login"
                 className="neon-btn"
@@ -215,7 +213,6 @@ export default function Header({
               >
                 🔑
               </Link>
-              {/* რეგისტრაცია */}
               <Link
                 to="/register"
                 className="neon-btn"
@@ -258,8 +255,13 @@ export default function Header({
             className="dropdown-parent"
             style={{ position: "relative", padding: "12px 0" }}
           >
+            {/* გასწორდა ლინკი: იყენებს სწორ /category/... როუტს */}
             <Link
-              to={`/?category=${cat.name === "All" ? "" : cat.name}`}
+              to={
+                cat.name === "All"
+                  ? "/"
+                  : `/category/${encodeURIComponent(cat.name)}`
+              }
               style={{
                 color: "#fff",
                 fontSize: "0.95rem",
@@ -293,7 +295,7 @@ export default function Header({
                 {cat.sub.map((subItem, subIndex) => (
                   <Link
                     key={subIndex}
-                    to={`/?category=${subItem}`}
+                    to={`/category/${encodeURIComponent(cat.name)}/${encodeURIComponent(subItem)}`}
                     style={{
                       color: "#fff",
                       padding: "10px 15px",
