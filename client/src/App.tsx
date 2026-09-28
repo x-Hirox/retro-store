@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
@@ -10,6 +10,7 @@ import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
 import CategoryView from "./pages/CategoryView";
+import Header from "./components/Header";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -60,7 +61,6 @@ export default function App() {
     0,
   );
   const [token, setToken] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -72,14 +72,6 @@ export default function App() {
     setToken(null);
     alert("თქვენ წარმატებით გამოხვედით სისტემიდან.");
     window.location.href = "/";
-  };
-
-  // ძებნის დამუშავება
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/?search=${encodeURIComponent(searchQuery.trim())}`;
-    }
   };
 
   return (
@@ -104,8 +96,8 @@ export default function App() {
               transition: all 0.3s ease;
             }
             .neon-btn:hover {
-              box-shadow: 0 0 12px rgba(155, 89, 182, 0.8);
-              transform: translateY(-1px);
+              box-shadow: 0 0 12px rgba(168, 85, 247, 0.9);
+              transform: translateY(-2px);
             }
             @media (max-width: 768px) {
               .nav-container {
@@ -133,265 +125,13 @@ export default function App() {
           `}
         </style>
 
-        {/* პროფესიონალური ჰედერი */}
-        <header
-          style={{
-            width: "100%",
-            backgroundColor: "#ffffff",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-          }}
-        >
-          {/* ზედა თხელი საინფორმაციო ზოლი */}
-          <div
-            style={{
-              backgroundColor: "#ff6600",
-              color: "#fff",
-              fontSize: "0.85rem",
-              padding: "8px 20px",
-              textAlign: "center",
-              fontWeight: "500",
-              width: "100%",
-              boxSizing: "border-box",
-            }}
-          >
-            🔥 უფასო მიწოდება და 1 წლიანი გარანტია ყველა რეტრო კონსოლზე!
-          </div>
-
-          {/* მთავარი ნავბარი */}
-          <div
-            className="nav-container"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              width: "100%",
-              padding: "15px 40px",
-              boxSizing: "border-box",
-            }}
-          >
-            {/* ლოგო */}
-            <Link
-              to="/"
-              style={{
-                fontSize: "1.6rem",
-                fontWeight: "bold",
-                color: "#2c3e50",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              🕹️ RetroStore
-            </Link>
-
-            {/* ძებნის ველი (ფორმა ინფუთით და ლუპის ღილაკით) */}
-            <div
-              className="search-box-wrapper"
-              style={{
-                flex: 1,
-                maxWidth: "550px",
-                margin: "0 30px",
-                boxSizing: "border-box",
-              }}
-            >
-              <form
-                onSubmit={handleSearchSubmit}
-                style={{ display: "flex", position: "relative", width: "100%" }}
-              >
-                <input
-                  type="text"
-                  placeholder="მოძებნე თამაშები და კონსოლები..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "10px 45px 10px 18px",
-                    borderRadius: "20px",
-                    border: "1px solid #ddd",
-                    outline: "none",
-                    fontSize: "0.95rem",
-                    backgroundColor: "#f9f9f9",
-                    color: "#000",
-                    boxSizing: "border-box",
-                  }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    position: "absolute",
-                    right: "5px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "1.1rem",
-                    padding: "5px 10px",
-                  }}
-                >
-                  🔍
-                </button>
-              </form>
-            </div>
-
-            {/* ღილაკები რეტრო ნეონური სტილით */}
-            <div
-              className="nav-links-wrapper"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                flexWrap: "wrap",
-              }}
-            >
-              <Link
-                to="/cart"
-                className="neon-btn"
-                style={{
-                  backgroundColor: "#9b59b6",
-                  color: "white",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  textDecoration: "none",
-                  fontWeight: "600",
-                  fontSize: "0.9rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
-                🛒 კალათა ({totalItems})
-              </Link>
-
-              {token ? (
-                <button
-                  onClick={handleLogout}
-                  className="neon-btn"
-                  style={{
-                    backgroundColor: "#e74c3c",
-                    color: "white",
-                    border: "none",
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontWeight: "600",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  🚪 გასვლა
-                </button>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="neon-btn"
-                    style={{
-                      color: "#9b59b6",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                      padding: "8px 12px",
-                      fontSize: "0.9rem",
-                      border: "1px solid #9b59b6",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    🔑 შესვლა
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="neon-btn"
-                    style={{
-                      backgroundColor: "#9b59b6",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: "8px",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    ⚡ რეგისტრაცია
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ */}
-          <nav
-            className="main-nav-bar"
-            style={{
-              backgroundColor: "#111",
-              padding: "0 40px",
-              display: "flex",
-              gap: "30px",
-              width: "100%",
-              boxSizing: "border-box",
-              position: "relative",
-            }}
-          >
-            {categoriesData.map((cat, index) => (
-              <div
-                key={index}
-                className="dropdown-parent"
-                style={{ position: "relative", padding: "12px 0" }}
-              >
-                <Link
-                  to={`/?category=${cat.name === "All" ? "" : cat.name}`}
-                  style={{
-                    color: "#fff",
-                    fontSize: "0.95rem",
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                    fontWeight: "500",
-                    textDecoration: "none",
-                    display: "block",
-                  }}
-                >
-                  {cat.name} {cat.sub.length > 0 && "▾"}
-                </Link>
-
-                {cat.sub.length > 0 && (
-                  <div
-                    className="dropdown-content"
-                    style={{
-                      display: "none",
-                      position: "absolute",
-                      top: "100%",
-                      left: 0,
-                      backgroundColor: "#111",
-                      minWidth: "220px",
-                      boxShadow: "0px 8px 16px rgba(0,0,0,0.4)",
-                      zIndex: 100,
-                      borderRadius: "4px",
-                      overflow: "hidden",
-                      border: "1px solid #333",
-                    }}
-                  >
-                    {cat.sub.map((subItem, subIndex) => (
-                      <Link
-                        key={subIndex}
-                        to={`/?category=${subItem}`}
-                        style={{
-                          color: "#fff",
-                          padding: "10px 15px",
-                          textDecoration: "none",
-                          display: "block",
-                          fontSize: "0.9rem",
-                          borderBottom: "1px solid #222",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {subItem}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
-        </header>
+        {/* გამოყოფილი ჰედერის კომპონენტი */}
+        <Header
+          categoriesData={categoriesData}
+          totalItems={totalItems}
+          token={token}
+          onLogout={handleLogout}
+        />
 
         {/* როუტები / გვერდები */}
         <div style={{ width: "100%", boxSizing: "border-box" }}>
