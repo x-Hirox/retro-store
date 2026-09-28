@@ -6,11 +6,10 @@ import type { IProduct } from "../types";
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // ნაგულისხმევად მუქი იასამნისფერი (რეტრო სტილი)
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") || "";
-  const searchQuery = searchParams.get("search")?.toLowerCase() || ""; // ძებნის პარამეტრის წაკითხვა
+  const searchQuery = searchParams.get("search")?.toLowerCase() || "";
 
   useEffect(() => {
     getProducts()
@@ -41,7 +40,6 @@ export default function Home() {
 
     if (isBanner) return false;
 
-    // თუ ძებნის სიტყვა გვაქვს
     if (searchQuery) {
       const matchesTitle = p.title?.toLowerCase().includes(searchQuery);
       const matchesDesc = p.description?.toLowerCase().includes(searchQuery);
@@ -49,65 +47,24 @@ export default function Home() {
       return matchesTitle || matchesDesc || matchesCat;
     }
 
-    // თუ კატეგორიაა არჩეული
     if (selectedCategory && selectedCategory !== "All") {
       return p.category === selectedCategory;
     }
     return true;
   });
 
-  // დინამიკური ფერები რეტრო იასამნისფერი / ღია თემისთვის
-  const theme = {
-    bg: isDarkMode ? "#0d061a" : "#f8f9fa", // მუქი იასამნისფერი რეტრო ფონი
-    cardBg: isDarkMode ? "#1a102f" : "#ffffff",
-    textColor: isDarkMode ? "#f3e8ff" : "#1e293b",
-    subText: isDarkMode ? "#cbd5e1" : "#64748b",
-    accent: "#a855f7", // ნათელი იასამნისფერი (Neon Purple)
-    border: isDarkMode ? "#3b2064" : "#e2e8f0",
-  };
-
   return (
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: theme.bg,
-        color: theme.textColor,
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
         paddingBottom: "60px",
         overflowX: "hidden",
-        transition: "background-color 0.3s ease",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
-      {/* ფერის შეცვლის (Dark/Light Retro) ღილაკი */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          padding: "15px 40px",
-        }}
-      >
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          style={{
-            backgroundColor: theme.accent,
-            color: "#ffffff",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            boxShadow: "0 0 12px rgba(168, 85, 247, 0.5)",
-            transition: "transform 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.transform = "scale(1.05)")
-          }
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        >
-          {isDarkMode ? "☀️ ღია რეჟიმი" : "🟣 მუქი იასამნისფერი (რეტრო)"}
-        </button>
-      </div>
-
-      {/* --- 1. მთავარი (Hero) ბანერი - კლიკით გადადის PlayStation კატეგორიაში --- */}
+      {/* --- 1. მთავარი (Hero) ბანერი --- */}
       {heroBanner && heroBanner.imageUrl && !searchQuery && (
         <div
           onClick={() => {
@@ -141,12 +98,9 @@ export default function Home() {
         <div style={{ marginBottom: "25px", textAlign: "left" }}>
           <h2
             style={{
-              color: theme.textColor,
+              color: "var(--text-h)",
               fontSize: "1.8rem",
               fontWeight: "bold",
-              textShadow: isDarkMode
-                ? "0 0 8px rgba(168, 85, 247, 0.6)"
-                : "none",
             }}
           >
             {searchQuery
@@ -162,7 +116,7 @@ export default function Home() {
             style={{
               textAlign: "center",
               fontSize: "1.2rem",
-              color: theme.subText,
+              color: "var(--text)",
               marginTop: "50px",
             }}
           >
@@ -173,12 +127,12 @@ export default function Home() {
             style={{
               textAlign: "center",
               padding: "40px",
-              backgroundColor: theme.cardBg,
+              backgroundColor: "var(--code-bg)",
               borderRadius: "12px",
-              border: `1px solid ${theme.border}`,
+              border: "1px solid var(--border)",
             }}
           >
-            <p style={{ color: theme.subText, fontSize: "1.1rem" }}>
+            <p style={{ color: "var(--text)", fontSize: "1.1rem" }}>
               პროდუქტები ამჟამად არ მოიძებნება.
             </p>
           </div>
@@ -194,34 +148,40 @@ export default function Home() {
               <div
                 key={product._id}
                 style={{
-                  backgroundColor: theme.cardBg,
-                  borderRadius: "12px",
-                  boxShadow: isDarkMode
-                    ? "0 4px 20px rgba(13, 6, 26, 0.7)"
-                    : "0 4px 15px rgba(0,0,0,0.05)",
+                  backgroundColor: "var(--code-bg)",
+                  borderRadius: "18px",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  transition: "all 0.3s ease",
                   cursor: "pointer",
-                  border: `1px solid ${theme.border}`,
+                  border: "1px solid rgba(168, 85, 247, 0.2)",
+                  padding: "16px",
                 }}
                 onClick={() => navigate(`/product/${product._id}`)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-5px)";
+                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 35px rgba(168, 85, 247, 0.35), 0 0 20px rgba(236, 72, 153, 0.2)";
+                  e.currentTarget.style.borderColor = "#a855f7";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 15px rgba(0,0,0,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.2)";
                 }}
               >
                 <div
                   style={{
                     height: "190px",
-                    backgroundColor: isDarkMode ? "#261642" : "#f1f5f9",
+                    backgroundColor: "var(--border)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     overflow: "hidden",
+                    borderRadius: "12px",
                   }}
                 >
                   {product.imageUrl ? (
@@ -241,7 +201,7 @@ export default function Home() {
 
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "14px 0 0 0",
                     display: "flex",
                     flexDirection: "column",
                     flex: 1,
@@ -250,8 +210,8 @@ export default function Home() {
                   <h3
                     style={{
                       margin: "0 0 10px 0",
-                      color: theme.textColor,
-                      fontSize: "1.2rem",
+                      color: "var(--text-h)",
+                      fontSize: "1.1rem",
                       fontWeight: "bold",
                     }}
                   >
@@ -260,7 +220,7 @@ export default function Home() {
                   <p
                     style={{
                       margin: "0 0 20px 0",
-                      color: theme.subText,
+                      color: "var(--text)",
                       fontSize: "0.95rem",
                       lineHeight: "1.5",
                       flex: 1,
@@ -268,6 +228,7 @@ export default function Home() {
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: "vertical",
                       overflow: "hidden",
+                      opacity: 0.8,
                     }}
                   >
                     {product.description}
@@ -283,9 +244,10 @@ export default function Home() {
                   >
                     <span
                       style={{
-                        fontSize: "1.3rem",
-                        fontWeight: "bold",
-                        color: "#c084fc",
+                        fontSize: "1.35rem",
+                        fontWeight: "800",
+                        color: "#a855f7",
+                        textShadow: "0 0 10px rgba(168, 85, 247, 0.3)",
                       }}
                     >
                       {product.price} ₾
@@ -296,13 +258,24 @@ export default function Home() {
                         navigate(`/product/${product._id}`);
                       }}
                       style={{
-                        backgroundColor: theme.accent,
+                        background:
+                          "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
                         color: "white",
                         border: "none",
                         padding: "8px 16px",
-                        borderRadius: "8px",
+                        borderRadius: "10px",
                         cursor: "pointer",
-                        fontWeight: "600",
+                        fontWeight: "bold",
+                        boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "0.95";
+                        e.currentTarget.style.transform = "scale(1.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.transform = "scale(1)";
                       }}
                     >
                       დეტალები

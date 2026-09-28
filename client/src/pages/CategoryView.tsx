@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
 
-// ქვეკატეგორიების სტრუქტურა პლატფორმების მიხედვით
 const subCategoriesMap: Record<
   string,
   { name: string; slug: string; image: string }[]
@@ -69,9 +68,32 @@ const subCategoriesMap: Record<
         "https://images.unsplash.com/photo-1578303512597-81e6cc155b12?w=400",
     },
   ],
+  xbox: [
+    {
+      name: "Xbox",
+      slug: "xbox",
+      image:
+        "https://images.unsplash.com/photo-1605901309584-818e2596098f?w=400",
+    },
+  ],
+  sega: [
+    {
+      name: "Sega Genesis",
+      slug: "sega-genesis",
+      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
+    },
+  ],
+  "chinese consoles": [
+    {
+      name: "Anbernic",
+      slug: "anbernic",
+      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
+    },
+  ],
+  bundles: [],
+  "atari & more": [],
 };
 
-// შიდა ქვეკატეგორიები
 const productTypes = [
   {
     name: "თამაშები",
@@ -101,7 +123,6 @@ export default function CategoryView() {
 
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true); // ნაგულისხმევად მუქი იასამნისფერი რეტრო ნეონი
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   useEffect(() => {
@@ -116,27 +137,6 @@ export default function CategoryView() {
         setLoading(false);
       });
   }, [platform, sub]);
-
-  // რეტრო ნეონის თემების პლალიტრა
-  const theme = {
-    bg: isDarkMode ? "#0d061a" : "#f8f9fa",
-    headerBg: isDarkMode
-      ? "linear-gradient(135deg, #1e1b4b 0%, #3b0764 100%)"
-      : "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-    cardBg: isDarkMode ? "#171026" : "#ffffff",
-    textColor: isDarkMode ? "#f3e8ff" : "#1e293b",
-    subText: isDarkMode ? "#cbd5e1" : "#64748b",
-    accentPurple: "#c084fc",
-    accentBlue: "#38bdf8",
-    accentPink: "#ec4899",
-    border: isDarkMode ? "#4c1d95" : "#e2e8f0",
-    neonGlow: isDarkMode
-      ? "0 0 15px rgba(192, 132, 252, 0.4), inset 0 0 10px rgba(56, 189, 248, 0.2)"
-      : "0 4px 6px rgba(0,0,0,0.1)",
-    cardHoverGlow: isDarkMode
-      ? "0 0 25px rgba(236, 72, 153, 0.7), 0 0 10px rgba(192, 132, 252, 0.8)"
-      : "0 10px 20px rgba(0,0,0,0.15)",
-  };
 
   const currentSubCategories = platform
     ? subCategoriesMap[platform.toLowerCase()] || []
@@ -153,92 +153,129 @@ export default function CategoryView() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: theme.bg,
-        color: theme.textColor,
-        paddingBottom: "60px",
-        transition: "background-color 0.3s ease",
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
+        paddingBottom: "80px",
+        transition: "all 0.3s ease",
       }}
     >
-      {/* ფერის შეცვლის / თემის გადამრთველი ღილაკი ზედა კუთხეში */}
+      {/* უკან დაბრუნების ღილაკი */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "15px 40px",
-          backgroundColor: isDarkMode ? "#130926" : "#ffffff",
-          borderBottom: `1px solid ${theme.border}`,
+          padding: "20px 40px",
+          backgroundColor: "var(--bg)",
         }}
       >
         <button
           onClick={() => navigate("/")}
           style={{
             backgroundColor: "transparent",
-            color: theme.accentBlue,
-            border: `1px solid ${theme.accentBlue}`,
-            padding: "8px 16px",
-            borderRadius: "8px",
+            color: "#a855f7",
+            border: "2px solid #a855f7",
+            padding: "10px 20px",
+            borderRadius: "12px",
             cursor: "pointer",
             fontWeight: "bold",
-            boxShadow: isDarkMode ? "0 0 10px rgba(56, 189, 248, 0.4)" : "none",
+            letterSpacing: "1px",
+            boxShadow: "0 0 15px rgba(168, 85, 247, 0.25)",
+            transition: "all 0.3s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#a855f7";
+            e.currentTarget.style.color = "#ffffff";
+            e.currentTarget.style.boxShadow =
+              "0 0 25px rgba(168, 85, 247, 0.5)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+            e.currentTarget.style.color = "#a855f7";
+            e.currentTarget.style.boxShadow =
+              "0 0 15px rgba(168, 85, 247, 0.25)";
           }}
         >
           ← მთავარ გვერდზე დაბრუნება
         </button>
-
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          style={{
-            backgroundColor: theme.accentPurple,
-            color: "#ffffff",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            boxShadow: "0 0 15px rgba(192, 132, 252, 0.6)",
-          }}
-        >
-          {isDarkMode ? "☀️ ღია რეჟიმი" : "🟣 მუქი იასამნისფერი (რეტრო)"}
-        </button>
       </div>
 
-      {/* 1. ზედა ნეონური ზონა (პლატფორმების და ქვეკატეგორიების არჩევანი) */}
+      {/* სრულეკრანიანი რეტრო-ფუტურისტული ბანერი (Hero Banner) */}
       <div
         style={{
-          background: theme.headerBg,
-          padding: "40px 20px",
+          position: "relative",
+          background:
+            "linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(236, 72, 153, 0.12) 50%, rgba(59, 130, 246, 0.1) 100%)",
+          padding: "70px 20px",
           textAlign: "center",
-          boxShadow: isDarkMode ? "0 10px 30px rgba(15, 5, 30, 0.8)" : "none",
-          borderBottom: `2px solid ${theme.accentPurple}`,
+          overflow: "hidden",
+          borderBottom: "2px solid rgba(168, 85, 247, 0.3)",
+          boxShadow: "inset 0 0 40px rgba(168, 85, 247, 0.1)",
         }}
       >
-        <h1
+        {/* ფონური დეკორატიული ელემენტი (რეტრო ბზინვარება) */}
+        <div
           style={{
-            color: theme.textColor,
-            marginBottom: "30px",
-            textTransform: "uppercase",
-            fontSize: "2.2rem",
-            letterSpacing: "2px",
-            textShadow: isDarkMode
-              ? "0 0 10px #c084fc, 0 0 20px #38bdf8, 0 0 30px #ec4899"
-              : "none",
+            position: "absolute",
+            top: "-50%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "600px",
+            height: "200px",
+            background:
+              "radial-gradient(circle, rgba(168,85,247,0.3) 0%, rgba(0,0,0,0) 70%)",
+            zIndex: 0,
+            pointerEvents: "none",
           }}
-        >
-          {sub ? `${sub} - ${platform}` : platform}
-        </h1>
+        />
 
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <span
+            style={{
+              display: "inline-block",
+              padding: "6px 16px",
+              background: "rgba(168, 85, 247, 0.15)",
+              color: "#a855f7",
+              borderRadius: "20px",
+              fontSize: "0.9rem",
+              fontWeight: "bold",
+              letterSpacing: "2px",
+              marginBottom: "15px",
+              border: "1px solid rgba(168, 85, 247, 0.3)",
+              textTransform: "uppercase",
+            }}
+          >
+            Retro Universe 🎮
+          </span>
+
+          <h1
+            style={{
+              color: "var(--text-h)",
+              marginBottom: "35px",
+              textTransform: "uppercase",
+              fontSize: "3rem",
+              letterSpacing: "4px",
+              fontWeight: "900",
+              textShadow: "0 0 25px rgba(168, 85, 247, 0.4)",
+            }}
+          >
+            {sub ? `${sub} — ${platform}` : platform}
+          </h1>
+        </div>
+
+        {/* υπο-категории / ბარათები ბანერის შიგნით */}
         <div
           style={{
             display: "flex",
             justifyContent: "center",
-            gap: "20px",
+            gap: "24px",
             flexWrap: "wrap",
             maxWidth: "1200px",
             margin: "0 auto",
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          {/* მოდელები (PS1, PS2...) */}
           {!sub &&
             currentSubCategories.map((item) => {
               const isHovered = hoveredCard === item.slug;
@@ -249,18 +286,22 @@ export default function CategoryView() {
                   onMouseLeave={() => setHoveredCard(null)}
                   onClick={() => navigate(`/category/${platform}/${item.slug}`)}
                   style={{
-                    backgroundColor: theme.cardBg,
-                    borderRadius: "14px",
-                    width: "160px",
-                    padding: "15px",
+                    backgroundColor: "var(--bg)",
+                    borderRadius: "16px",
+                    width: "170px",
+                    padding: "16px",
                     cursor: "pointer",
-                    boxShadow: isHovered ? theme.cardHoverGlow : theme.neonGlow,
+                    boxShadow: isHovered
+                      ? "0 15px 35px rgba(168, 85, 247, 0.45), 0 0 20px rgba(236, 72, 153, 0.3)"
+                      : "0 6px 20px rgba(0, 0, 0, 0.12)",
                     transform: isHovered
-                      ? "translateY(-8px) scale(1.03)"
+                      ? "translateY(-8px) scale(1.04)"
                       : "translateY(0)",
-                    transition: "all 0.3s ease-in-out",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     textAlign: "center",
-                    border: `1px solid ${isHovered ? theme.accentPink : theme.border}`,
+                    border: isHovered
+                      ? "2px solid #a855f7"
+                      : "1px solid rgba(168, 85, 247, 0.3)",
                   }}
                 >
                   <img
@@ -268,17 +309,17 @@ export default function CategoryView() {
                     alt={item.name}
                     style={{
                       width: "100%",
-                      height: "100px",
+                      height: "110px",
                       objectFit: "cover",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
+                      borderRadius: "10px",
+                      marginBottom: "12px",
                     }}
                   />
                   <h4
                     style={{
                       margin: 0,
                       fontSize: "0.95rem",
-                      color: theme.textColor,
+                      color: "var(--text-h)",
                       fontWeight: "bold",
                     }}
                   >
@@ -288,7 +329,6 @@ export default function CategoryView() {
               );
             })}
 
-          {/* შიდა ტიპები (Games, Consoles...) */}
           {sub &&
             productTypes.map((item) => {
               const isHovered = hoveredCard === item.slug;
@@ -298,18 +338,22 @@ export default function CategoryView() {
                   onMouseEnter={() => setHoveredCard(item.slug)}
                   onMouseLeave={() => setHoveredCard(null)}
                   style={{
-                    backgroundColor: theme.cardBg,
-                    borderRadius: "14px",
+                    backgroundColor: "var(--bg)",
+                    borderRadius: "16px",
                     width: "170px",
-                    padding: "15px",
+                    padding: "16px",
                     cursor: "pointer",
-                    boxShadow: isHovered ? theme.cardHoverGlow : theme.neonGlow,
+                    boxShadow: isHovered
+                      ? "0 15px 35px rgba(168, 85, 247, 0.45), 0 0 20px rgba(236, 72, 153, 0.3)"
+                      : "0 6px 20px rgba(0, 0, 0, 0.12)",
                     transform: isHovered
-                      ? "translateY(-8px) scale(1.03)"
+                      ? "translateY(-8px) scale(1.04)"
                       : "translateY(0)",
-                    transition: "all 0.3s ease-in-out",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     textAlign: "center",
-                    border: `1px solid ${isHovered ? theme.accentPink : theme.border}`,
+                    border: isHovered
+                      ? "2px solid #a855f7"
+                      : "1px solid rgba(168, 85, 247, 0.3)",
                   }}
                 >
                   <img
@@ -317,17 +361,17 @@ export default function CategoryView() {
                     alt={item.name}
                     style={{
                       width: "100%",
-                      height: "100px",
+                      height: "110px",
                       objectFit: "cover",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
+                      borderRadius: "10px",
+                      marginBottom: "12px",
                     }}
                   />
                   <h4
                     style={{
                       margin: 0,
                       fontSize: "0.95rem",
-                      color: theme.textColor,
+                      color: "var(--text-h)",
                       fontWeight: "bold",
                     }}
                   >
@@ -339,45 +383,55 @@ export default function CategoryView() {
         </div>
       </div>
 
-      {/* 2. პროდუქტების სია */}
+      {/* პროდუქტების სია */}
       <div
-        style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}
+        style={{ maxWidth: "1200px", margin: "50px auto", padding: "0 20px" }}
       >
         <h2
           style={{
-            color: theme.textColor,
-            marginBottom: "25px",
-            fontSize: "1.6rem",
-            textShadow: isDarkMode
-              ? "0 0 10px rgba(192, 132, 252, 0.6)"
-              : "none",
+            color: "var(--text-h)",
+            marginBottom: "30px",
+            fontSize: "1.8rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
           }}
         >
-          📂 პროდუქტების სია ({filteredProducts.length})
+          <span style={{ color: "#a855f7" }}>📂</span> პროდუქტების სია{" "}
+          <span style={{ fontSize: "1.2rem", color: "#a855f7" }}>
+            ({filteredProducts.length})
+          </span>
         </h2>
 
         {loading ? (
           <p
             style={{
               textAlign: "center",
-              color: theme.subText,
+              color: "var(--text)",
               fontSize: "1.2rem",
+              padding: "40px",
             }}
           >
-            იტვირთება რეტრო მონაცემები...
+            იტვირთება რეტრო სამყარო... ✨
           </p>
         ) : filteredProducts.length === 0 ? (
           <div
             style={{
               textAlign: "center",
-              padding: "40px",
-              backgroundColor: theme.cardBg,
-              borderRadius: "12px",
-              border: `1px solid ${theme.border}`,
+              padding: "50px",
+              backgroundColor: "rgba(168, 85, 247, 0.04)",
+              borderRadius: "20px",
+              border: "1px dashed rgba(168, 85, 247, 0.3)",
             }}
           >
-            <p style={{ color: theme.subText, fontSize: "1.1rem" }}>
-              ამ კატეგორიაში პროდუქტები არ მოიძებნა.
+            <p
+              style={{
+                color: "var(--text)",
+                fontSize: "1.2rem",
+                fontWeight: "500",
+              }}
+            >
+              ამ კატეგორიაში პროდუქტები ჯერ არ მოიძებნა.
             </p>
           </div>
         ) : (
@@ -385,7 +439,7 @@ export default function CategoryView() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: "24px",
+              gap: "28px",
             }}
           >
             {filteredProducts.map((product) => (
@@ -393,27 +447,25 @@ export default function CategoryView() {
                 key={product._id}
                 onClick={() => navigate(`/product/${product._id}`)}
                 style={{
-                  backgroundColor: theme.cardBg,
-                  borderRadius: "14px",
-                  padding: "15px",
+                  backgroundColor: "var(--bg)",
+                  borderRadius: "18px",
+                  padding: "16px",
                   cursor: "pointer",
-                  border: `1px solid ${theme.border}`,
-                  boxShadow: isDarkMode
-                    ? "0 4px 20px rgba(13, 6, 26, 0.8)"
-                    : "0 2px 5px rgba(0,0,0,0.05)",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  border: "1px solid rgba(168, 85, 247, 0.2)",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+                  transition: "all 0.3s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-6px)";
-                  e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 0 20px rgba(192, 132, 252, 0.6)"
-                    : "0 8px 15px rgba(0,0,0,0.1)";
+                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 15px 35px rgba(168, 85, 247, 0.35), 0 0 20px rgba(236, 72, 153, 0.2)";
+                  e.currentTarget.style.borderColor = "#a855f7";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = isDarkMode
-                    ? "0 4px 20px rgba(13, 6, 26, 0.8)"
-                    : "0 2px 5px rgba(0,0,0,0.05)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 15px rgba(0,0,0,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.2)";
                 }}
               >
                 <img
@@ -421,16 +473,16 @@ export default function CategoryView() {
                   alt={product.title}
                   style={{
                     width: "100%",
-                    height: "180px",
+                    height: "190px",
                     objectFit: "cover",
-                    borderRadius: "10px",
+                    borderRadius: "12px",
                   }}
                 />
                 <h3
                   style={{
                     fontSize: "1.1rem",
-                    margin: "12px 0 8px",
-                    color: theme.textColor,
+                    margin: "14px 0 10px",
+                    color: "var(--text-h)",
                     fontWeight: "bold",
                   }}
                 >
@@ -445,26 +497,34 @@ export default function CategoryView() {
                 >
                   <span
                     style={{
-                      color: theme.accentPurple,
-                      fontWeight: "bold",
-                      fontSize: "1.3rem",
-                      textShadow: isDarkMode
-                        ? "0 0 8px rgba(192, 132, 252, 0.5)"
-                        : "none",
+                      color: "#a855f7",
+                      fontWeight: "800",
+                      fontSize: "1.35rem",
+                      textShadow: "0 0 10px rgba(168, 85, 247, 0.3)",
                     }}
                   >
                     {product.price} ₾
                   </span>
                   <button
                     style={{
-                      backgroundColor: theme.accentPink,
+                      background:
+                        "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
                       color: "#ffffff",
                       border: "none",
-                      padding: "6px 14px",
-                      borderRadius: "8px",
+                      padding: "8px 16px",
+                      borderRadius: "10px",
                       fontWeight: "bold",
                       cursor: "pointer",
-                      boxShadow: "0 0 10px rgba(236, 72, 153, 0.5)",
+                      boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.95";
+                      e.currentTarget.style.transform = "scale(1.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
                     დეტალები

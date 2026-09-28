@@ -62,9 +62,18 @@ export default function App() {
   );
   const [token, setToken] = useState<string | null>(null);
 
+  // 🟢 აპლიკაციის ჩატვირთვისას ვამოწმებთ შენახულ თემას
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
+
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+      localStorage.setItem("theme", "light"); // დეფაულტად ყოველთვის თეთრი
+    }
   }, []);
 
   const handleLogout = () => {
@@ -79,13 +88,14 @@ export default function App() {
       <div
         style={{
           minHeight: "100vh",
-          backgroundColor: "#0f172a",
-          color: "#f8fafc",
+          backgroundColor: "var(--bg)",
+          color: "var(--text)",
           width: "100%",
           margin: 0,
           padding: 0,
           boxSizing: "border-box",
           overflowX: "hidden",
+          transition: "background-color 0.2s ease, color 0.2s ease",
         }}
       >
         <style>

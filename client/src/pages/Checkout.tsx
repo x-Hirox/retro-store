@@ -95,21 +95,25 @@ export default function Checkout() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
         padding: "40px 20px",
+        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <div
         style={{
           maxWidth: "800px",
           margin: "0 auto",
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--bg)",
+          color: "var(--text)",
+          border: "1px solid var(--border)",
           borderRadius: "16px",
           padding: "40px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          boxShadow: "var(--shadow)",
         }}
       >
-        <h1 style={{ color: "#2c3e50", marginBottom: "30px" }}>
+        <h1 style={{ color: "var(--text-h)", marginBottom: "30px" }}>
           შეკვეთის გაფორმება 🚀
         </h1>
 
@@ -129,7 +133,7 @@ export default function Checkout() {
               <label
                 style={{
                   display: "block",
-                  color: "#7f8c8d",
+                  color: "var(--text)",
                   marginBottom: "5px",
                 }}
               >
@@ -145,7 +149,9 @@ export default function Checkout() {
                   width: "100%",
                   padding: "10px",
                   borderRadius: "8px",
-                  border: "1px solid #ced4da",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--code-bg)",
+                  color: "var(--text-h)",
                 }}
               />
             </div>
@@ -154,7 +160,7 @@ export default function Checkout() {
               <label
                 style={{
                   display: "block",
-                  color: "#7f8c8d",
+                  color: "var(--text)",
                   marginBottom: "5px",
                 }}
               >
@@ -168,20 +174,68 @@ export default function Checkout() {
                   width: "100%",
                   padding: "12px",
                   borderRadius: "8px",
-                  border: "1px solid #ced4da",
-                  backgroundColor: "white",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--code-bg)",
                   fontSize: "1rem",
-                  color: "#2c3e50",
+                  color: "var(--text-h)",
                   outline: "none",
                   cursor: "pointer",
                 }}
               >
-                <option value="თბილისი">თბილისი</option>
-                <option value="ქუთაისი">ქუთაისი</option>
-                <option value="ბათუმი">ბათუმი</option>
-                <option value="რუსთავი">რუსთავი</option>
-                <option value="ზუგდიდი">ზუგდიდი</option>
-                <option value="სხვა რეგიონები">სხვა რეგიონები</option>
+                <option
+                  value="თბილისი"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  თბილისი
+                </option>
+                <option
+                  value="ქუთაისი"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  ქუთაისი
+                </option>
+                <option
+                  value="ბათუმი"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  ბათუმი
+                </option>
+                <option
+                  value="რუსთავი"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  რუსთავი
+                </option>
+                <option
+                  value="ზუგდიდი"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  ზუგდიდი
+                </option>
+                <option
+                  value="სხვა რეგიონები"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  სხვა რეგიონები
+                </option>
               </select>
             </div>
 
@@ -191,7 +245,7 @@ export default function Checkout() {
                 <label
                   style={{
                     display: "block",
-                    color: "#7f8c8d",
+                    color: "var(--text)",
                     marginBottom: "5px",
                   }}
                 >
@@ -208,7 +262,9 @@ export default function Checkout() {
                     width: "100%",
                     padding: "10px",
                     borderRadius: "8px",
-                    border: "1px solid #ced4da",
+                    border: "1px solid var(--border)",
+                    backgroundColor: "var(--code-bg)",
+                    color: "var(--text-h)",
                   }}
                 />
               </div>
@@ -218,7 +274,7 @@ export default function Checkout() {
               <label
                 style={{
                   display: "block",
-                  color: "#7f8c8d",
+                  color: "var(--text)",
                   marginBottom: "5px",
                 }}
               >
@@ -235,7 +291,9 @@ export default function Checkout() {
                   width: "100%",
                   padding: "10px",
                   borderRadius: "8px",
-                  border: "1px solid #ced4da",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--code-bg)",
+                  color: "var(--text-h)",
                 }}
               />
             </div>
@@ -244,7 +302,7 @@ export default function Checkout() {
               <label
                 style={{
                   display: "block",
-                  color: "#7f8c8d",
+                  color: "var(--text)",
                   marginBottom: "5px",
                 }}
               >
@@ -261,7 +319,9 @@ export default function Checkout() {
                   width: "100%",
                   padding: "10px",
                   borderRadius: "8px",
-                  border: "1px solid #ced4da",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--code-bg)",
+                  color: "var(--text-h)",
                 }}
               />
             </div>
@@ -270,7 +330,7 @@ export default function Checkout() {
               <label
                 style={{
                   display: "block",
-                  color: "#7f8c8d",
+                  color: "var(--text)",
                   marginBottom: "5px",
                 }}
               >
@@ -284,19 +344,36 @@ export default function Checkout() {
                   width: "100%",
                   padding: "10px",
                   borderRadius: "8px",
-                  border: "1px solid #ced4da",
-                  backgroundColor: "white",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--code-bg)",
+                  color: "var(--text-h)",
                 }}
               >
-                <option value="card">ბარათით გადახდა (TBC / BOG) 💳</option>
-                <option value="cash">ნაღდი ანგარიშსწორება კურიერთან 💵</option>
+                <option
+                  value="card"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  ბარათით გადახდა (TBC / BOG) 💳
+                </option>
+                <option
+                  value="cash"
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    color: "var(--text-h)",
+                  }}
+                >
+                  ნაღდი ანგარიშსწორება კურიერთან 💵
+                </option>
               </select>
             </div>
 
             <button
               type="submit"
               style={{
-                backgroundColor: "#2ecc71",
+                backgroundColor: "var(--accent)",
                 color: "white",
                 border: "none",
                 padding: "14px",
@@ -314,13 +391,13 @@ export default function Checkout() {
           {/* შეკვეთის შეჯამება */}
           <div
             style={{
-              backgroundColor: "#f8f9fa",
+              backgroundColor: "var(--code-bg)",
               padding: "20px",
               borderRadius: "12px",
-              border: "1px solid #e9ecef",
+              border: "1px solid var(--border)",
             }}
           >
-            <h3 style={{ color: "#2c3e50", marginBottom: "15px" }}>
+            <h3 style={{ color: "var(--text-h)", marginBottom: "15px" }}>
               თქვენი კალათა 🛒
             </h3>
             <div
@@ -340,13 +417,13 @@ export default function Checkout() {
                     display: "flex",
                     justifyContent: "space-between",
                     fontSize: "0.95rem",
-                    color: "#495057",
+                    color: "var(--text)",
                   }}
                 >
                   <span>
                     {item.title} (x{item.quantity})
                   </span>
-                  <span style={{ fontWeight: "bold" }}>
+                  <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
                     ${item.price * item.quantity}
                   </span>
                 </div>
@@ -355,7 +432,7 @@ export default function Checkout() {
             <hr
               style={{
                 border: "0",
-                borderTop: "1px solid #dee2e6",
+                borderTop: "1px solid var(--border)",
                 marginBottom: "15px",
               }}
             />
@@ -365,11 +442,11 @@ export default function Checkout() {
                 justifyContent: "space-between",
                 fontSize: "1.2rem",
                 fontWeight: "bold",
-                color: "#2c3e50",
+                color: "var(--text-h)",
               }}
             >
               <span>სულ ჯამი:</span>
-              <span style={{ color: "#e74c3c" }}>
+              <span style={{ color: "var(--accent)" }}>
                 ${totalAmount.toFixed(2)}
               </span>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {
@@ -19,6 +19,25 @@ export default function Header({
 }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // თემის მართვის ლოგიკა: დეფაულტად არის თეთრი, თუ ხელით არ ჩართავ შავს
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem("theme") === "dark";
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.body.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => !prev);
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -32,8 +51,10 @@ export default function Header({
     <header
       style={{
         width: "100%",
-        backgroundColor: "#ffffff",
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
         boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
       {/* ზედა თხელი საინფორმაციო ზოლი */}
@@ -70,7 +91,7 @@ export default function Header({
           style={{
             fontSize: "1.6rem",
             fontWeight: "bold",
-            color: "#2c3e50",
+            color: "var(--text-h)",
             textDecoration: "none",
             display: "flex",
             alignItems: "center",
@@ -103,11 +124,11 @@ export default function Header({
                 width: "100%",
                 padding: "10px 45px 10px 18px",
                 borderRadius: "20px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 outline: "none",
                 fontSize: "0.95rem",
-                backgroundColor: "#f9f9f9",
-                color: "#000",
+                backgroundColor: "var(--code-bg)",
+                color: "var(--text)",
                 boxSizing: "border-box",
               }}
             />
@@ -130,7 +151,7 @@ export default function Header({
           </form>
         </div>
 
-        {/* მარჯვენა იკონები */}
+        {/* მარჯვენა იკონები და თემის გადამრთველი ღილაკი */}
         <div
           className="nav-links-wrapper"
           style={{
@@ -140,13 +161,31 @@ export default function Header({
             flexWrap: "wrap",
           }}
         >
+          {/* თემის გადართვის ღილაკი */}
+          <button
+            onClick={toggleTheme}
+            className="neon-btn"
+            style={{
+              backgroundColor: "var(--code-bg)",
+              color: "var(--text-h)",
+              border: "1px solid var(--border)",
+              padding: "8px 14px",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.9rem",
+            }}
+          >
+            {isDark ? "☀️ ღია რეჟიმი" : "🌙 მუქი რეჟიმი"}
+          </button>
+
           {/* კალათა */}
           <Link
             to="/cart"
             className="neon-btn"
             title="კალათა"
             style={{
-              backgroundColor: "#1a102f",
+              backgroundColor: "var(--code-bg)",
               color: "#c084fc",
               border: "1px solid #a855f7",
               padding: "8px 12px",
@@ -157,7 +196,6 @@ export default function Header({
               display: "flex",
               alignItems: "center",
               gap: "6px",
-              boxShadow: "0 0 8px rgba(168, 85, 247, 0.4)",
             }}
           >
             🛒{" "}
@@ -180,7 +218,7 @@ export default function Header({
               className="neon-btn"
               title="გასვლა"
               style={{
-                backgroundColor: "#1a102f",
+                backgroundColor: "var(--code-bg)",
                 color: "#ff6b6b",
                 border: "1px solid #ff4757",
                 padding: "8px 12px",
@@ -188,7 +226,6 @@ export default function Header({
                 cursor: "pointer",
                 fontWeight: "600",
                 fontSize: "1rem",
-                boxShadow: "0 0 8px rgba(255, 71, 87, 0.4)",
               }}
             >
               🚪
@@ -200,7 +237,7 @@ export default function Header({
                 className="neon-btn"
                 title="შესვლა"
                 style={{
-                  backgroundColor: "#1a102f",
+                  backgroundColor: "var(--code-bg)",
                   color: "#c084fc",
                   border: "1px solid #a855f7",
                   padding: "8px 12px",
@@ -208,7 +245,6 @@ export default function Header({
                   textDecoration: "none",
                   fontWeight: "600",
                   fontSize: "1rem",
-                  boxShadow: "0 0 8px rgba(168, 85, 247, 0.4)",
                 }}
               >
                 🔑
@@ -226,7 +262,6 @@ export default function Header({
                   textDecoration: "none",
                   fontWeight: "600",
                   fontSize: "1rem",
-                  boxShadow: "0 0 10px rgba(168, 85, 247, 0.6)",
                 }}
               >
                 ⚡
@@ -240,7 +275,9 @@ export default function Header({
       <nav
         className="main-nav-bar"
         style={{
-          backgroundColor: "#111",
+          backgroundColor: "var(--bg)",
+          borderTop: "1px solid var(--border)",
+          borderBottom: "1px solid var(--border)",
           padding: "0 40px",
           display: "flex",
           gap: "30px",
@@ -255,7 +292,6 @@ export default function Header({
             className="dropdown-parent"
             style={{ position: "relative", padding: "12px 0" }}
           >
-            {/* გასწორდა ლინკი: იყენებს სწორ /category/... როუტს */}
             <Link
               to={
                 cat.name === "All"
@@ -263,7 +299,7 @@ export default function Header({
                   : `/category/${encodeURIComponent(cat.name)}`
               }
               style={{
-                color: "#fff",
+                color: "var(--text)",
                 fontSize: "0.95rem",
                 cursor: "pointer",
                 whiteSpace: "nowrap",
@@ -283,13 +319,13 @@ export default function Header({
                   position: "absolute",
                   top: "100%",
                   left: 0,
-                  backgroundColor: "#111",
+                  backgroundColor: "var(--bg)",
                   minWidth: "220px",
-                  boxShadow: "0px 8px 16px rgba(0,0,0,0.4)",
+                  boxShadow: "var(--shadow)",
                   zIndex: 100,
                   borderRadius: "4px",
                   overflow: "hidden",
-                  border: "1px solid #333",
+                  border: "1px solid var(--border)",
                 }}
               >
                 {cat.sub.map((subItem, subIndex) => (
@@ -297,12 +333,12 @@ export default function Header({
                     key={subIndex}
                     to={`/category/${encodeURIComponent(cat.name)}/${encodeURIComponent(subItem)}`}
                     style={{
-                      color: "#fff",
+                      color: "var(--text)",
                       padding: "10px 15px",
                       textDecoration: "none",
                       display: "block",
                       fontSize: "0.9rem",
-                      borderBottom: "1px solid #222",
+                      borderBottom: "1px solid var(--border)",
                       whiteSpace: "nowrap",
                     }}
                   >
