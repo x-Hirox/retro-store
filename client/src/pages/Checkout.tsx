@@ -103,13 +103,13 @@ export default function Checkout() {
     >
       <div
         style={{
-          maxWidth: "800px",
+          maxWidth: "900px",
           margin: "0 auto",
           backgroundColor: "var(--bg)",
           color: "var(--text)",
           border: "1px solid var(--border)",
           borderRadius: "16px",
-          padding: "40px",
+          padding: "30px",
           boxShadow: "var(--shadow)",
         }}
       >
@@ -117,17 +117,18 @@ export default function Checkout() {
           შეკვეთის გაფორმება 🚀
         </h1>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.2fr 0.8fr",
-            gap: "40px",
-          }}
-        >
+        {/* გამოყენებულია details-grid, რომ მობილურზე ავტომატურად ჩამოვიდეს ქვემოთ */}
+        <div className="details-grid" style={{ alignItems: "flex-start" }}>
           {/* ფორმა */}
           <form
             onSubmit={handleOrderSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              flex: 1,
+              width: "100%",
+            }}
           >
             <div>
               <label
@@ -152,6 +153,7 @@ export default function Checkout() {
                   border: "1px solid var(--border)",
                   backgroundColor: "var(--code-bg)",
                   color: "var(--text-h)",
+                  boxSizing: "border-box",
                 }}
               />
             </div>
@@ -180,6 +182,7 @@ export default function Checkout() {
                   color: "var(--text-h)",
                   outline: "none",
                   cursor: "pointer",
+                  boxSizing: "border-box",
                 }}
               >
                 <option
@@ -265,6 +268,7 @@ export default function Checkout() {
                     border: "1px solid var(--border)",
                     backgroundColor: "var(--code-bg)",
                     color: "var(--text-h)",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
@@ -294,6 +298,7 @@ export default function Checkout() {
                   border: "1px solid var(--border)",
                   backgroundColor: "var(--code-bg)",
                   color: "var(--text-h)",
+                  boxSizing: "border-box",
                 }}
               />
             </div>
@@ -322,6 +327,7 @@ export default function Checkout() {
                   border: "1px solid var(--border)",
                   backgroundColor: "var(--code-bg)",
                   color: "var(--text-h)",
+                  boxSizing: "border-box",
                 }}
               />
             </div>
@@ -347,6 +353,7 @@ export default function Checkout() {
                   border: "1px solid var(--border)",
                   backgroundColor: "var(--code-bg)",
                   color: "var(--text-h)",
+                  boxSizing: "border-box",
                 }}
               >
                 <option
@@ -395,6 +402,9 @@ export default function Checkout() {
               padding: "20px",
               borderRadius: "12px",
               border: "1px solid var(--border)",
+              flex: 1,
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             <h3 style={{ color: "var(--text-h)", marginBottom: "15px" }}>
@@ -424,7 +434,7 @@ export default function Checkout() {
                     {item.title} (x{item.quantity})
                   </span>
                   <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
-                    ${item.price * item.quantity}
+                    {item.price * item.quantity} ₾
                   </span>
                 </div>
               ))}
@@ -447,7 +457,7 @@ export default function Checkout() {
             >
               <span>სულ ჯამი:</span>
               <span style={{ color: "var(--accent)" }}>
-                ${totalAmount.toFixed(2)}
+                {totalAmount.toFixed(2)} ₾
               </span>
             </div>
           </div>

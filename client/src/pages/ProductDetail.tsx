@@ -73,7 +73,7 @@ export default function ProductDetail() {
         backgroundColor: "var(--bg)",
         color: "var(--text)",
         padding: "40px 20px",
-        boxSizing: "box-border",
+        boxSizing: "border-box",
       }}
     >
       <div
