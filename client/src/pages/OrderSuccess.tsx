@@ -113,25 +113,28 @@ export default function OrderSuccess() {
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            {order.orderItems?.map((item: any, index: number) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "1rem",
-                  borderBottom: "1px dashed var(--border)",
-                  paddingBottom: "8px",
-                }}
-              >
-                <span>
-                  {item.product?.title || "პროდუქტი"} (x{item.quantity})
-                </span>
-                <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
-                  {item.price * item.quantity} ₾
-                </span>
-              </div>
-            ))}
+            {order.orderItems?.map((item: any, index: number) => {
+              const itemPrice = item.price ?? item.product?.price ?? 0;
+              return (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "1rem",
+                    borderBottom: "1px dashed var(--border)",
+                    paddingBottom: "8px",
+                  }}
+                >
+                  <span>
+                    {item.product?.title || "პროდუქტი"} (x{item.quantity})
+                  </span>
+                  <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
+                    {(itemPrice * item.quantity).toFixed(2)} ₾
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -148,7 +151,9 @@ export default function OrderSuccess() {
           }}
         >
           <span>სულ გადასახდელი:</span>
-          <span style={{ color: "var(--accent)" }}>{order.totalPrice} ₾</span>
+          <span style={{ color: "var(--accent)" }}>
+            {Number(order.totalPrice || 0).toFixed(2)} ₾
+          </span>
         </div>
 
         <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
