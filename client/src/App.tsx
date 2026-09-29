@@ -11,6 +11,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
 import CategoryView from "./pages/CategoryView";
 import Header from "./components/Header";
+import OrderSuccess from "./pages/OrderSuccess";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -157,6 +158,7 @@ export default function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/category/:platform" element={<CategoryView />} />
             <Route path="/category/:platform/:sub" element={<CategoryView />} />
+            <Route path="/order-success/:id" element={<OrderSuccess />} />
           </Routes>
         </div>
       </div>

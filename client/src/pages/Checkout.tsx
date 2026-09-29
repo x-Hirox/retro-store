@@ -73,19 +73,19 @@ export default function Checkout() {
         totalPrice: totalAmount,
       };
 
-      // 🟢 ვიყენებთ API.post-ს (რომელიც ავტომატურად მიმართავს Render-ის ლაივ სერვერს)
-      await API.post("/orders", orderData);
+      // 🟢 ვაგზავნით შეკვეთას სერვერზე და ვიღებთ პასუხს (რომელშიც არის შექმნილი შეკვეთის _id)
+      const response = await API.post("/orders", orderData);
+      const orderId = response.data._id || response.data.order?._id;
 
-      if (formData.paymentMethod === "card") {
-        alert(
-          "შეკვეთა შეიქმნა! გადამისამართება TBC / BOG უსაფრთხო გადახდის გვერდზე... 💳",
-        );
-      } else {
-        alert("შეკვეთა წარმატებით გაფორმდა! მადლობა შეძენისთვის. 🎉");
-      }
-
+      // ვასუფთავებთ კალათას
       clearCart();
-      navigate("/");
+
+      // გადავყავართ ინვოისის/წარმატების გვერდზე შეკვეთის ID-ით
+      if (orderId) {
+        navigate(`/order-success/${orderId}`);
+      } else {
+        navigate("/");
+      }
     } catch (error: any) {
       alert(error.response?.data?.message || "შეცდომა შეკვეთის გაფორმებისას");
     }

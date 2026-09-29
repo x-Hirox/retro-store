@@ -31,6 +31,30 @@ export const addOrderItems = async (
   }
 };
 
+// @desc    კონკრეტული შეკვეთის წამოღება ID-ით
+// @route   GET /api/orders/:id
+// @access  Private
+export const getOrderById = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "orderItems.product",
+      "title image price",
+    );
+
+    if (!order) {
+      res.status(404).json({ message: "შეკვეთა ვერ მოიძებნა" });
+      return;
+    }
+
+    res.status(200).json(order);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || "სერვერის შეცდომა" });
+  }
+};
+
 // @desc    მომხმარებლის საკუთარი შეკვეთების ნახვა
 // @route   GET /api/orders/myorders
 // @access  Private
