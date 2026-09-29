@@ -149,6 +149,32 @@ svg {
 }
 
 /* ==========================================
+   უნივერსალური რესფონსივი კლასები მობილურისთვის
+   (იყენებ ნებისმიერ გვერდზე და ავტომატურად სწორდება)
+   ========================================== */
+.page-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.details-grid {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+/* ==========================================
    მობილურის ვერსიის სრულყოფილი გასწორება
    ========================================== */
 @media (max-width: 768px) {
@@ -193,5 +219,23 @@ svg {
     padding: 10px 15px !important;
     justify-content: flex-start !important;
     gap: 20px !important;
+  }
+
+  /* დეტალების გვერდი მობილურზე ავტომატურად ჩამოვა ერთმანეთის ქვეშ */
+  .details-grid {
+    flex-direction: column !important;
+    gap: 20px !important;
+    padding: 10px !important;
+  }
+
+  .details-grid > div {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 0 10px !important;
   }
 }
