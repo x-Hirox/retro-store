@@ -150,7 +150,6 @@ svg {
 
 /* ==========================================
    უნივერსალური რესფონსივი კლასები მობილურისთვის
-   (იყენებ ნებისმიერ გვერდზე და ავტომატურად სწორდება)
    ========================================== */
 .page-container {
   width: 100%;
@@ -239,7 +238,6 @@ svg {
     padding: 0 10px !important;
   }
 
-  /* სრული ავტომატიზაცია: ნებისმიერი ინლაინ ორსვეტიანი ბადე მობილურზე ხდება ვერტიკალური */
   div[style*="gridTemplateColumns"] {
     display: flex !important;
     flex-direction: column !important;
@@ -250,5 +248,42 @@ svg {
   div[style*="gridTemplateColumns"] > * {
     width: 100% !important;
     max-width: 100% !important;
+  }
+}
+
+/* ==========================================
+   ინვოისის ამობეჭდვის (Print) სტილები
+   ========================================== */
+@media print {
+  /* სრულად ვმალავთ ჰედერს, ნავიგაციას, ძებნას, ფუტერს და ღილაკებს */
+  header,
+  nav,
+  footer,
+  .navbar,
+  button,
+  .print-hidden,
+  input {
+    display: none !important;
+  }
+
+  /* ვასუფთავებთ ფონებს და ზომებს პრინტისთვის */
+  body,
+  html {
+    background: #fff !important;
+    color: #000 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ვზრუნავთ, რომ მხოლოდ ინვოისის მთავარი ყუთი გამოჩნდეს სუფთად */
+  .order-success-container,
+  div[style*="background"],
+  main {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
 }
