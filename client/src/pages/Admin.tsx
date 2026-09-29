@@ -5,10 +5,7 @@ import {
   deleteProduct,
 } from "../services/productService";
 import type { IProduct } from "../types";
-import axios from "axios";
-
-// შეცვალე შენი რეალური Render ბექენდის ლინკით (ბოლოში /api-ს გარეშე)
-const API_URL = "https://retro-store.onrender.com";
+import API from "../services/api"; // 🟢 ვიყენებთ საერთო გამართულ API ინსტანსს
 
 interface Order {
   _id: string;
@@ -28,18 +25,14 @@ interface Order {
 }
 
 export default function Admin() {
-  // აქტიური ტაბი: "products" ან "orders"
   const [activeTab, setActiveTab] = useState<"products" | "orders">("products");
 
-  // პროდუქტების სტეიტები
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  // შეკვეთების სტეიტები
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
-  // ფორმის ველები პროდუქტისთვის
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -50,7 +43,6 @@ export default function Admin() {
     "none" | "banner-hero" | "banner-middle" | "banner-bottom"
   >("none");
 
-  // პროდუქტების წამოღება
   const fetchProducts = async () => {
     try {
       const data = await getProducts();
@@ -62,14 +54,11 @@ export default function Admin() {
     }
   };
 
-  // შეკვეთების წამოღება (დაცული როუტიდან)
+  // 🟢 შეკვეთების წამოღება API ინსტანსის გამოყენებით
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`${API_URL}/api/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await API.get("/orders");
       setOrders(response.data);
     } catch (err) {
       console.error("შეკვეთების წამოღება ვერ მოხერხდა", err);
@@ -82,7 +71,6 @@ export default function Admin() {
     fetchProducts();
   }, []);
 
-  // ტაბის შეცვლისას შეკვეთების ჩატვირთვა
   const handleTabChange = (tab: "products" | "orders") => {
     setActiveTab(tab);
     if (tab === "orders" && orders.length === 0) {
@@ -131,15 +119,10 @@ export default function Admin() {
     }
   };
 
-  // შეკვეთის სტატუსის განახლება
+  // 🟢 შეკვეთის სტატუსის განახლება API ინსტანსის გამოყენებით
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_URL}/api/orders/${id}/status`,
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      await API.put(`/orders/${id}/status`, { status: newStatus });
       setOrders(
         orders.map((o) => (o._id === id ? { ...o, status: newStatus } : o)),
       );
@@ -167,7 +150,6 @@ export default function Admin() {
         🛡️ ადმინისტრატორის პანელი
       </h1>
 
-      {/* ნავიგაციის ტაბები */}
       <div
         style={{
           display: "flex",
@@ -208,7 +190,6 @@ export default function Admin() {
         </button>
       </div>
 
-      {/* ტაბი 1: პროდუქტების მართვა და დამატება */}
       {activeTab === "products" && (
         <>
           <form
@@ -499,7 +480,6 @@ export default function Admin() {
         </>
       )}
 
-      {/* ტაბი 2: შეკვეთების ცხრილი */}
       {activeTab === "orders" && (
         <div>
           <h2
