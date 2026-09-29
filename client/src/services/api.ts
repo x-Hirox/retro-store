@@ -10,12 +10,9 @@ const API = axios.create({
 
 // ტოკენის ავტომატურად მიმაგრება მოთხოვნებზე
 API.interceptors.request.use((config) => {
-  const userInfo = localStorage.getItem("userInfo");
-  if (userInfo) {
-    const { token } = JSON.parse(userInfo);
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = localStorage.getItem("token"); // 🟢 პირდაპირ ვკითხულობთ "token"-ს
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });

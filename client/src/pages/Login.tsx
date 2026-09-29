@@ -13,9 +13,9 @@ export default function Login() {
     try {
       const data = await loginUser({ email, password });
       localStorage.setItem("token", data.token);
-      alert("წარმატებული ავტორიზაცია! 🎉");
 
-      window.location.href = "/"; // გადაგვყავს მთავარზე და ვტვირთავთ თავიდან ჰედერის განსაახლებლად
+      // 🟢 მყისიერი გადამისამართება ყოველგვარი alert()-ის გარეშე
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.response?.data?.message || "შეცდომა ავტორიზაციისას");
     }
@@ -28,22 +28,24 @@ export default function Login() {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "80vh",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
       }}
     >
       <div
         style={{
-          backgroundColor: "white",
+          backgroundColor: "var(--bg)",
+          border: "1px solid var(--border)",
           padding: "40px",
           borderRadius: "16px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          boxShadow: "var(--shadow)",
           width: "100%",
           maxWidth: "400px",
         }}
       >
         <h2
           style={{
-            color: "#2c3e50",
+            color: "var(--text-h)",
             marginBottom: "20px",
             textAlign: "center",
           }}
@@ -57,6 +59,8 @@ export default function Login() {
               color: "#e74c3c",
               marginBottom: "15px",
               textAlign: "center",
+              fontSize: "0.9rem",
+              fontWeight: "600",
             }}
           >
             {error}
@@ -71,7 +75,7 @@ export default function Login() {
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
               }}
             >
@@ -86,8 +90,11 @@ export default function Login() {
                 width: "100%",
                 padding: "10px",
                 borderRadius: "8px",
-                border: "1px solid #ced4da",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--code-bg)",
+                color: "var(--text-h)",
                 fontSize: "1rem",
+                boxSizing: "border-box",
               }}
             />
           </div>
@@ -96,7 +103,7 @@ export default function Login() {
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
               }}
             >
@@ -119,8 +126,11 @@ export default function Login() {
                   padding: "10px",
                   paddingRight: "40px",
                   borderRadius: "8px",
-                  border: "1px solid #ced4da",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--code-bg)",
+                  color: "var(--text-h)",
                   fontSize: "1rem",
+                  boxSizing: "border-box",
                 }}
               />
               <button
@@ -139,12 +149,11 @@ export default function Login() {
               </button>
             </div>
 
-            {/* დაგავიწყდა პაროლი? ბმული */}
             <div style={{ textAlign: "right", marginTop: "5px" }}>
               <Link
                 to="/forgot-password"
                 style={{
-                  color: "#3498db",
+                  color: "var(--accent)",
                   textDecoration: "none",
                   fontSize: "0.85rem",
                   fontWeight: "600",
@@ -158,7 +167,7 @@ export default function Login() {
           <button
             type="submit"
             style={{
-              backgroundColor: "#2ecc71",
+              backgroundColor: "var(--accent)",
               color: "white",
               border: "none",
               padding: "12px",
@@ -173,11 +182,21 @@ export default function Login() {
           </button>
         </form>
 
-        <p style={{ textAlign: "center", marginTop: "20px", color: "#7f8c8d" }}>
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: "20px",
+            color: "var(--text)",
+          }}
+        >
           არ გაქვს აკაუნტი?{" "}
           <Link
             to="/register"
-            style={{ color: "#3498db", textDecoration: "none" }}
+            style={{
+              color: "var(--accent)",
+              textDecoration: "none",
+              fontWeight: "600",
+            }}
           >
             რეგისტრაცია
           </Link>
