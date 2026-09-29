@@ -7,6 +7,9 @@ import {
 import type { IProduct } from "../types";
 import axios from "axios";
 
+// შეცვალე შენი რეალური Render ბექენდის ლინკით (ბოლოში /api-ს გარეშე)
+const API_URL = "https://retro-store.onrender.com";
+
 interface Order {
   _id: string;
   createdAt: string;
@@ -28,7 +31,7 @@ export default function Admin() {
   // აქტიური ტაბი: "products" ან "orders"
   const [activeTab, setActiveTab] = useState<"products" | "orders">("products");
 
-  // პროდუქტებისსტეიტები
+  // პროდუქტების სტეიტები
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
@@ -64,7 +67,7 @@ export default function Admin() {
     setLoadingOrders(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/orders", {
+      const response = await axios.get(`${API_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(response.data);
@@ -133,7 +136,7 @@ export default function Admin() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/orders/${id}/status`,
+        `${API_URL}/api/orders/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } },
       );
