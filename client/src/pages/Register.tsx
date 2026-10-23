@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 
@@ -8,7 +8,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // თვალის ნიშნის ਸტატუსები (თავიდან დაფარულია - false)
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -17,7 +16,6 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ბექენდის მოთხოვნებთან შესაბამისი ვალიდაცია
   const validatePassword = (pass: string) => {
     if (pass.length < 8) return "პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.";
     if (!/[A-Z]/.test(pass))
@@ -55,7 +53,6 @@ export default function Register() {
       );
       setLoading(false);
 
-      // 3 წამის შემდეგ გადავამისამართებთ შესვლის გვერდზე
       setTimeout(() => {
         navigate("/login");
       }, 4000);
@@ -64,6 +61,53 @@ export default function Register() {
       setLoading(false);
     }
   };
+
+  // Google OAuth ინიციალიზაცია რეგისტრაციის გვერდზეც
+  useEffect(() => {
+    const handleGoogleResponse = async (response: { credential: string }) => {
+      setError("");
+      setLoading(true);
+      try {
+        const data = await authService.googleAuth({
+          credential: response.credential,
+        });
+        localStorage.setItem("token", data.token);
+        setLoading(false);
+        window.location.href = "/";
+      } catch (err: any) {
+        setError(
+          err.response?.data?.message || "Google ავტორიზაცია ვერ მოხერხდა",
+        );
+        setLoading(false);
+      }
+    };
+
+    const loadGoogleScript = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+        });
+
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-register-btn"),
+          { theme: "outline", size: "large", width: "100%" },
+        );
+      }
+    };
+
+    if (!document.getElementById("google-client-script")) {
+      const script = document.createElement("script");
+      script.id = "google-client-script";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = loadGoogleScript;
+      document.body.appendChild(script);
+    } else {
+      loadGoogleScript();
+    }
+  }, []);
 
   return (
     <div
@@ -143,6 +187,37 @@ export default function Register() {
           </div>
         )}
 
+        {/* Google რეგისტრაციის ღილაკის კონტეინერი */}
+        <div
+          style={{
+            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div id="google-register-btn" style={{ width: "100%" }}></div>
+        </div>
+
+        <div
+          style={{ display: "flex", alignItems: "center", margin: "15px 0" }}
+        >
+          <div
+            style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }}
+          ></div>
+          <span
+            style={{
+              padding: "0 10px",
+              color: "var(--text)",
+              fontSize: "0.85rem",
+            }}
+          >
+            ან
+          </span>
+          <div
+            style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }}
+          ></div>
+        </div>
+
         <form
           onSubmit={handleRegister}
           style={{ display: "flex", flexDirection: "column", gap: "15px" }}
@@ -207,7 +282,6 @@ export default function Register() {
             />
           </div>
 
-          {/* პაროლის ველი თვალის ნიშნით */}
           <div>
             <label
               style={{
@@ -265,7 +339,6 @@ export default function Register() {
             </span>
           </div>
 
-          {/* პაროლის გამეორების ველი თვალის ნიშნით */}
           <div>
             <label
               style={{

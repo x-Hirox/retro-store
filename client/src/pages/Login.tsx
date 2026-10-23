@@ -1,6 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../services/authService";
+
+// დეკლარაცია Google-ის გლობალური ობიექტისთვის TypeScript-ში
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+          }) => void;
+          renderButton: (
+            element: HTMLElement | null,
+            options: { theme: string; size: string; width?: string },
+          ) => void;
+        };
+      };
+    };
+  }
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,7 +35,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 🟢 სწორი გამოძახება authService-იდან
       const data = await authService.login({ email, password });
       localStorage.setItem("token", data.token);
 
@@ -26,6 +45,54 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  // Google OAuth-ის ინიციალიზაცია
+  useEffect(() => {
+    const handleGoogleResponse = async (response: { credential: string }) => {
+      setError("");
+      setLoading(true);
+      try {
+        // ვუგზავნით Google-ის ტოკენს ჩვენს ბექენდს (/api/auth/google)
+        const data = await authService.googleAuth({
+          credential: response.credential,
+        });
+        localStorage.setItem("token", data.token);
+        setLoading(false);
+        window.location.href = "/";
+      } catch (err: any) {
+        setError(
+          err.response?.data?.message || "Google ავტორიზაცია ვერ მოხერხდა",
+        );
+        setLoading(false);
+      }
+    };
+
+    const loadGoogleScript = () => {
+      if (window.google && window.google.accounts) {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+        });
+
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-login-btn"),
+          { theme: "outline", size: "large", width: "100%" },
+        );
+      }
+    };
+
+    if (!document.getElementById("google-client-script")) {
+      const script = document.createElement("script");
+      script.id = "google-client-script";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = loadGoogleScript;
+      document.body.appendChild(script);
+    } else {
+      loadGoogleScript();
+    }
+  }, []);
 
   return (
     <div className="auth-container">
@@ -66,6 +133,37 @@ export default function Login() {
             {error}
           </div>
         )}
+
+        {/* Google შესვლის ღილაკის კონტეინერი */}
+        <div
+          style={{
+            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div id="google-login-btn" style={{ width: "100%" }}></div>
+        </div>
+
+        <div
+          style={{ display: "flex", alignItems: "center", margin: "15px 0" }}
+        >
+          <div
+            style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }}
+          ></div>
+          <span
+            style={{
+              padding: "0 10px",
+              color: "var(--text)",
+              fontSize: "0.85rem",
+            }}
+          >
+            ან
+          </span>
+          <div
+            style={{ flex: 1, height: "1px", backgroundColor: "var(--border)" }}
+          ></div>
+        </div>
 
         <form
           onSubmit={handleLogin}

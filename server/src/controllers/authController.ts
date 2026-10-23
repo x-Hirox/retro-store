@@ -4,6 +4,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // 1. დამხმარე ფუნქცია ელ-ფოსტის ფორმატის შესამოწმებლად (Regex)
 const validateEmailFormat = (email: string): boolean => {
@@ -43,7 +46,6 @@ export const registerUser = async (
   try {
     const { name, email, password } = req.body;
 
-    // მეილის ფორმატის შემოწმება
     if (!email || !validateEmailFormat(email)) {
       res
         .status(400)
@@ -51,14 +53,12 @@ export const registerUser = async (
       return;
     }
 
-    // პაროლის შემოწმება
     const passwordError = validatePasswordBackend(password);
     if (passwordError) {
       res.status(400).json({ message: passwordError });
       return;
     }
 
-    // არსებობს თუ არა მომხმარებელი ბაზაში
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       res.status(400).json({ message: "მომხმარებელი ამ მეილით უკვე არსებობს" });
@@ -68,7 +68,6 @@ export const registerUser = async (
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ვქმნით უნიკალურ ტოკენს მეილის აქტივაციისთვის
     const verificationToken = crypto.randomBytes(32).toString("hex");
 
     const user = await User.create({
@@ -147,7 +146,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ვამოწმებთ არის თუ არა მეილი გააქტიურებული
     if (!user.isVerified) {
       res.status(400).json({
         message:
@@ -179,7 +177,78 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// D. პაროლის აღდგენის მოთხოვნა (Forgot Password)
+// D. Google ავტორიზაცია (Google Auth)
+export const googleAuth = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      res.status(400).json({ message: "Google ტოკენი ვერ მოიძებნა." });
+      return;
+    }
+
+    // 🟢 დამატებულია await და as string ტიპიზაცია
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID as string,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload || !payload.email) {
+      res.status(400).json({ message: "Google ავტორიზაცია ვერ განხორციელდა." });
+      return;
+    }
+
+    const { email, name } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const salt = await bcrypt.genSalt(10);
+      const randomPassword = await bcrypt.hash(
+        Math.random().toString(36).slice(-10),
+        salt,
+      );
+
+      user = await User.create({
+        email,
+        name: name || "Google User",
+        password: randomPassword,
+        isVerified: true, // Google-ის მეილი უკვე ვერიფიცირებულია
+      });
+    } else if (!user.isVerified) {
+      user.isVerified = true;
+      await user.save();
+    }
+
+    const token = generateToken(
+      user._id.toString(),
+      (user as any).role || "user",
+    );
+
+    res.status(200).json({
+      message: "წარმატებული ავტორიზაცია Google-ით",
+      token,
+      user: {
+        id: user._id,
+        name: (user as any).name,
+        email: user.email,
+        role: (user as any).role || "user",
+      },
+    });
+  } catch (error: any) {
+    console.error("Google Auth Error:", error);
+    res.status(500).json({
+      message: "სერვერის შეცდომა Google ავტორიზაციისას",
+      error: error.message,
+    });
+  }
+};
+
+// E. პაროლის აღდგენის მოთხოვნა (Forgot Password)
 export const forgotPassword = async (
   req: Request,
   res: Response,
@@ -222,7 +291,7 @@ export const forgotPassword = async (
   }
 };
 
-// E. ახალი პაროლის დაყენება (Reset Password)
+// F. ახალი პაროლის დაყენება (Reset Password)
 export const resetPassword = async (
   req: Request,
   res: Response,

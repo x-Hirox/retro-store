@@ -48,4 +48,10 @@ export const authService = {
     const response = await API.post("/auth/reset-password", data);
     return response.data;
   },
+
+  // 6. Google ავტორიზაცია (დამატებულია)
+  googleAuth: async (data: { credential: string }) => {
+    const response = await API.post("/auth/google", data);
+    return response.data;
+  },
 };

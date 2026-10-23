@@ -9,12 +9,13 @@ export const sendEmail = async (options: {
     service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      pass: process.env.EMAIL_PASS, // 🟢 აუცილებელია Google App Password (16 ნიშნა)
     },
   });
 
   const mailOptions = {
-    from: "RetroStore <support@retrostore.com>",
+    // 🟢 სწორი ფორმატი Gmail-ისთვის:
+    from: `"RetroStore" <${process.env.EMAIL_USER}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,
