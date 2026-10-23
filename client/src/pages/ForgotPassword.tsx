@@ -32,27 +32,30 @@ export default function ForgotPassword() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        backgroundColor: "#f8f9fa",
+        minHeight: "calc(100vh - 80px)",
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         padding: "20px",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
       <div
         style={{
           width: "100%",
           maxWidth: "400px",
-          backgroundColor: "#ffffff",
+          backgroundColor: "var(--code-bg)",
+          border: "1px solid var(--border)",
           borderRadius: "16px",
           padding: "40px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+          boxShadow: "var(--shadow)",
         }}
       >
         <h2
           style={{
-            color: "#2c3e50",
+            color: "var(--text-h)",
             marginBottom: "10px",
             textAlign: "center",
           }}
@@ -61,7 +64,7 @@ export default function ForgotPassword() {
         </h2>
         <p
           style={{
-            color: "#7f8c8d",
+            color: "var(--text)",
             fontSize: "0.9rem",
             textAlign: "center",
             marginBottom: "25px",
@@ -73,12 +76,13 @@ export default function ForgotPassword() {
         {message && (
           <div
             style={{
-              backgroundColor: "#d4edda",
-              color: "#155724",
+              backgroundColor: "rgba(34, 197, 94, 0.15)",
+              color: "#22c55e",
               padding: "10px",
               borderRadius: "8px",
               marginBottom: "15px",
               fontSize: "0.9rem",
+              border: "1px solid rgba(34, 197, 94, 0.3)",
             }}
           >
             {message}
@@ -88,12 +92,13 @@ export default function ForgotPassword() {
         {error && (
           <div
             style={{
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
+              backgroundColor: "rgba(239, 68, 68, 0.15)",
+              color: "#ef4444",
               padding: "10px",
               borderRadius: "8px",
               marginBottom: "15px",
               fontSize: "0.9rem",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
             }}
           >
             {error}
@@ -108,7 +113,7 @@ export default function ForgotPassword() {
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
                 fontSize: "0.9rem",
               }}
@@ -125,7 +130,9 @@ export default function ForgotPassword() {
                 width: "100%",
                 padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #ced4da",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg)",
+                color: "var(--text-h)",
                 fontSize: "1rem",
                 outline: "none",
               }}
@@ -136,7 +143,7 @@ export default function ForgotPassword() {
             type="submit"
             disabled={loading}
             style={{
-              backgroundColor: "#3498db",
+              backgroundColor: "var(--accent)",
               color: "white",
               border: "none",
               padding: "12px",
@@ -155,7 +162,7 @@ export default function ForgotPassword() {
           <Link
             to="/login"
             style={{
-              color: "#3498db",
+              color: "var(--accent)",
               textDecoration: "none",
               fontSize: "0.9rem",
               fontWeight: "600",
