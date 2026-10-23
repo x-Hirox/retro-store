@@ -1,17 +1,22 @@
 <!doctype html>
-<html lang="en">
+<html lang="ka">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RetroStore - რეტრო მაღაზია</title>
-    <!-- Google Fonts: რეტრო / გრაფიტის სტილისთვის -->
+
+    <!-- 🟢 Google Fonts: 80s/90s Retro Anime & Arcade Typography -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Permanent+Marker&family=Press+Start+2P&family=VT323&family=Noto+Sans+Georgia:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
+    <!-- CRT TV Overlay Layer (Scanlines & Screen Glow Effect) -->
+    <div class="crt-overlay" aria-hidden="true"></div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

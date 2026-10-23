@@ -11,10 +11,15 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* 🟢 Cyberpunk Anime Neon Color Palette */
+  --neon-pink: #ff007f;
+  --neon-cyan: #00f0ff;
+  --neon-purple: #9d00ff;
+
+  --sans: "Noto Sans Georgia", system-ui, -apple-system, sans-serif;
+  --heading: "Orbitron", "Noto Sans Georgia", sans-serif;
+  --pixel: "Press Start 2P", monospace;
+  --mono: "VT323", ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
@@ -30,26 +35,57 @@
   }
 }
 
-/* როდესაც კლასად ეწერება body-ს dark (მუქი თემა) */
+/* 🟢 body.dark — მუქი თემა რეტრო-ნეონური აურით */
 body.dark {
-  --text: #9ca3af;
-  --text-h: #f3f4f6;
-  --bg: #16171d;
-  --border: #2e303a;
-  --code-bg: #1f2028;
-  --accent: #c084fc;
-  --accent-bg: rgba(192, 132, 252, 0.15);
-  --accent-border: rgba(192, 132, 252, 0.5);
-  --social-bg: rgba(47, 48, 58, 0.5);
+  --text: #a3a8b8;
+  --text-h: #ffffff;
+  --bg: #0d0e12;
+  --border: #262833;
+  --code-bg: #14161f;
+  --accent: #d066ff;
+  --accent-bg: rgba(208, 102, 255, 0.15);
+  --accent-border: rgba(208, 102, 255, 0.5);
+  --social-bg: rgba(38, 40, 51, 0.5);
   --shadow:
-    rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.6) 0 10px 20px -3px, rgba(0, 240, 255, 0.05) 0 0 15px;
 }
 
 body.dark #social .button-icon {
   filter: invert(1) brightness(2);
 }
 
-/* გლობალური ფონები და ტექსტები */
+/* ==========================================
+   📺 1. CRT Scanlines & TV Flicker Effect
+   ========================================== */
+.crt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+  background-size: 100% 4px;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0.45;
+  animation: crtFlicker 0.15s infinite;
+}
+
+@keyframes crtFlicker {
+  0% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0.41;
+  }
+}
+
+/* ==========================================
+   ✨ 2. Retro Neon Pulse & Typography
+   ========================================== */
 html,
 body {
   margin: 0;
@@ -60,8 +96,8 @@ body {
   background-color: var(--bg);
   color: var(--text);
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 #root {
@@ -77,27 +113,55 @@ body {
 h1,
 h2 {
   font-family: var(--heading);
-  font-weight: 600;
+  font-weight: 800;
   color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* რეტრო ნეონური ტექსტის კლასი სათაურებისა და ლოგოსთვის */
+.retro-neon-title {
+  color: #fff;
+  font-family: var(--pixel);
+  text-shadow:
+    0 0 5px var(--neon-pink),
+    0 0 10px var(--neon-pink),
+    0 0 20px var(--neon-purple),
+    0 0 40px var(--neon-cyan);
+  animation: neonGlow 2s infinite alternate;
+}
+
+@keyframes neonGlow {
+  from {
+    text-shadow:
+      0 0 5px var(--neon-pink),
+      0 0 10px var(--neon-pink),
+      0 0 20px var(--neon-purple);
+  }
+  to {
+    text-shadow:
+      0 0 10px var(--neon-pink),
+      0 0 20px var(--neon-pink),
+      0 0 35px var(--neon-cyan),
+      0 0 50px var(--neon-cyan);
+  }
 }
 
 h1 {
-  font-size: 36px;
-  letter-spacing: -0.5px;
+  font-size: 32px;
   margin: 32px 0;
   @media (max-width: 1024px) {
-    font-size: 28px;
+    font-size: 24px;
     margin: 20px 0;
   }
 }
 
 h2 {
-  font-size: 22px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
+  font-size: 20px;
+  line-height: 120%;
   margin: 0 0 8px;
   @media (max-width: 1024px) {
-    font-size: 18px;
+    font-size: 17px;
   }
 }
 
@@ -111,16 +175,17 @@ code,
   display: inline-flex;
   border-radius: 4px;
   color: var(--text-h);
+  font-size: 18px;
 }
 
 code {
-  font-size: 15px;
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+  border: 1px solid var(--border);
 }
 
-/* ყველა სურათი, ვიდეო და ბლოკი ავტომატურად მოერგება ეკრანს */
+/* სურათები და ვიდეოები */
 img,
 video,
 canvas,
@@ -129,7 +194,6 @@ svg {
   height: auto;
 }
 
-/* გამორიცხავს ელემენტების მიერ ეკრანის გაფართოებას */
 *,
 *:before,
 *:after {
@@ -137,19 +201,139 @@ svg {
 }
 
 /* ==========================================
-   ჩამოსაშლელი (Dropdown) მენიუს სტილები
+   🎮 3. Anime Glitch & Arcade Card Hover
    ========================================== */
-.dropdown-parent:hover .dropdown-content {
-  display: block !important;
+.products-grid > *,
+.retro-card {
+  transition:
+    transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
-.dropdown-content a:hover {
-  background-color: #ff6600 !important;
-  color: #fff !important;
+/* როცა მაუსი მიგვაქვს პროდუქტზე — ნეონური ჩარჩო და გლიჩ-ნახტომი */
+.products-grid > *:hover,
+.retro-card:hover {
+  transform: translateY(-6px) scale(1.015);
+  border-color: var(--neon-pink) !important;
+  box-shadow:
+    -4px 4px 0px var(--neon-pink),
+    4px -4px 0px var(--neon-cyan) !important;
 }
 
 /* ==========================================
-   უნივერსალური რესფონსივი კლასები მობილურისთვის
+   🕹️ 4. Arcade Button Physics (ღილაკები)
+   ========================================== */
+.auth-button,
+.arcade-btn {
+  font-family: var(--heading);
+  background: linear-gradient(135deg, var(--accent) 0%, #8200e6 100%);
+  color: white !important;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow:
+    0px 5px 0px #520099,
+    0px 8px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease-in-out;
+  position: relative;
+  top: 0;
+}
+
+.auth-button:hover,
+.arcade-btn:hover {
+  box-shadow:
+    0px 5px 0px #520099,
+    0px 0px 20px var(--neon-pink);
+  opacity: 1;
+}
+
+.auth-button:active,
+.arcade-btn:active {
+  top: 4px;
+  box-shadow:
+    0px 1px 0px #520099,
+    0px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* ==========================================
+   👾 5. ჩამოსაშლელი (Dropdown) & ავტორიზაცია
+   ========================================== */
+.dropdown-parent:hover .dropdown-content {
+  display: block !important;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-content a:hover {
+  background-color: var(--neon-pink) !important;
+  color: #fff !important;
+  box-shadow: inset 4px 0px 0px var(--neon-cyan);
+}
+
+.auth-container {
+  min-height: calc(100vh - 80px);
+  background-color: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--code-bg);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.3s ease;
+}
+
+.auth-card:hover {
+  border-color: var(--accent-border);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  color: var(--text-h);
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* ==========================================
+   📱 6. მობილურის რესფონსივი
    ========================================== */
 .page-container {
   width: 100%;
@@ -173,64 +357,6 @@ svg {
   width: 100%;
 }
 
-/* ==========================================
-   ავტორიზაციის და რეგისტრაციის გლობალური სტილები
-   ========================================== */
-.auth-container {
-  min-height: calc(100vh - 80px);
-  background-color: var(--bg);
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 420px;
-  background-color: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: var(--shadow);
-}
-
-.auth-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background-color: var(--bg);
-  color: var(--text-h);
-  font-size: 1rem;
-  outline: none;
-}
-
-.auth-button {
-  width: 100%;
-  background-color: var(--accent);
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 10px;
-  transition: opacity 0.2s ease;
-}
-
-.auth-button:hover {
-  opacity: 0.9;
-}
-
-/* ==========================================
-   მობილურის ვერსიის სრულყოფილი გასწორება
-   ========================================== */
 @media (max-width: 768px) {
   .nav-container {
     display: flex !important;
@@ -243,7 +369,6 @@ svg {
     box-sizing: border-box !important;
   }
 
-  /* ძებნის ველი მობილურზე რომ სრულად ჩანდეს */
   .nav-container > div {
     width: 100% !important;
     max-width: 100% !important;
@@ -266,7 +391,6 @@ svg {
     font-size: 0.85rem !important;
   }
 
-  /* კატეგორიების ზოლის ჰორიზონტალური გადახვევა მობილურზე */
   nav[style*="background-color: #111"] {
     overflow-x: auto !important;
     white-space: nowrap !important;
@@ -275,7 +399,6 @@ svg {
     gap: 20px !important;
   }
 
-  /* დეტალების გვერდი მობილურზე ავტომატურად ჩამოვა ერთმანეთის ქვეშ */
   .details-grid {
     flex-direction: column !important;
     gap: 20px !important;
@@ -292,25 +415,15 @@ svg {
     gap: 16px !important;
     padding: 0 10px !important;
   }
-
-  div[style*="gridTemplateColumns"] {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 20px !important;
-    width: 100% !important;
-  }
-
-  div[style*="gridTemplateColumns"] > * {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
 }
 
 /* ==========================================
-   ინვოისის ამობეჭდვის (Print) სტილები
+   🖨️ 7. Print სტილები
    ========================================== */
 @media print {
-  /* სრულად ვმალავთ ჰედერს, ნავიგაციას, ძებნას, ფუტერს და ღილაკებს */
+  .crt-overlay {
+    display: none !important;
+  }
   header,
   nav,
   footer,
@@ -321,7 +434,6 @@ svg {
     display: none !important;
   }
 
-  /* ვასუფთავებთ ფონებს და ზომებს პრინტისთვის */
   body,
   html {
     background: #fff !important;
@@ -329,16 +441,5 @@ svg {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  /* ვზრუნავთ, რომ მხოლოდ ინვოისის მთავარი ყუთი გამოჩნდეს სუფთად */
-  .order-success-container,
-  div[style*="background"],
-  main {
-    box-shadow: none !important;
-    border: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
   }
 }
