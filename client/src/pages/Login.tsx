@@ -37,6 +37,10 @@ export default function Login() {
     try {
       const data = await authService.login({ email, password });
       localStorage.setItem("token", data.token);
+      // 🟢 შენახულია user ობიექტი, რომ ფრონტენდმა როლი (admin/user) ზუსტად დაინახოს
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
 
       setLoading(false);
       window.location.href = "/";
@@ -57,6 +61,10 @@ export default function Login() {
           credential: response.credential,
         });
         localStorage.setItem("token", data.token);
+        // 🟢 Google ავტორიზაციისასაც ვინახავთ user ობიექტს
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
         setLoading(false);
         window.location.href = "/";
       } catch (err: any) {
