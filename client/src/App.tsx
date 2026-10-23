@@ -9,11 +9,11 @@ import { useEffect, useState } from "react";
 import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
-import AdminRoute from "./components/AdminRoute"; // 🟢 შემოვიტანეთ ჩვენი დაცული მარშრუტი
+import AdminRoute from "./components/AdminRoute";
 import CategoryView from "./pages/CategoryView";
 import Header from "./components/Header";
 import OrderSuccess from "./pages/OrderSuccess";
-import VerifyEmail from "./pages/VerifyEmail";
+import { VerifyEmail } from "./pages/VerifyEmail"; // 🟢 შემოვიტანეთ ფიგურული ფრჩხილებით
 import ResetPassword from "./pages/ResetPassword";
 
 const categoriesData = [
@@ -66,7 +66,6 @@ export default function App() {
   );
   const [token, setToken] = useState<string | null>(null);
 
-  // 🟢 აპლიკაციის ჩატვირთვისას ვამოწმებთ შენახულ თემას და ტოკენს
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
@@ -76,13 +75,13 @@ export default function App() {
       document.body.classList.add("dark");
     } else {
       document.body.classList.remove("dark");
-      localStorage.setItem("theme", "light"); // დეფოლტად თეთრი
+      localStorage.setItem("theme", "light");
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user"); // 🟢 გამოსვლისას ვასუფთავებთ იუზერის მონაცემებსაც
+    localStorage.removeItem("user");
     setToken(null);
     alert("თქვენ წარმატებით გამოხვედით სისტემიდან.");
     window.location.href = "/";
@@ -141,7 +140,6 @@ export default function App() {
           `}
         </style>
 
-        {/* გამოყოფილი ჰედერის კომპონენტი */}
         <Header
           categoriesData={categoriesData}
           totalItems={totalItems}
@@ -149,7 +147,6 @@ export default function App() {
           onLogout={handleLogout}
         />
 
-        {/* როუტები / გვერდები */}
         <div style={{ width: "100%", boxSizing: "border-box" }}>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -162,7 +159,6 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
 
-            {/* 🟢 დაცული ადმინ მარშრუტი */}
             <Route
               path="/admin"
               element={
