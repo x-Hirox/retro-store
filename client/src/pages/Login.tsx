@@ -1,66 +1,66 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { loginUser } from "../services/authService";
+import { authService } from "../services/authService";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
-      const data = await loginUser({ email, password });
+      // 🟢 სწორი გამოძახება authService-იდან
+      const data = await authService.login({ email, password });
       localStorage.setItem("token", data.token);
 
-      // 🟢 მყისიერი გადამისამართება ყოველგვარი alert()-ის გარეშე
+      setLoading(false);
       window.location.href = "/";
     } catch (err: any) {
       setError(err.response?.data?.message || "შეცდომა ავტორიზაციისას");
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "80vh",
-        backgroundColor: "var(--bg)",
-        color: "var(--text)",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "var(--bg)",
-          border: "1px solid var(--border)",
-          padding: "40px",
-          borderRadius: "16px",
-          boxShadow: "var(--shadow)",
-          width: "100%",
-          maxWidth: "400px",
-        }}
-      >
+    <div className="auth-container">
+      <div className="auth-card">
         <h2
           style={{
             color: "var(--text-h)",
-            marginBottom: "20px",
+            marginBottom: "10px",
             textAlign: "center",
           }}
         >
           შესვლა 🔑
         </h2>
+        <p
+          style={{
+            color: "var(--text)",
+            fontSize: "0.9rem",
+            textAlign: "center",
+            marginBottom: "25px",
+          }}
+        >
+          შეიყვანე შენი მონაცემები ანგარიშში შესასვლელად.
+        </p>
 
         {error && (
           <div
             style={{
-              color: "#e74c3c",
+              backgroundColor: "rgba(239, 68, 68, 0.15)",
+              color: "#ef4444",
+              padding: "10px",
+              borderRadius: "8px",
               marginBottom: "15px",
-              textAlign: "center",
               fontSize: "0.9rem",
-              fontWeight: "600",
+              textAlign: "center",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
             }}
           >
             {error}
@@ -77,6 +77,7 @@ export default function Login() {
                 display: "block",
                 color: "var(--text)",
                 marginBottom: "5px",
+                fontSize: "0.9rem",
               }}
             >
               ელ-ფოსტა
@@ -86,16 +87,8 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--code-bg)",
-                color: "var(--text-h)",
-                fontSize: "1rem",
-                boxSizing: "border-box",
-              }}
+              placeholder="example@gmail.com"
+              className="auth-input"
             />
           </div>
 
@@ -105,6 +98,7 @@ export default function Login() {
                 display: "block",
                 color: "var(--text)",
                 marginBottom: "5px",
+                fontSize: "0.9rem",
               }}
             >
               პაროლი
@@ -121,17 +115,9 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  paddingRight: "40px",
-                  borderRadius: "8px",
-                  border: "1px solid var(--border)",
-                  backgroundColor: "var(--code-bg)",
-                  color: "var(--text-h)",
-                  fontSize: "1rem",
-                  boxSizing: "border-box",
-                }}
+                placeholder="********"
+                className="auth-input"
+                style={{ paddingRight: "40px" }}
               />
               <button
                 type="button"
@@ -149,7 +135,7 @@ export default function Login() {
               </button>
             </div>
 
-            <div style={{ textAlign: "right", marginTop: "5px" }}>
+            <div style={{ textAlign: "right", marginTop: "8px" }}>
               <Link
                 to="/forgot-password"
                 style={{
@@ -164,21 +150,8 @@ export default function Login() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "white",
-              border: "none",
-              padding: "12px",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              fontSize: "1rem",
-              marginTop: "5px",
-            }}
-          >
-            შესვლა
+          <button type="submit" disabled={loading} className="auth-button">
+            {loading ? "იგზავნება..." : "შესვლა"}
           </button>
         </form>
 
@@ -187,6 +160,7 @@ export default function Login() {
             textAlign: "center",
             marginTop: "20px",
             color: "var(--text)",
+            fontSize: "0.9rem",
           }}
         >
           არ გაქვს აკაუნტი?{" "}
