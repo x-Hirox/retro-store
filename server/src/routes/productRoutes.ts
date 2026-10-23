@@ -1,10 +1,11 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import Product from "../models/Product.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js"; // შემოვიტანეთ ჩვენი მიდლვარები
 
 const router = Router();
 
-// ყველა პროდუქტის წამოღება (GET)
+// ყველა პროდუქტის წამოღება (GET) - ღიაა ყველასთვის
 router.get("/", async (req: Request, res: Response) => {
   try {
     const products = await Product.find();
@@ -16,14 +17,13 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// პროდუქტების ძებნა (SEARCH) - აუცილებლად :id-მდე უნდა იდგას!
+// პროდუქტების ძებნა (SEARCH) - ღიაა ყველასთვის
 router.get("/search", async (req: Request, res: Response) => {
   try {
     const query = req.query.q as string;
     if (!query) {
       return res.json([]);
     }
-    // ვეძებთ პროდუქტის სათაურით (title) ან აღწერით (description)
     const products = await Product.find({
       $or: [
         { title: { $regex: query, $options: "i" } },
@@ -37,8 +37,26 @@ router.get("/search", async (req: Request, res: Response) => {
   }
 });
 
+// კონკრეტული პროდუქტის წამოღება ID-ით (GET) - ღიაა ყველასთვის
+router.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
+    }
+    res.json(product);
+  } catch (error) {
+    console.error("შეცდომა ძებნისას:", error);
+    res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+});
+
+// ==========================================
+// დაცული მარშრუტები (მხოლოდ ადმინისთვის!)
+// ==========================================
+
 // ახალი პროდუქტის დამატება (POST)
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
   try {
     const { title, description, price, category, imageUrl, stock } = req.body;
 
@@ -60,23 +78,8 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-// კონკრეტული პროდუქტის წამოღება ID-ით (GET)
-router.get("/:id", async (req: Request, res: Response) => {
-  try {
-    console.log("მოთხოვნილი პროდუქტის ID:", req.params.id);
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
-    }
-    res.json(product);
-  } catch (error) {
-    console.error("შეცდომა ძებნისას:", error);
-    res.status(500).json({ message: "სერვერის შეცდომა" });
-  }
-});
-
 // პროდუქტის განახლება / რედაქტირება (PUT)
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -95,16 +98,21 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 // პროდუქტის წაშლა (DELETE)
-router.delete("/:id", async (req: Request, res: Response) => {
-  try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
-    if (!deletedProduct) {
-      return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
+router.delete(
+  "/:id",
+  protect,
+  adminOnly,
+  async (req: Request, res: Response) => {
+    try {
+      const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+      if (!deletedProduct) {
+        return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
+      }
+      res.json({ message: "პროდუქტი წარმატებით წაიშალა" });
+    } catch (error) {
+      res.status(500).json({ message: "სერვერის შეცდომა წაშლისას" });
     }
-    res.json({ message: "პროდუქტი წარმატებით წაიშალა" });
-  } catch (error) {
-    res.status(500).json({ message: "სერვერის შეცდომა წაშლისას" });
-  }
-});
+  },
+);
 
 export default router;

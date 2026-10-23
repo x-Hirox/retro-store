@@ -9,9 +9,12 @@ import { useEffect, useState } from "react";
 import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
+import AdminRoute from "./components/AdminRoute"; // 🟢 შემოვიტანეთ ჩვენი დაცული მარშრუტი
 import CategoryView from "./pages/CategoryView";
 import Header from "./components/Header";
 import OrderSuccess from "./pages/OrderSuccess";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -63,7 +66,7 @@ export default function App() {
   );
   const [token, setToken] = useState<string | null>(null);
 
-  // 🟢 აპლიკაციის ჩატვირთვისას ვამოწმებთ შენახულ თემას
+  // 🟢 აპლიკაციის ჩატვირთვისას ვამოწმებთ შენახულ თემას და ტოკენს
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
@@ -73,12 +76,13 @@ export default function App() {
       document.body.classList.add("dark");
     } else {
       document.body.classList.remove("dark");
-      localStorage.setItem("theme", "light"); // დეფაულტად ყოველთვის თეთრი
+      localStorage.setItem("theme", "light"); // დეფოლტად თეთრი
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user"); // 🟢 გამოსვლისას ვასუფთავებთ იუზერის მონაცემებსაც
     setToken(null);
     alert("თქვენ წარმატებით გამოხვედით სისტემიდან.");
     window.location.href = "/";
@@ -153,9 +157,21 @@ export default function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+
+            {/* 🟢 დაცული ადმინ მარშრუტი */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              }
+            />
+
             <Route path="/category/:platform" element={<CategoryView />} />
             <Route path="/category/:platform/:sub" element={<CategoryView />} />
             <Route path="/order-success/:id" element={<OrderSuccess />} />
