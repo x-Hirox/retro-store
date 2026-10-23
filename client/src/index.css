@@ -1,20 +1,21 @@
 :root {
-  --text: #6b6375;
+  /* 🟢 Light Mode (ღია თემა - სუფთა, მკაფიო და წაკითხვადი) */
+  --text: #4a4552;
   --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
+  --bg: #f8f7f9;
+  --border: #e2e0e5;
+  --code-bg: #ecebf0;
+  --accent: #9328e6;
+  --accent-bg: rgba(147, 40, 230, 0.1);
+  --accent-border: rgba(147, 40, 230, 0.4);
+  --social-bg: rgba(230, 228, 235, 0.6);
   --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    rgba(0, 0, 0, 0.08) 0 10px 15px -3px, rgba(0, 0, 0, 0.04) 0 4px 6px -2px;
 
   /* 🟢 Cyberpunk Anime Neon Color Palette */
-  --neon-pink: #ff007f;
-  --neon-cyan: #00f0ff;
-  --neon-purple: #9d00ff;
+  --neon-pink: #d9006c;
+  --neon-cyan: #00b8cc;
+  --neon-purple: #8000d9;
 
   --sans: "Noto Sans Georgia", system-ui, -apple-system, sans-serif;
   --heading: "Orbitron", "Noto Sans Georgia", sans-serif;
@@ -24,7 +25,7 @@
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -35,7 +36,7 @@
   }
 }
 
-/* 🟢 body.dark — მუქი თემა რეტრო-ნეონური აურით */
+/* 🟢 Dark Mode (მუქი თემა - ნეონური Cyberpunk აურა) */
 body.dark {
   --text: #a3a8b8;
   --text-h: #ffffff;
@@ -48,6 +49,10 @@ body.dark {
   --social-bg: rgba(38, 40, 51, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.6) 0 10px 20px -3px, rgba(0, 240, 255, 0.05) 0 0 15px;
+
+  --neon-pink: #ff007f;
+  --neon-cyan: #00f0ff;
+  --neon-purple: #9d00ff;
 }
 
 body.dark #social .button-icon {
@@ -55,36 +60,28 @@ body.dark #social .button-icon {
 }
 
 /* ==========================================
-   📺 1. CRT Scanlines & TV Flicker Effect
+   📺 1. CRT Scanlines Effect (მხოლოდ Dark Mode-ში)
    ========================================== */
 .crt-overlay {
+  display: none; /* ღია თემაში გამორთულია */
+}
+
+body.dark .crt-overlay {
+  display: block;
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%);
   background-size: 100% 4px;
   z-index: 99999;
   pointer-events: none;
-  opacity: 0.45;
-  animation: crtFlicker 0.15s infinite;
-}
-
-@keyframes crtFlicker {
-  0% {
-    opacity: 0.42;
-  }
-  50% {
-    opacity: 0.45;
-  }
-  100% {
-    opacity: 0.41;
-  }
+  opacity: 0.25; /* ძალიან ნაზი, თვალს რომ არ ტკენდეს */
 }
 
 /* ==========================================
-   ✨ 2. Retro Neon Pulse & Typography
+   ✨ 2. Гლობალური სტილები და ტოპოგრაფია
    ========================================== */
 html,
 body {
@@ -119,32 +116,18 @@ h2 {
   letter-spacing: 0.5px;
 }
 
-/* რეტრო ნეონური ტექსტის კლასი სათაურებისა და ლოგოსთვის */
+/* რეტრო ნეონური ტექსტის კლასი */
 .retro-neon-title {
-  color: #fff;
+  color: var(--text-h);
   font-family: var(--pixel);
+}
+
+body.dark .retro-neon-title {
+  color: #fff;
   text-shadow:
     0 0 5px var(--neon-pink),
     0 0 10px var(--neon-pink),
-    0 0 20px var(--neon-purple),
-    0 0 40px var(--neon-cyan);
-  animation: neonGlow 2s infinite alternate;
-}
-
-@keyframes neonGlow {
-  from {
-    text-shadow:
-      0 0 5px var(--neon-pink),
-      0 0 10px var(--neon-pink),
-      0 0 20px var(--neon-purple);
-  }
-  to {
-    text-shadow:
-      0 0 10px var(--neon-pink),
-      0 0 20px var(--neon-pink),
-      0 0 35px var(--neon-cyan),
-      0 0 50px var(--neon-cyan);
-  }
+    0 0 20px var(--neon-purple);
 }
 
 h1 {
@@ -201,7 +184,7 @@ svg {
 }
 
 /* ==========================================
-   🎮 3. Anime Glitch & Arcade Card Hover
+   🎮 3. Product Cards Hover
    ========================================== */
 .products-grid > *,
 .retro-card {
@@ -211,20 +194,26 @@ svg {
     border-color 0.2s ease;
   border: 1px solid var(--border);
   border-radius: 12px;
+  background-color: var(--code-bg);
 }
 
-/* როცა მაუსი მიგვაქვს პროდუქტზე — ნეონური ჩარჩო და გლიჩ-ნახტომი */
 .products-grid > *:hover,
 .retro-card:hover {
-  transform: translateY(-6px) scale(1.015);
+  transform: translateY(-5px);
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+body.dark .products-grid > *:hover,
+body.dark .retro-card:hover {
   border-color: var(--neon-pink) !important;
   box-shadow:
-    -4px 4px 0px var(--neon-pink),
-    4px -4px 0px var(--neon-cyan) !important;
+    -3px 3px 0px var(--neon-pink),
+    3px -3px 0px var(--neon-cyan) !important;
 }
 
 /* ==========================================
-   🕹️ 4. Arcade Button Physics (ღილაკები)
+   🕹️ 4. Arcade Buttons Physics
    ========================================== */
 .auth-button,
 .arcade-btn {
@@ -236,12 +225,10 @@ svg {
   border-radius: 8px;
   font-weight: bold;
   cursor: pointer;
-  font-size: 0.95rem;
-  letter-spacing: 1px;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
-  box-shadow:
-    0px 5px 0px #520099,
-    0px 8px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 4px 0px #520099;
   transition: all 0.1s ease-in-out;
   position: relative;
   top: 0;
@@ -249,43 +236,25 @@ svg {
 
 .auth-button:hover,
 .arcade-btn:hover {
-  box-shadow:
-    0px 5px 0px #520099,
-    0px 0px 20px var(--neon-pink);
-  opacity: 1;
+  opacity: 0.95;
 }
 
 .auth-button:active,
 .arcade-btn:active {
-  top: 4px;
-  box-shadow:
-    0px 1px 0px #520099,
-    0px 2px 5px rgba(0, 0, 0, 0.3);
+  top: 3px;
+  box-shadow: 0px 1px 0px #520099;
 }
 
 /* ==========================================
-   👾 5. ჩამოსაშლელი (Dropdown) & ავტორიზაცია
+   👾 5. Dropdown & Auth
    ========================================== */
 .dropdown-parent:hover .dropdown-content {
   display: block !important;
-  animation: dropdownSlide 0.2s ease;
-}
-
-@keyframes dropdownSlide {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .dropdown-content a:hover {
-  background-color: var(--neon-pink) !important;
+  background-color: var(--accent) !important;
   color: #fff !important;
-  box-shadow: inset 4px 0px 0px var(--neon-cyan);
 }
 
 .auth-container {
@@ -302,15 +271,10 @@ svg {
   width: 100%;
   max-width: 420px;
   background-color: var(--code-bg);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 40px;
   box-shadow: var(--shadow);
-  transition: border-color 0.3s ease;
-}
-
-.auth-card:hover {
-  border-color: var(--accent-border);
 }
 
 .auth-input {
@@ -322,14 +286,10 @@ svg {
   color: var(--text-h);
   font-size: 1rem;
   outline: none;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
 .auth-input:focus {
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+  border-color: var(--accent);
 }
 
 /* ==========================================
