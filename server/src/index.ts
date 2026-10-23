@@ -6,13 +6,14 @@ import mongoose from "mongoose";
 import productRoutes from "./routes/productRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "";
 
-// Middleware - აქ ჩავსვით CORS-ის სწორი პარამეტრები
+// Middleware - CORS-ის პარამეტრები
 app.use(
   cors({
     origin: [
@@ -27,9 +28,14 @@ app.use(
 
 app.use(express.json());
 
+// --- Root Route (UptimeRobot & Health Check-ისთვის) ---
+app.get("/", (req: Request, res: Response) => {
+  res.send("🚀 RetroStore Server is running healthy!");
+});
+
 // Routes
 app.use("/api/products", productRoutes);
-app.get("/api/test", (req, res) => {
+app.get("/api/test", (req: Request, res: Response) => {
   res.json({ message: "სერვერი მუშაობს!" });
 });
 app.use("/api/auth", authRouter);
