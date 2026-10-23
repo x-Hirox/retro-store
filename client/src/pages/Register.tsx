@@ -1,84 +1,141 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { registerUser } from "../services/authService";
-import { validatePassword } from "../utils/validations"; // ვალიდაციის იმპორტი
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../services/authService";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // დამატებულია
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // თვალის ნიშნის ਸტატუსები (თავიდან დაფარულია - false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // ბექენდის მოთხოვნებთან შესაბამისი ვალიდაცია
+  const validatePassword = (pass: string) => {
+    if (pass.length < 8) return "პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.";
+    if (!/[A-Z]/.test(pass))
+      return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ დიდ ასოს (A-Z).";
+    if (!/\d/.test(pass))
+      return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს (0-9).";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass))
+      return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ სპეციალურ სიმბოლოს.";
+    return null;
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setMessage("");
 
-    // 1. ვამოწმებთ ემთხვევა თუ არა პაროლები ერთმანეთს
     if (password !== confirmPassword) {
-      setError("პაროლები არ ემთხვევა ერთმანეთს!");
+      setError("პაროლები არ ემთხვევა ერთმანეთს.");
       return;
     }
 
-    // 2. ვამოწმებთ პაროლის სირთულეს სერვერზე გაგზავნამდე
     const passwordError = validatePassword(password);
     if (passwordError) {
       setError(passwordError);
       return;
     }
 
+    setLoading(true);
+
     try {
-      await registerUser({ name, email, password });
-      alert("რეგისტრაცია წარმატებით დასრულდა! გთხოვთ გაიაროთ ავტორიზაცია.");
-      navigate("/login");
+      const response = await authService.register({ name, email, password });
+      setMessage(
+        response.message ||
+          "რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ მეილი.",
+      );
+      setLoading(false);
+
+      // 3 წამის შემდეგ გადავამისამართებთ შესვლის გვერდზე
+      setTimeout(() => {
+        navigate("/login");
+      }, 4000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "შეცდომა რეგისტრაციისას");
+      setError(err.response?.data?.message || "რეგისტრაციის შეცდომა.");
+      setLoading(false);
     }
   };
 
   return (
     <div
       style={{
+        minHeight: "calc(100vh - 80px)",
+        backgroundColor: "var(--bg)",
+        color: "var(--text)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "80vh",
-        backgroundColor: "#f8f9fa",
-        padding: "16px", // დამატებულია მობილურისთვის, რომ კიდეებს არ მიეკრას
-        boxSizing: "border-box",
+        padding: "20px",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
       <div
         style={{
-          backgroundColor: "white",
-          padding: "30px 20px", // ოპტიმიზებულია მობილური ეკრანებისთვის
-          borderRadius: "16px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           width: "100%",
-          maxWidth: "400px",
-          boxSizing: "border-box",
+          maxWidth: "420px",
+          backgroundColor: "var(--code-bg)",
+          border: "1px solid var(--border)",
+          borderRadius: "16px",
+          padding: "40px",
+          boxShadow: "var(--shadow)",
         }}
       >
         <h2
           style={{
-            color: "#2c3e50",
-            marginBottom: "20px",
+            color: "var(--text-h)",
+            marginBottom: "10px",
             textAlign: "center",
           }}
         >
           რეგისტრაცია 📝
         </h2>
+        <p
+          style={{
+            color: "var(--text)",
+            fontSize: "0.9rem",
+            textAlign: "center",
+            marginBottom: "25px",
+          }}
+        >
+          შეიქმენი ანგარიში რეტრო კოლექციების განსათავსებლად და შესაძენად.
+        </p>
+
+        {message && (
+          <div
+            style={{
+              backgroundColor: "rgba(34, 197, 94, 0.15)",
+              color: "#22c55e",
+              padding: "12px",
+              borderRadius: "8px",
+              marginBottom: "15px",
+              fontSize: "0.9rem",
+              border: "1px solid rgba(34, 197, 94, 0.3)",
+              textAlign: "center",
+            }}
+          >
+            {message}
+          </div>
+        )}
 
         {error && (
           <div
             style={{
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
-              padding: "10px",
+              backgroundColor: "rgba(239, 68, 68, 0.15)",
+              color: "#ef4444",
+              padding: "12px",
               borderRadius: "8px",
               marginBottom: "15px",
-              fontSize: "0.85rem",
+              fontSize: "0.9rem",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
               textAlign: "center",
             }}
           >
@@ -94,8 +151,9 @@ export default function Register() {
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
+                fontSize: "0.9rem",
               }}
             >
               სახელი
@@ -104,13 +162,17 @@ export default function Register() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="შენი სახელი"
               style={{
                 width: "100%",
-                padding: "10px",
+                padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #ced4da",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg)",
+                color: "var(--text-h)",
                 fontSize: "1rem",
-                boxSizing: "border-box",
+                outline: "none",
               }}
             />
           </div>
@@ -119,8 +181,9 @@ export default function Register() {
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
+                fontSize: "0.9rem",
               }}
             >
               ელ-ფოსტა
@@ -130,87 +193,131 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="example@gmail.com"
               style={{
                 width: "100%",
-                padding: "10px",
+                padding: "12px",
                 borderRadius: "8px",
-                border: "1px solid #ced4da",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg)",
+                color: "var(--text-h)",
                 fontSize: "1rem",
-                boxSizing: "border-box",
+                outline: "none",
               }}
             />
           </div>
 
+          {/* პაროლის ველი თვალის ნიშნით */}
           <div>
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
+                fontSize: "0.9rem",
               }}
             >
               პაროლი
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="********"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  paddingRight: "40px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--bg)",
+                  color: "var(--text-h)",
+                  fontSize: "1rem",
+                  outline: "none",
+                }}
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "1.1rem",
+                  userSelect: "none",
+                }}
+              >
+                {showPassword ? "👁️‍🗨️" : "👁️"}
+              </span>
+            </div>
+            <span
               style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "1px solid #ced4da",
-                fontSize: "1rem",
-                boxSizing: "border-box",
+                fontSize: "0.75rem",
+                color: "var(--text)",
+                display: "block",
+                marginTop: "4px",
               }}
-            />
+            >
+              მინ. 8 სიმბოლო, დიდი ასო, ციფრი და სპეც. სიმბოლო.
+            </span>
           </div>
 
-          {/* პაროლის გამეორების ველი */}
+          {/* პაროლის გამეორების ველი თვალის ნიშნით */}
           <div>
             <label
               style={{
                 display: "block",
-                color: "#7f8c8d",
+                color: "var(--text)",
                 marginBottom: "5px",
+                fontSize: "0.9rem",
               }}
             >
               გაიმეორეთ პაროლი
             </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "8px",
-                border: "1px solid #ced4da",
-                fontSize: "1rem",
-                boxSizing: "border-box",
-              }}
-            />
-
-            {/* პაროლის მოთხოვნების მითითება */}
-            <p
-              style={{
-                color: "#7f8c8d",
-                fontSize: "0.75rem",
-                marginTop: "5px",
-                lineHeight: "1.3",
-              }}
-            >
-              პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან, შეიცავდეს დიდ ასოს,
-              ციფრს და სპეციალურ სიმბოლოს (!@#$%^&*).
-            </p>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="********"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  paddingRight: "40px",
+                  borderRadius: "8px",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--bg)",
+                  color: "var(--text-h)",
+                  fontSize: "1rem",
+                  outline: "none",
+                }}
+              />
+              <span
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  fontSize: "1.1rem",
+                  userSelect: "none",
+                }}
+              >
+                {showConfirmPassword ? "👁️‍🗨️" : "👁️"}
+              </span>
+            </div>
           </div>
 
           <button
             type="submit"
+            disabled={loading}
             style={{
-              backgroundColor: "#3498db",
+              backgroundColor: "var(--accent)",
               color: "white",
               border: "none",
               padding: "12px",
@@ -221,19 +328,23 @@ export default function Register() {
               marginTop: "10px",
             }}
           >
-            რეგისტრაცია
+            {loading ? "რეგისტრაცია..." : "რეგისტრაცია"}
           </button>
         </form>
 
-        <p style={{ textAlign: "center", marginTop: "20px", color: "#7f8c8d" }}>
-          უკვე გაქვს აკაუნტი?{" "}
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
           <Link
             to="/login"
-            style={{ color: "#3498db", textDecoration: "none" }}
+            style={{
+              color: "var(--accent)",
+              textDecoration: "none",
+              fontSize: "0.9rem",
+              fontWeight: "600",
+            }}
           >
-            შესვლა
+            უკვე გაქვს აკაუნტი? შესვლა →
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

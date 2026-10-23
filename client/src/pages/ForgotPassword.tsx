@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { authService } from "../services/authService";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -14,13 +15,12 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      // მომავალში აქ დავამერთებთ რეალურ ბექენდ ენდპოინტს
-      setTimeout(() => {
-        setMessage(
-          "თუ აღნიშნული ელ-ფოსტა რეგისტრირებულია, აღდგენის ინსტრუქცია გამოგზავნილია. ✉️",
-        );
-        setLoading(false);
-      }, 1000);
+      // 🟢 ვუერთებთ რეალურ ბექენდ ენდპოინტს authService-ის მეშვეობით
+      const response = await authService.forgotPassword({ email });
+      setMessage(
+        response.message || "აღდგენის ინსტრუქცია გამოგზავნილია მეილზე. ✉️",
+      );
+      setLoading(false);
     } catch (err: any) {
       setError(
         err.response?.data?.message || "შეცდომა მოხდა მოთხოვნის გაგზავნისას.",
@@ -30,29 +30,8 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "calc(100vh - 80px)",
-        backgroundColor: "var(--bg)",
-        color: "var(--text)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "20px",
-        transition: "background-color 0.2s ease, color 0.2s ease",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          backgroundColor: "var(--code-bg)",
-          border: "1px solid var(--border)",
-          borderRadius: "16px",
-          padding: "40px",
-          boxShadow: "var(--shadow)",
-        }}
-      >
+    <div className="auth-container">
+      <div className="auth-card">
         <h2
           style={{
             color: "var(--text-h)",
@@ -70,7 +49,7 @@ export default function ForgotPassword() {
             marginBottom: "25px",
           }}
         >
-          შეიყვანე შენი ელ-ფოსტა და ჩვენ გამოგიგზავნით ინსტრუქციას.
+          შეიყვანე შენი ელ-ფოსტა და ჩვენ გამოგიგზავნით აღდგენის ინსტრუქციას.
         </p>
 
         {message && (
@@ -83,6 +62,7 @@ export default function ForgotPassword() {
               marginBottom: "15px",
               fontSize: "0.9rem",
               border: "1px solid rgba(34, 197, 94, 0.3)",
+              textAlign: "center",
             }}
           >
             {message}
@@ -99,6 +79,7 @@ export default function ForgotPassword() {
               marginBottom: "15px",
               fontSize: "0.9rem",
               border: "1px solid rgba(239, 68, 68, 0.3)",
+              textAlign: "center",
             }}
           >
             {error}
@@ -126,34 +107,11 @@ export default function ForgotPassword() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="example@gmail.com"
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "8px",
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--bg)",
-                color: "var(--text-h)",
-                fontSize: "1rem",
-                outline: "none",
-              }}
+              className="auth-input"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "white",
-              border: "none",
-              padding: "12px",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              fontSize: "1rem",
-              marginTop: "10px",
-            }}
-          >
+          <button type="submit" disabled={loading} className="auth-button">
             {loading ? "იგზავნება..." : "აღდგენის მოთხოვნა"}
           </button>
         </form>

@@ -6,25 +6,46 @@ export interface IAuthResponse {
     id: string;
     email: string;
     name?: string;
+    role?: string;
   };
 }
 
-// რეგისტრაცია
-export const registerUser = async (userData: {
-  email: string;
-  password: string;
-  name?: string;
-}) => {
-  // 🟢 /auth/register ავტომატურად დაემატება https://retro-store.onrender.com/api-ს
-  const response = await API.post("/auth/register", userData);
-  return response.data;
-};
+export const authService = {
+  // 1. რეგისტრაცია
+  register: async (userData: {
+    email: string;
+    password: string;
+    name?: string;
+  }) => {
+    const response = await API.post("/auth/register", userData);
+    return response.data;
+  },
 
-// შესვლა (Login)
-export const loginUser = async (userData: {
-  email: string;
-  password: string;
-}) => {
-  const response = await API.post("/auth/login", userData);
-  return response.data;
+  // 2. მეილის ვერიფიკაცია / აქტივაცია
+  verifyEmail: async (data: { token: string | null; email: string | null }) => {
+    const response = await API.post("/auth/verify-email", data);
+    return response.data;
+  },
+
+  // 3. შესვლა (Login)
+  login: async (userData: { email: string; password: string }) => {
+    const response = await API.post("/auth/login", userData);
+    return response.data;
+  },
+
+  // 4. პაროლის აღდგენის მოთხოვნა (Forgot Password)
+  forgotPassword: async (data: { email: string }) => {
+    const response = await API.post("/auth/forgot-password", data);
+    return response.data;
+  },
+
+  // 5. ახალი პაროლის დაყენება (Reset Password)
+  resetPassword: async (data: {
+    token: string | null;
+    email: string | null;
+    newPassword: string;
+  }) => {
+    const response = await API.post("/auth/reset-password", data);
+    return response.data;
+  },
 };
