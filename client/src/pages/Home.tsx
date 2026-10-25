@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
@@ -10,6 +10,8 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category") || "";
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getProducts()
@@ -79,7 +81,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* 2. SHOP BY POPULAR BRANDS (სწორად გასწორებული ლოგოები და ტექსტები) */}
+      {/* 2. SHOP BY POPULAR BRANDS (მხოლოდ სუფთა PNG ლოგოები ტექსტის გარეშე) */}
       {!searchQuery && (
         <div
           style={{
@@ -93,10 +95,10 @@ export default function Home() {
           <h2
             style={{
               textAlign: "center",
-              marginBottom: "25px",
+              marginBottom: "20px",
               color: "#fff",
               fontSize: "1.2rem",
-              letterSpacing: "1.5px",
+              letterSpacing: "2px",
               fontFamily: "var(--heading)",
             }}
           >
@@ -107,23 +109,21 @@ export default function Home() {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              gap: "40px",
-              flexWrap: "wrap",
-              maxWidth: "1100px",
-              margin: "0 auto",
+              gap: "45px",
+              flexWrap: "nowrap",
+              overflowX: "auto",
+              padding: "10px 0",
             }}
           >
             <div
               onClick={() => navigate("/category/nintendo")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
                 cursor: "pointer",
-                transition: "transform 0.2s ease",
+                flexShrink: 0,
+                transition: "transform 0.2s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.08)")
+                (e.currentTarget.style.transform = "scale(1.15)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.transform = "scale(1)")
@@ -133,29 +133,24 @@ export default function Home() {
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Nintendo.svg/512px-Nintendo.svg.png"
                 alt="Nintendo"
                 style={{
-                  height: "24px",
-                  objectFit: "contain",
+                  height: "28px",
+                  width: "auto",
                   filter: "brightness(0) invert(1)",
+                  objectFit: "contain",
+                  display: "block",
                 }}
               />
-              <span
-                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
-              >
-                Nintendo
-              </span>
             </div>
 
             <div
               onClick={() => navigate("/category/playstation")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
                 cursor: "pointer",
-                transition: "transform 0.2s ease",
+                flexShrink: 0,
+                transition: "transform 0.2s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.08)")
+                (e.currentTarget.style.transform = "scale(1.15)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.transform = "scale(1)")
@@ -165,29 +160,24 @@ export default function Home() {
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/PlayStation_logo.svg/2560px-PlayStation_logo.svg.png"
                 alt="PlayStation"
                 style={{
-                  height: "22px",
-                  objectFit: "contain",
+                  height: "24px",
+                  width: "auto",
                   filter: "brightness(0) invert(1)",
+                  objectFit: "contain",
+                  display: "block",
                 }}
               />
-              <span
-                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
-              >
-                PlayStation
-              </span>
             </div>
 
             <div
               onClick={() => navigate("/category/xbox")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
                 cursor: "pointer",
-                transition: "transform 0.2s ease",
+                flexShrink: 0,
+                transition: "transform 0.2s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.08)")
+                (e.currentTarget.style.transform = "scale(1.15)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.transform = "scale(1)")
@@ -197,29 +187,24 @@ export default function Home() {
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Xbox_one_logo.svg/1024px-Xbox_one_logo.svg.png"
                 alt="Xbox"
                 style={{
-                  height: "26px",
-                  objectFit: "contain",
+                  height: "30px",
+                  width: "auto",
                   filter: "brightness(0) invert(1)",
+                  objectFit: "contain",
+                  display: "block",
                 }}
               />
-              <span
-                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
-              >
-                Xbox
-              </span>
             </div>
 
             <div
               onClick={() => navigate("/category/sega")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
                 cursor: "pointer",
-                transition: "transform 0.2s ease",
+                flexShrink: 0,
+                transition: "transform 0.2s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.08)")
+                (e.currentTarget.style.transform = "scale(1.15)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.transform = "scale(1)")
@@ -229,29 +214,24 @@ export default function Home() {
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/SEGA_logo.svg/1280px-SEGA_logo.svg.png"
                 alt="Sega"
                 style={{
-                  height: "20px",
-                  objectFit: "contain",
+                  height: "22px",
+                  width: "auto",
                   filter: "brightness(0) invert(1)",
+                  objectFit: "contain",
+                  display: "block",
                 }}
               />
-              <span
-                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
-              >
-                Sega
-              </span>
             </div>
 
             <div
               onClick={() => navigate("/category/atari")}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
                 cursor: "pointer",
-                transition: "transform 0.2s ease",
+                flexShrink: 0,
+                transition: "transform 0.2s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.08)")
+                (e.currentTarget.style.transform = "scale(1.15)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.transform = "scale(1)")
@@ -261,22 +241,19 @@ export default function Home() {
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Atari-Logo.svg/1200px-Atari-Logo.svg.png"
                 alt="Atari"
                 style={{
-                  height: "24px",
-                  objectFit: "contain",
+                  height: "28px",
+                  width: "auto",
                   filter: "brightness(0) invert(1)",
+                  objectFit: "contain",
+                  display: "block",
                 }}
               />
-              <span
-                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
-              >
-                Atari
-              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. საუკეთესო გაყიდვები (BEST SELLERS) */}
+      {/* 3. საუკეთესო გაყიდვები (BEST SELLERS - ჰორიზონტალური სლაიდერი) */}
       <div
         style={{ width: "100%", padding: "0 40px", boxSizing: "border-box" }}
       >
@@ -340,155 +317,234 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-              gap: "24px",
-            }}
-          >
-            {regularProducts.map((product) => (
-              <div
-                key={product._id}
-                style={{
-                  backgroundColor: "var(--code-bg)",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "all 0.3s ease",
-                  cursor: "pointer",
-                  border: "1px solid var(--border)",
-                  padding: "16px",
-                  position: "relative",
-                }}
-                onClick={() => navigate(`/product/${product._id}`)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-6px)";
-                  e.currentTarget.style.borderColor = "var(--accent)";
-                  e.currentTarget.style.boxShadow =
-                    "0 12px 25px rgba(147, 40, 230, 0.2)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor = "var(--border)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "20px",
-                    backgroundColor: "#0066ff",
-                    color: "#fff",
-                    fontSize: "0.75rem",
-                    fontWeight: "bold",
-                    padding: "3px 8px",
-                    borderRadius: "10px",
-                    zIndex: 2,
-                  }}
-                >
-                  -15%
-                </span>
-
+          <div style={{ position: "relative" }}>
+            {/* ჰორიზონტალურად მოძრავი კონტეინერი */}
+            <div
+              ref={sliderRef}
+              style={{
+                display: "flex",
+                gap: "24px",
+                overflowX: "auto",
+                scrollBehavior: "smooth",
+                paddingBottom: "15px",
+                scrollbarWidth: "none",
+              }}
+            >
+              {regularProducts.map((product) => (
                 <div
+                  key={product._id}
                   style={{
-                    height: "180px",
-                    backgroundColor: "var(--bg)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    minWidth: "250px",
+                    maxWidth: "250px",
+                    backgroundColor: "var(--code-bg)",
+                    borderRadius: "16px",
                     overflow: "hidden",
-                    borderRadius: "10px",
-                  }}
-                >
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                        padding: "10px",
-                      }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: "3rem" }}>🕹️</span>
-                  )}
-                </div>
-
-                <div
-                  style={{
-                    padding: "14px 0 0 0",
                     display: "flex",
                     flexDirection: "column",
-                    flex: 1,
+                    transition: "all 0.3s ease",
+                    cursor: "pointer",
+                    border: "1px solid var(--border)",
+                    padding: "16px",
+                    position: "relative",
+                    flexShrink: 0,
+                  }}
+                  onClick={() => navigate(`/product/${product._id}`)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-6px)";
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.boxShadow =
+                      "0 12px 25px rgba(147, 40, 230, 0.2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
-                  <h3
+                  <span
                     style={{
-                      margin: "0 0 8px 0",
-                      color: "var(--text-h)",
-                      fontSize: "1rem",
+                      position: "absolute",
+                      top: "20px",
+                      left: "20px",
+                      backgroundColor: "#0066ff",
+                      color: "#fff",
+                      fontSize: "0.75rem",
                       fontWeight: "bold",
+                      padding: "3px 8px",
+                      borderRadius: "10px",
+                      zIndex: 2,
                     }}
                   >
-                    {product.title}
-                  </h3>
+                    -15%
+                  </span>
 
                   <div
                     style={{
+                      height: "180px",
+                      backgroundColor: "var(--bg)",
                       display: "flex",
                       alignItems: "center",
-                      gap: "5px",
-                      marginBottom: "12px",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      borderRadius: "10px",
                     }}
                   >
-                    <span style={{ color: "#f59e0b", fontSize: "0.9rem" }}>
-                      ★
-                    </span>
-                    <span style={{ fontSize: "0.85rem", color: "var(--text)" }}>
-                      4.8 (399)
-                    </span>
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.title}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: "3rem" }}>🕹️</span>
+                    )}
                   </div>
 
                   <div
                     style={{
+                      padding: "14px 0 0 0",
                       display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginTop: "auto",
+                      flexDirection: "column",
+                      flex: 1,
                     }}
                   >
-                    <span
+                    <h3
                       style={{
-                        fontSize: "1.2rem",
-                        fontWeight: "800",
+                        margin: "0 0 8px 0",
                         color: "var(--text-h)",
+                        fontSize: "1rem",
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
-                      {product.price} ₾
-                    </span>
-                    <span
+                      {product.title}
+                    </h3>
+
+                    <div
                       style={{
-                        fontSize: "0.85rem",
-                        color: "var(--text)",
-                        textDecoration: "line-through",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        marginBottom: "12px",
                       }}
                     >
-                      {(product.price * 1.2).toFixed(2)} ₾
-                    </span>
+                      <span style={{ color: "#f59e0b", fontSize: "0.9rem" }}>
+                        ★
+                      </span>
+                      <span
+                        style={{ fontSize: "0.85rem", color: "var(--text)" }}
+                      >
+                        4.8 (399)
+                      </span>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        marginTop: "auto",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "1.2rem",
+                          fontWeight: "800",
+                          color: "var(--text-h)",
+                        }}
+                      >
+                        {product.price} ₾
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--text)",
+                          textDecoration: "line-through",
+                        }}
+                      >
+                        {(product.price * 1.2).toFixed(2)} ₾
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* სლაიდერის სამართავი ღილაკები */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "12px",
+                marginTop: "20px",
+              }}
+            >
+              <button
+                onClick={() =>
+                  sliderRef.current?.scrollBy({
+                    left: -300,
+                    behavior: "smooth",
+                  })
+                }
+                style={{
+                  backgroundColor: "#222",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "32px",
+                  height: "32px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                &lt;
+              </button>
+              <span
+                style={{
+                  width: "24px",
+                  height: "8px",
+                  borderRadius: "4px",
+                  backgroundColor: "#0066ff",
+                }}
+              ></span>
+              <span
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  backgroundColor: "#555",
+                }}
+              ></span>
+              <button
+                onClick={() =>
+                  sliderRef.current?.scrollBy({ left: 300, behavior: "smooth" })
+                }
+                style={{
+                  backgroundColor: "#222",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "32px",
+                  height: "32px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                &gt;
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* 4. კატეგორიები (SHOP BY CATEGORIES) */}
+      {/* 4. კატეგორიები */}
       {!searchQuery && (
         <div
           style={{
