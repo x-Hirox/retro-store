@@ -213,7 +213,6 @@ export default function CategoryView() {
           boxShadow: "inset 0 0 40px rgba(168, 85, 247, 0.1)",
         }}
       >
-        {/* ფონური დეკორატიული ელემენტი (რეტრო ბზინვარება) */}
         <div
           style={{
             position: "absolute",
@@ -263,7 +262,7 @@ export default function CategoryView() {
           </h1>
         </div>
 
-        {/* υπο-категории / ბარათები ბანერის შიგნით */}
+        {/* ქვეკატეგორიების / ტიპების ბარათები ბანერის შიგნით */}
         <div
           style={{
             display: "flex",
@@ -383,157 +382,267 @@ export default function CategoryView() {
         </div>
       </div>
 
-      {/* პროდუქტების სია */}
-      <div
-        style={{ maxWidth: "1200px", margin: "50px auto", padding: "0 20px" }}
-      >
-        <h2
-          style={{
-            color: "var(--text-h)",
-            marginBottom: "30px",
-            fontSize: "1.8rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <span style={{ color: "#a855f7" }}>📂</span> პროდუქტების სია{" "}
-          <span style={{ fontSize: "1.2rem", color: "#a855f7" }}>
-            ({filteredProducts.length})
-          </span>
-        </h2>
-
-        {loading ? (
-          <p
-            style={{
-              textAlign: "center",
-              color: "var(--text)",
-              fontSize: "1.2rem",
-              padding: "40px",
-            }}
-          >
-            იტვირთება რეტრო სამყარო... ✨
-          </p>
-        ) : filteredProducts.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "50px",
-              backgroundColor: "rgba(168, 85, 247, 0.04)",
-              borderRadius: "20px",
-              border: "1px dashed rgba(168, 85, 247, 0.3)",
-            }}
-          >
-            <p
-              style={{
-                color: "var(--text)",
-                fontSize: "1.2rem",
-                fontWeight: "500",
-              }}
-            >
-              ამ კატეგორიაში პროდუქტები ჯერ არ მოიძებნა.
-            </p>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-              gap: "28px",
-            }}
-          >
-            {filteredProducts.map((product) => (
+      {/* 🟢 `.shop-layout` აკავშირებს მარცხენა ფილტრსა და პროდუქტებს გვერდი-გვერდ */}
+      <div className="shop-layout" style={{ marginTop: "40px" }}>
+        {/* მარცხენა ფილტრების პანელი */}
+        <aside className="filter-sidebar">
+          <div className="filter-group">
+            <div className="filter-title">
+              PRICE <span>⌄</span>
+            </div>
+            <div style={{ padding: "10px 0" }}>
+              <input
+                type="range"
+                min="0"
+                max="1200"
+                defaultValue="1200"
+                style={{ width: "100%", accentColor: "var(--accent)" }}
+              />
               <div
-                key={product._id}
-                onClick={() => navigate(`/product/${product._id}`)}
                 style={{
-                  backgroundColor: "var(--bg)",
-                  borderRadius: "18px",
-                  padding: "16px",
-                  cursor: "pointer",
-                  border: "1px solid rgba(168, 85, 247, 0.2)",
-                  boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 15px 35px rgba(168, 85, 247, 0.35), 0 0 20px rgba(236, 72, 153, 0.2)";
-                  e.currentTarget.style.borderColor = "#a855f7";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 15px rgba(0,0,0,0.08)";
-                  e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.2)";
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: "0.85rem",
+                  marginTop: "5px",
+                  color: "var(--text)",
                 }}
               >
-                <img
-                  src={product.imageUrl}
-                  alt={product.title}
-                  style={{
-                    width: "100%",
-                    height: "190px",
-                    objectFit: "cover",
-                    borderRadius: "12px",
-                  }}
-                />
-                <h3
-                  style={{
-                    fontSize: "1.1rem",
-                    margin: "14px 0 10px",
-                    color: "var(--text-h)",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {product.title}
-                </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#a855f7",
-                      fontWeight: "800",
-                      fontSize: "1.35rem",
-                      textShadow: "0 0 10px rgba(168, 85, 247, 0.3)",
-                    }}
-                  >
-                    {product.price} ₾
-                  </span>
-                  <button
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-                      color: "#ffffff",
-                      border: "none",
-                      padding: "8px 16px",
-                      borderRadius: "10px",
-                      fontWeight: "bold",
-                      cursor: "pointer",
-                      boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "0.95";
-                      e.currentTarget.style.transform = "scale(1.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                  >
-                    დეტალები
-                  </button>
-                </div>
+                <span>$0.00</span>
+                <span>$1,199.97</span>
               </div>
-            ))}
+            </div>
           </div>
-        )}
+
+          <div className="filter-group">
+            <div className="filter-title">
+              PLATFORM <span>⌄</span>
+            </div>
+            <label className="checkbox-label">
+              <input type="checkbox" /> PS1{" "}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: "0.8rem",
+                  color: "var(--text)",
+                }}
+              >
+                60
+              </span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" /> PS2{" "}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: "0.8rem",
+                  color: "var(--text)",
+                }}
+              >
+                885
+              </span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" /> PS3{" "}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: "0.8rem",
+                  color: "var(--text)",
+                }}
+              >
+                429
+              </span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" /> PS4{" "}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: "0.8rem",
+                  color: "var(--text)",
+                }}
+              >
+                239
+              </span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" /> PS5{" "}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: "0.8rem",
+                  color: "var(--text)",
+                }}
+              >
+                58
+              </span>
+            </label>
+            <label className="checkbox-label">
+              <input type="checkbox" /> PSP{" "}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: "0.8rem",
+                  color: "var(--text)",
+                }}
+              >
+                279
+              </span>
+            </label>
+          </div>
+        </aside>
+
+        {/* პროდუქტების სია (მარჯვენა მხარე) */}
+        <div style={{ flex: 1, padding: "0 20px" }}>
+          <h2
+            style={{
+              color: "var(--text-h)",
+              marginBottom: "30px",
+              fontSize: "1.8rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            <span style={{ color: "#a855f7" }}>📂</span> პროდუქტების სია{" "}
+            <span style={{ fontSize: "1.2rem", color: "#a855f7" }}>
+              ({filteredProducts.length})
+            </span>
+          </h2>
+
+          {loading ? (
+            <p
+              style={{
+                textAlign: "center",
+                color: "var(--text)",
+                fontSize: "1.2rem",
+                padding: "40px",
+              }}
+            >
+              იტვირთება რეტრო სამყარო... ✨
+            </p>
+          ) : filteredProducts.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "50px",
+                backgroundColor: "rgba(168, 85, 247, 0.04)",
+                borderRadius: "20px",
+                border: "1px dashed rgba(168, 85, 247, 0.3)",
+              }}
+            >
+              <p
+                style={{
+                  color: "var(--text)",
+                  fontSize: "1.2rem",
+                  fontWeight: "500",
+                }}
+              >
+                ამ კატეგორიაში პროდუქტები ჯერ არ მოიძებნა.
+              </p>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+                gap: "28px",
+              }}
+            >
+              {filteredProducts.map((product) => (
+                <div
+                  key={product._id}
+                  onClick={() => navigate(`/product/${product._id}`)}
+                  style={{
+                    backgroundColor: "var(--bg)",
+                    borderRadius: "18px",
+                    padding: "16px",
+                    cursor: "pointer",
+                    border: "1px solid rgba(168, 85, 247, 0.2)",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-8px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 15px 35px rgba(168, 85, 247, 0.35), 0 0 20px rgba(236, 72, 153, 0.2)";
+                    e.currentTarget.style.borderColor = "#a855f7";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 15px rgba(0,0,0,0.08)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(168, 85, 247, 0.2)";
+                  }}
+                >
+                  <img
+                    src={product.imageUrl}
+                    alt={product.title}
+                    style={{
+                      width: "100%",
+                      height: "190px",
+                      objectFit: "cover",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <h3
+                    style={{
+                      fontSize: "1.1rem",
+                      margin: "14px 0 10px",
+                      color: "var(--text-h)",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {product.title}
+                  </h3>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: "#a855f7",
+                        fontWeight: "800",
+                        fontSize: "1.35rem",
+                        textShadow: "0 0 10px rgba(168, 85, 247, 0.3)",
+                      }}
+                    >
+                      {product.price} ₾
+                    </span>
+                    <button
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "8px 16px",
+                        borderRadius: "10px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.opacity = "0.95";
+                        e.currentTarget.style.transform = "scale(1.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.opacity = "1";
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                    >
+                      დეტალები
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -23,14 +23,11 @@ export default function Home() {
       });
   }, []);
 
-  // ბანერების გამოყოფა
   const heroBanner = products.find(
     (p) => p.category === "banner-hero" || p.isHeroBanner === true,
   );
   const middleBanner = products.find((p) => p.category === "banner-middle");
-  const bottomBanner = products.find((p) => p.category === "banner-bottom");
 
-  // ჩვეულებრივი პროდუქტები (გაფილტრული კატეგორიით ან ძებნით)
   const regularProducts = products.filter((p) => {
     const isBanner =
       p.category === "banner-hero" ||
@@ -61,28 +58,20 @@ export default function Home() {
         color: "var(--text)",
         paddingBottom: "60px",
         overflowX: "hidden",
-        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
-      {/* --- 1. მთავარი (Hero) ბანერი --- */}
+      {/* 1. მთავარი ბანერი */}
       {heroBanner && heroBanner.imageUrl && !searchQuery && (
         <div
-          onClick={() => {
-            navigate("/category/playstation");
-          }}
-          style={{
-            width: "100%",
-            cursor: "pointer",
-            marginBottom: "30px",
-            overflow: "hidden",
-          }}
+          onClick={() => navigate("/category/playstation")}
+          style={{ width: "100%", cursor: "pointer", overflow: "hidden" }}
         >
           <img
             src={heroBanner.imageUrl}
             alt={heroBanner.title || "Banner"}
             style={{
               width: "100%",
-              maxHeight: "450px",
+              maxHeight: "480px",
               objectFit: "cover",
               display: "block",
             }}
@@ -90,12 +79,215 @@ export default function Home() {
         </div>
       )}
 
-      {/* მთავარი კონტენტი */}
+      {/* 2. SHOP BY POPULAR BRANDS (სწორად გასწორებული ლოგოები და ტექსტები) */}
+      {!searchQuery && (
+        <div
+          style={{
+            backgroundColor: "#0a0a0c",
+            padding: "35px 20px",
+            borderTop: "1px solid #222",
+            borderBottom: "1px solid #222",
+            marginBottom: "40px",
+          }}
+        >
+          <h2
+            style={{
+              textAlign: "center",
+              marginBottom: "25px",
+              color: "#fff",
+              fontSize: "1.2rem",
+              letterSpacing: "1.5px",
+              fontFamily: "var(--heading)",
+            }}
+          >
+            SHOP BY POPULAR BRANDS
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "40px",
+              flexWrap: "wrap",
+              maxWidth: "1100px",
+              margin: "0 auto",
+            }}
+          >
+            <div
+              onClick={() => navigate("/category/nintendo")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.08)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Nintendo.svg/512px-Nintendo.svg.png"
+                alt="Nintendo"
+                style={{
+                  height: "24px",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+              <span
+                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Nintendo
+              </span>
+            </div>
+
+            <div
+              onClick={() => navigate("/category/playstation")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.08)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/PlayStation_logo.svg/2560px-PlayStation_logo.svg.png"
+                alt="PlayStation"
+                style={{
+                  height: "22px",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+              <span
+                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
+              >
+                PlayStation
+              </span>
+            </div>
+
+            <div
+              onClick={() => navigate("/category/xbox")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.08)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Xbox_one_logo.svg/1024px-Xbox_one_logo.svg.png"
+                alt="Xbox"
+                style={{
+                  height: "26px",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+              <span
+                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Xbox
+              </span>
+            </div>
+
+            <div
+              onClick={() => navigate("/category/sega")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.08)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/SEGA_logo.svg/1280px-SEGA_logo.svg.png"
+                alt="Sega"
+                style={{
+                  height: "20px",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+              <span
+                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Sega
+              </span>
+            </div>
+
+            <div
+              onClick={() => navigate("/category/atari")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.08)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Atari-Logo.svg/1200px-Atari-Logo.svg.png"
+                alt="Atari"
+                style={{
+                  height: "24px",
+                  objectFit: "contain",
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+              <span
+                style={{ color: "#fff", fontWeight: "bold", fontSize: "1rem" }}
+              >
+                Atari
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. საუკეთესო გაყიდვები (BEST SELLERS) */}
       <div
-        id="catalog-section"
         style={{ width: "100%", padding: "0 40px", boxSizing: "border-box" }}
       >
-        <div style={{ marginBottom: "25px", textAlign: "left" }}>
+        <div
+          style={{
+            marginBottom: "25px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <h2
             style={{
               color: "var(--text-h)",
@@ -107,8 +299,19 @@ export default function Home() {
               ? `🔍 ძებნის შედეგი: "${searchQuery}"`
               : selectedCategory
                 ? `📂 ${selectedCategory}`
-                : "🔥 ALL PRODUCTS"}
+                : "BEST SELLERS"}
           </h2>
+          <span
+            onClick={() => navigate("/category/playstation")}
+            style={{
+              color: "var(--text)",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontSize: "0.9rem",
+            }}
+          >
+            VIEW MORE &gt;
+          </span>
         </div>
 
         {loading ? (
@@ -140,7 +343,7 @@ export default function Home() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
               gap: "24px",
             }}
           >
@@ -149,39 +352,55 @@ export default function Home() {
                 key={product._id}
                 style={{
                   backgroundColor: "var(--code-bg)",
-                  borderRadius: "18px",
-                  boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+                  borderRadius: "16px",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
                   transition: "all 0.3s ease",
                   cursor: "pointer",
-                  border: "1px solid rgba(168, 85, 247, 0.2)",
+                  border: "1px solid var(--border)",
                   padding: "16px",
+                  position: "relative",
                 }}
                 onClick={() => navigate(`/product/${product._id}`)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
+                  e.currentTarget.style.transform = "translateY(-6px)";
+                  e.currentTarget.style.borderColor = "var(--accent)";
                   e.currentTarget.style.boxShadow =
-                    "0 15px 35px rgba(168, 85, 247, 0.35), 0 0 20px rgba(236, 72, 153, 0.2)";
-                  e.currentTarget.style.borderColor = "#a855f7";
+                    "0 12px 25px rgba(147, 40, 230, 0.2)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 15px rgba(0,0,0,0.08)";
-                  e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.2)";
+                  e.currentTarget.style.borderColor = "var(--border)";
+                  e.currentTarget.style.boxShadow = "none";
                 }}
               >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "20px",
+                    left: "20px",
+                    backgroundColor: "#0066ff",
+                    color: "#fff",
+                    fontSize: "0.75rem",
+                    fontWeight: "bold",
+                    padding: "3px 8px",
+                    borderRadius: "10px",
+                    zIndex: 2,
+                  }}
+                >
+                  -15%
+                </span>
+
                 <div
                   style={{
-                    height: "190px",
-                    backgroundColor: "var(--border)",
+                    height: "180px",
+                    backgroundColor: "var(--bg)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     overflow: "hidden",
-                    borderRadius: "12px",
+                    borderRadius: "10px",
                   }}
                 >
                   {product.imageUrl ? (
@@ -191,7 +410,8 @@ export default function Home() {
                       style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover",
+                        objectFit: "contain",
+                        padding: "10px",
                       }}
                     />
                   ) : (
@@ -209,77 +429,57 @@ export default function Home() {
                 >
                   <h3
                     style={{
-                      margin: "0 0 10px 0",
+                      margin: "0 0 8px 0",
                       color: "var(--text-h)",
-                      fontSize: "1.1rem",
+                      fontSize: "1rem",
                       fontWeight: "bold",
                     }}
                   >
                     {product.title}
                   </h3>
-                  <p
-                    style={{
-                      margin: "0 0 20px 0",
-                      color: "var(--text)",
-                      fontSize: "0.95rem",
-                      lineHeight: "1.5",
-                      flex: 1,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      opacity: 0.8,
-                    }}
-                  >
-                    {product.description}
-                  </p>
 
                   <div
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "space-between",
+                      gap: "5px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span style={{ color: "#f59e0b", fontSize: "0.9rem" }}>
+                      ★
+                    </span>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text)" }}>
+                      4.8 (399)
+                    </span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
                       marginTop: "auto",
                     }}
                   >
                     <span
                       style={{
-                        fontSize: "1.35rem",
+                        fontSize: "1.2rem",
                         fontWeight: "800",
-                        color: "#a855f7",
-                        textShadow: "0 0 10px rgba(168, 85, 247, 0.3)",
+                        color: "var(--text-h)",
                       }}
                     >
                       {product.price} ₾
                     </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/product/${product._id}`);
-                      }}
+                    <span
                       style={{
-                        background:
-                          "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-                        color: "white",
-                        border: "none",
-                        padding: "8px 16px",
-                        borderRadius: "10px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                        boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "0.95";
-                        e.currentTarget.style.transform = "scale(1.05)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.transform = "scale(1)";
+                        fontSize: "0.85rem",
+                        color: "var(--text)",
+                        textDecoration: "line-through",
                       }}
                     >
-                      დეტალები
-                    </button>
+                      {(product.price * 1.2).toFixed(2)} ₾
+                    </span>
                   </div>
                 </div>
               </div>
@@ -288,46 +488,145 @@ export default function Home() {
         )}
       </div>
 
-      {/* --- 2. შუა ბანერი (Middle Banner) --- */}
-      {middleBanner && middleBanner.imageUrl && !searchQuery && (
+      {/* 4. კატეგორიები (SHOP BY CATEGORIES) */}
+      {!searchQuery && (
         <div
           style={{
-            width: "100%",
-            marginTop: "50px",
-            cursor: "pointer",
-          }}
-          onClick={() => {
-            navigate("/category/playstation");
+            maxWidth: "1200px",
+            margin: "60px auto 0",
+            padding: "0 20px",
           }}
         >
-          <img
-            src={middleBanner.imageUrl}
-            alt={middleBanner.title || "Middle Banner"}
+          <h2
             style={{
-              width: "100%",
-              maxHeight: "300px",
-              objectFit: "cover",
-              display: "block",
+              color: "var(--text-h)",
+              textAlign: "center",
+              marginBottom: "30px",
+              fontSize: "1.8rem",
+              fontFamily: "var(--heading)",
             }}
-          />
+          >
+            SHOP BY CATEGORIES
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+              gap: "24px",
+            }}
+          >
+            <div
+              onClick={() => navigate("/category/playstation")}
+              style={{
+                background: "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)",
+                borderRadius: "16px",
+                padding: "30px",
+                cursor: "pointer",
+                color: "#fff",
+                minHeight: "200px",
+                boxShadow: "0 10px 25px rgba(30, 58, 138, 0.3)",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-5px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
+            >
+              <h3
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: "900",
+                  marginBottom: "10px",
+                }}
+              >
+                HOME CONSOLES
+              </h3>
+              <p style={{ fontSize: "0.9rem", opacity: "0.85" }}>
+                Power up your setup with legendary consoles. Expertly
+                refurbished.
+              </p>
+            </div>
+
+            <div
+              onClick={() => navigate("/category/nintendo")}
+              style={{
+                background: "linear-gradient(135deg, #581c87 0%, #7e22ce 100%)",
+                borderRadius: "16px",
+                padding: "30px",
+                cursor: "pointer",
+                color: "#fff",
+                minHeight: "200px",
+                boxShadow: "0 10px 25px rgba(88, 28, 135, 0.3)",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-5px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
+            >
+              <h3
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: "900",
+                  marginBottom: "10px",
+                }}
+              >
+                HANDHELD CONSOLES
+              </h3>
+              <p style={{ fontSize: "0.9rem", opacity: "0.85" }}>
+                Take your favourite games on the go. Tested and reliable.
+              </p>
+            </div>
+
+            <div
+              onClick={() => navigate("/category/sega")}
+              style={{
+                background: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                borderRadius: "16px",
+                padding: "30px",
+                cursor: "pointer",
+                color: "#fff",
+                minHeight: "200px",
+                boxShadow: "0 10px 25px rgba(6, 95, 70, 0.3)",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "translateY(-5px)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "translateY(0)")
+              }
+            >
+              <h3
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: "900",
+                  marginBottom: "10px",
+                }}
+              >
+                GAMES
+              </h3>
+              <p style={{ fontSize: "0.9rem", opacity: "0.85" }}>
+                From timeless classics to hidden gems. Cleaned and tested.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* --- 3. ქვედა ბანერი (Bottom Banner) --- */}
-      {bottomBanner && bottomBanner.imageUrl && !searchQuery && (
+      {middleBanner && middleBanner.imageUrl && !searchQuery && (
         <div
-          style={{
-            width: "100%",
-            marginTop: "30px",
-            cursor: "pointer",
-          }}
-          onClick={() => {
-            navigate("/category/playstation");
-          }}
+          style={{ width: "100%", marginTop: "50px", cursor: "pointer" }}
+          onClick={() => navigate("/category/playstation")}
         >
           <img
-            src={bottomBanner.imageUrl}
-            alt={bottomBanner.title || "Bottom Banner"}
+            src={middleBanner.imageUrl}
+            alt="Banner"
             style={{
               width: "100%",
               maxHeight: "300px",
