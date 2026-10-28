@@ -19,7 +19,6 @@ export default function Header({
 }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // თემის მართვის ლოგიკა: დეფაულტად არის თეთრი, თუ ხელით არ ჩართავ შავს
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -53,7 +52,9 @@ export default function Header({
         width: "100%",
         backgroundColor: "var(--bg)",
         color: "var(--text)",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        position: "relative", // 👈 აუცილებელია ზონების გამოსაყოფად
+        zIndex: 1000, // 👈 უზრუნველყოფს, რომ ჰედერი ყოველთვის ზემოდან იყოს
         transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
@@ -63,7 +64,7 @@ export default function Header({
           backgroundColor: "#ff6600",
           color: "#fff",
           fontSize: "0.85rem",
-          padding: "8px 20px",
+          padding: "6px 20px",
           textAlign: "center",
           fontWeight: "500",
           width: "100%",
@@ -81,7 +82,7 @@ export default function Header({
           justifyContent: "space-between",
           alignItems: "center",
           width: "100%",
-          padding: "15px 40px",
+          padding: "10px 40px",
           boxSizing: "border-box",
         }}
       >
@@ -98,7 +99,7 @@ export default function Header({
             src="/retrobit.png"
             alt="RetroBit"
             style={{
-              height: "100px", // იდეალური ზომა ჰედერისათვის
+              height: "75px",
               width: "auto",
               objectFit: "contain",
               display: "block",
@@ -166,7 +167,6 @@ export default function Header({
             flexWrap: "wrap",
           }}
         >
-          {/* თემის გადართვის ღილაკი */}
           <button
             onClick={toggleTheme}
             className="neon-btn"
@@ -184,7 +184,6 @@ export default function Header({
             {isDark ? "☀️ ღია რეჟიმი" : "🌙 მუქი რეჟიმი"}
           </button>
 
-          {/* კალათა */}
           <Link
             to="/cart"
             className="neon-btn"
@@ -282,13 +281,14 @@ export default function Header({
         style={{
           backgroundColor: "var(--bg)",
           borderTop: "1px solid var(--border)",
-          borderBottom: "1px solid var(--border)",
+          borderBottom: "2px solid var(--accent)", // 👈 მკაფიო იასამნისფერი ხაზი ბოლოში, რომელიც სრულად ხურავს ზონას
           padding: "0 40px",
           display: "flex",
           gap: "30px",
           width: "100%",
           boxSizing: "border-box",
           position: "relative",
+          zIndex: 10,
         }}
       >
         {categoriesData.map((cat, index) => (

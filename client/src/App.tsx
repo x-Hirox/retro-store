@@ -13,7 +13,7 @@ import AdminRoute from "./components/AdminRoute";
 import CategoryView from "./pages/CategoryView";
 import Header from "./components/Header";
 import OrderSuccess from "./pages/OrderSuccess";
-import { VerifyEmail } from "./pages/VerifyEmail"; // 🟢 შემოვიტანეთ ფიგურული ფრჩხილებით
+import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 
 const categoriesData = [

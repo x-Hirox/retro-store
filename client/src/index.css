@@ -60,28 +60,7 @@ body.dark #social .button-icon {
 }
 
 /* ==========================================
-   📺 1. CRT Scanlines Effect (მხოლოდ Dark Mode-ში)
-   ========================================== */
-.crt-overlay {
-  display: none; /* ღია თემაში გამორთულია */
-}
-
-body.dark .crt-overlay {
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.18) 50%);
-  background-size: 100% 4px;
-  z-index: 99999;
-  pointer-events: none;
-  opacity: 0.25; /* ძალიან ნაზი, თვალს რომ არ ტკენდეს */
-}
-
-/* ==========================================
-   ✨ 2. Гლობალური სტილები და ტოპოგრაფია
+   ✨ გლობალური სტილები და ტოპოგრაფია
    ========================================== */
 html,
 body {
@@ -184,10 +163,11 @@ svg {
 }
 
 /* ==========================================
-   🎮 3. Product Cards Hover
+   🎮 3. Product Cards Hover (ნეონური ეფექტით)
    ========================================== */
 .products-grid > *,
-.retro-card {
+.retro-card,
+div[style*="background-color: var(--code-bg)"] {
   transition:
     transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
     box-shadow 0.2s ease,
@@ -198,18 +178,24 @@ svg {
 }
 
 .products-grid > *:hover,
-.retro-card:hover {
+.retro-card:hover,
+div[style*="background-color: var(--code-bg)"]:hover {
   transform: translateY(-5px);
   border-color: var(--accent) !important;
-  box-shadow: var(--shadow) !important;
+  box-shadow:
+    -4px 4px 0px var(--accent),
+    4px -4px 0px var(--neon-cyan),
+    0 10px 25px rgba(147, 40, 230, 0.3) !important;
 }
 
 body.dark .products-grid > *:hover,
-body.dark .retro-card:hover {
+body.dark .retro-card:hover,
+body.dark div[style*="background-color: var(--code-bg)"]:hover {
   border-color: var(--neon-pink) !important;
   box-shadow:
-    -3px 3px 0px var(--neon-pink),
-    3px -3px 0px var(--neon-cyan) !important;
+    -4px 4px 0px var(--neon-pink),
+    4px -4px 0px var(--neon-cyan),
+    0 0 20px rgba(255, 0, 127, 0.4) !important;
 }
 
 /* ==========================================
@@ -381,9 +367,6 @@ body.dark .retro-card:hover {
    🖨️ 7. Print სტილები
    ========================================== */
 @media print {
-  .crt-overlay {
-    display: none !important;
-  }
   header,
   nav,
   footer,
@@ -403,6 +386,7 @@ body.dark .retro-card:hover {
     padding: 0 !important;
   }
 }
+
 /* ==========================================
    🎮 SHOP BY POPULAR BRANDS (ბრენდების სექცია)
    ========================================== */
@@ -440,7 +424,6 @@ body.dark .retro-card:hover {
   box-shadow: var(--shadow);
 }
 
-/* კურსორის მიტანისას გაზრდა (Zoom) და შენი საყვარელი იასამნისფერი კანტი */
 .brand-card:hover {
   transform: scale(1.08);
   border-color: var(--accent) !important;
@@ -459,7 +442,7 @@ body.dark .retro-card:hover {
 }
 
 /* ==========================================
-   🎛️ SIDEBAR FILTERS (მარცხენა ჩამოსაშლელი ფილტრები)
+   🎛️ SIDEBAR FILTERS
    ========================================== */
 .shop-layout {
   display: flex;
