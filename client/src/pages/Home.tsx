@@ -81,12 +81,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* 2. SHOP BY POPULAR BRANDS (მხოლოდ სუფთა PNG ლოგოები ტექსტის გარეშე) */}
+      {/* 2. SHOP BY POPULAR BRANDS (ჩარჩო-განათებით და აწევის ეფექტით) */}
       {!searchQuery && (
         <div
           style={{
             backgroundColor: "#0a0a0c",
-            padding: "35px 20px",
+            padding: "40px 20px",
             borderTop: "1px solid #222",
             borderBottom: "1px solid #222",
             marginBottom: "40px",
@@ -95,7 +95,7 @@ export default function Home() {
           <h2
             style={{
               textAlign: "center",
-              marginBottom: "20px",
+              marginBottom: "25px",
               color: "#fff",
               fontSize: "1.2rem",
               letterSpacing: "2px",
@@ -109,141 +109,200 @@ export default function Home() {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              gap: "45px",
+              gap: "30px",
               flexWrap: "nowrap",
               overflowX: "auto",
-              padding: "10px 0",
+              padding: "15px 0",
             }}
           >
+            {/* Nintendo */}
             <div
               onClick={() => navigate("/category/nintendo")}
               style={{
                 cursor: "pointer",
                 flexShrink: 0,
-                transition: "transform 0.2s",
+                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                padding: "12px 20px",
+                borderRadius: "14px",
+                border: "1px solid #222",
+                backgroundColor: "#121216",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.15)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.borderColor = "#a855f7";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 20px rgba(168, 85, 247, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#222";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Nintendo.svg/512px-Nintendo.svg.png"
+                src="/nintendo.png"
                 alt="Nintendo"
                 style={{
-                  height: "28px",
+                  height: "30px",
                   width: "auto",
-                  filter: "brightness(0) invert(1)",
                   objectFit: "contain",
                   display: "block",
                 }}
               />
             </div>
 
+            {/* PlayStation */}
             <div
               onClick={() => navigate("/category/playstation")}
               style={{
                 cursor: "pointer",
                 flexShrink: 0,
-                transition: "transform 0.2s",
+                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                padding: "12px 20px",
+                borderRadius: "14px",
+                border: "1px solid #222",
+                backgroundColor: "#121216",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.15)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.borderColor = "#a855f7";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 20px rgba(168, 85, 247, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#222";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/PlayStation_logo.svg/2560px-PlayStation_logo.svg.png"
+                src="/playstation1.png"
                 alt="PlayStation"
-                style={{
-                  height: "24px",
-                  width: "auto",
-                  filter: "brightness(0) invert(1)",
-                  objectFit: "contain",
-                  display: "block",
-                }}
-              />
-            </div>
-
-            <div
-              onClick={() => navigate("/category/xbox")}
-              style={{
-                cursor: "pointer",
-                flexShrink: 0,
-                transition: "transform 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.15)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Xbox_one_logo.svg/1024px-Xbox_one_logo.svg.png"
-                alt="Xbox"
                 style={{
                   height: "30px",
                   width: "auto",
-                  filter: "brightness(0) invert(1)",
                   objectFit: "contain",
                   display: "block",
                 }}
               />
             </div>
 
+            {/* Xbox */}
+            <div
+              onClick={() => navigate("/category/xbox")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                cursor: "pointer",
+                flexShrink: 0,
+                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                padding: "12px 20px",
+                borderRadius: "14px",
+                border: "1px solid #222",
+                backgroundColor: "#121216",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.borderColor = "#a855f7";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 20px rgba(168, 85, 247, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#222";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <img
+                src="/xbox.png"
+                alt="Xbox"
+                style={{
+                  height: "26px",
+                  width: "auto",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+              <span
+                style={{
+                  color: "#107c10",
+                  fontWeight: "bold",
+                  fontSize: "1.2rem",
+                  fontFamily: "sans-serif",
+                  letterSpacing: "1px",
+                }}
+              >
+                XBOX
+              </span>
+            </div>
+
+            {/* Sega */}
             <div
               onClick={() => navigate("/category/sega")}
               style={{
                 cursor: "pointer",
                 flexShrink: 0,
-                transition: "transform 0.2s",
+                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                padding: "12px 20px",
+                borderRadius: "14px",
+                border: "1px solid #222",
+                backgroundColor: "#121216",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.15)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.borderColor = "#a855f7";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 20px rgba(168, 85, 247, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#222";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/SEGA_logo.svg/1280px-SEGA_logo.svg.png"
+                src="/sega.png"
                 alt="Sega"
                 style={{
-                  height: "22px",
+                  height: "24px",
                   width: "auto",
-                  filter: "brightness(0) invert(1)",
                   objectFit: "contain",
                   display: "block",
                 }}
               />
             </div>
 
+            {/* Atari */}
             <div
               onClick={() => navigate("/category/atari")}
               style={{
                 cursor: "pointer",
                 flexShrink: 0,
-                transition: "transform 0.2s",
+                transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                padding: "12px 20px",
+                borderRadius: "14px",
+                border: "1px solid #222",
+                backgroundColor: "#121216",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "scale(1.15)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "scale(1)")
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.borderColor = "#a855f7";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 20px rgba(168, 85, 247, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#222";
+                e.currentTarget.style.boxShadow = "none";
+              }}
             >
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Atari-Logo.svg/1200px-Atari-Logo.svg.png"
+                src="/atari.png"
                 alt="Atari"
                 style={{
                   height: "28px",
                   width: "auto",
-                  filter: "brightness(0) invert(1)",
                   objectFit: "contain",
                   display: "block",
                 }}

@@ -89,16 +89,21 @@ export default function Header({
         <Link
           to="/"
           style={{
-            fontSize: "1.6rem",
-            fontWeight: "bold",
-            color: "var(--text-h)",
-            textDecoration: "none",
             display: "flex",
             alignItems: "center",
-            gap: "8px",
+            textDecoration: "none",
           }}
         >
-          🕹️ RetroStore
+          <img
+            src="/retrobit.png"
+            alt="RetroBit"
+            style={{
+              height: "100px", // იდეალური ზომა ჰედერისათვის
+              width: "auto",
+              objectFit: "contain",
+              display: "block",
+            }}
+          />
         </Link>
 
         {/* ძებნის ველი */}
