@@ -5,7 +5,7 @@ import {
   deleteProduct,
 } from "../services/productService";
 import type { IProduct } from "../types";
-import API from "../services/api"; // 🟢 ვიყენებთ საერთო გამართულ API ინსტანსს
+import API from "../services/api";
 
 interface Order {
   _id: string;
@@ -33,9 +33,11 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
+  // ფორმის ველები
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState(""); // 🟢 ახალი: ფასდაკლება %
   const [stock, setStock] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("PlayStation");
@@ -54,7 +56,6 @@ export default function Admin() {
     }
   };
 
-  // 🟢 შეკვეთების წამოღება API ინსტანსის გამოყენებით
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
@@ -86,15 +87,18 @@ export default function Admin() {
         title,
         description,
         price: isBanner ? 0 : Number(price),
+        discount: isBanner ? 0 : Number(discount) || 0, // 🟢 გაიგზავნება ფასდაკლებაც
         stock: isBanner ? 1 : Number(stock),
         imageUrl,
         category: isBanner ? bannerType : category,
         isHeroBanner: bannerType === "banner-hero",
       });
 
+      // ფორმის გასუფთავება
       setTitle("");
       setDescription("");
       setPrice("");
+      setDiscount(""); // გასუფთავება
       setStock("");
       setImageUrl("");
       setCategory("PlayStation");
@@ -119,7 +123,6 @@ export default function Admin() {
     }
   };
 
-  // 🟢 შეკვეთის სტატუსის განახლება API ინსტანსის გამოყენებით
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
       await API.put(`/orders/${id}/status`, { status: newStatus });
@@ -326,11 +329,12 @@ export default function Admin() {
                 </div>
               </div>
 
+              {/* 🟢 ფასი, ფასდაკლება და მარაგი */}
               {!isBannerSelected && (
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: "1fr 1fr 1fr",
                     gap: "15px",
                   }}
                 >
@@ -344,7 +348,14 @@ export default function Admin() {
                   />
                   <input
                     type="number"
-                    placeholder="მარაგი (რაოდენობა)"
+                    placeholder="ფასდაკლება % (მაგ: 20)"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <input
+                    type="number"
+                    placeholder="მარაგი"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
                     required={!isBannerSelected}
@@ -454,7 +465,7 @@ export default function Admin() {
                         >
                           {isABanner
                             ? "სარეკლამო ბანერი"
-                            : `ფასი: ${p.price} ₾ | მარაგი: ${p.stock}`}
+                            : `ფასი: ${p.price} ₾ ${p.discount ? `(სეილი: -${p.discount}%)` : ""} | მარაგი: ${p.stock}`}
                         </p>
                       </div>
                     </div>
