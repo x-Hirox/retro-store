@@ -4,11 +4,11 @@ export interface IProduct extends Document {
   title: string;
   description: string;
   price: number;
-  discount?: number; // 🟢 ფასდაკლება % (მაგ: 10, 20, 50)
+  discount?: number; // 🟢 ფასდაკლების პროცენტი
   category: string;
   imageUrl: string;
   stock: number;
-  isHeroBanner?: boolean; // 🟢 მთავარი ბანერის იდენტიფიკატორი
+  isHeroBanner?: boolean; // 🟢 მთავარი ბანერი
   createdAt: Date;
 }
 
@@ -16,7 +16,7 @@ const ProductSchema = new Schema<IProduct>({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
-  discount: { type: Number, default: 0 }, // 🟢 ნაგულისხმევად 0%
+  discount: { type: Number, default: 0 },
   category: { type: String, required: true },
   imageUrl: { type: String, required: true },
   stock: { type: Number, required: true, default: 1 },

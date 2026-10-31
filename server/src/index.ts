@@ -1,52 +1,11 @@
-import express from "express";
-import type { Request, Response } from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import productRoutes from "./routes/productRoutes.js";
-import authRouter from "./routes/authRoutes.js";
-import orderRoutes from "./routes/orderRoutes.js";
-
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || "";
-
-// Middleware - CORS-ის პარამეტრები
-app.use(
-  cors({
-    origin: [
-      "https://retrobit.ge",
-      "https://www.retrobit.ge",
-      "http://localhost:5173",
-      "http://localhost:5000",
-    ],
-    credentials: true,
-  }),
-);
-
-app.use(express.json());
-
-// --- Root Route (UptimeRobot & Health Check-ისთვის) ---
-app.get("/", (req: Request, res: Response) => {
-  res.send("🚀 RetroStore Server is running healthy!");
-});
-
-// Routes
-app.use("/api/products", productRoutes);
-app.get("/api/test", (req: Request, res: Response) => {
-  res.json({ message: "სერვერი მუშაობს!" });
-});
-app.use("/api/auth", authRouter);
-app.use("/api/orders", orderRoutes);
-
-// MongoDB Connection
-mongoose
-  .connect(MONGO_URI)
-  .then(() => console.log("🍃 MongoDB Atlas ბაზასთან კავშირი დამყარებულია!"))
-  .catch((err) => console.error("❌ MongoDB კავშირის შეცდომა:", err));
-
-app.listen(Number(PORT), "0.0.0.0", () => {
-  console.log(`🚀 სერვერი გაეშვა პორტზე: ${PORT}`);
-});
+export interface IProduct {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  discount?: number; // 🟢 ფასდაკლების პროცენტი
+  stock: number;
+  imageUrl: string;
+  category: string;
+  isHeroBanner?: boolean;
+}

@@ -3,8 +3,9 @@ export interface IProduct {
   title: string;
   description: string;
   price: number;
+  discount?: number; // 🟢 ფასდაკლების პროცენტი
   imageUrl?: string;
   category: string;
   stock: number;
-  isHeroBanner?: boolean; // <-- აი ეს ველი დავამატოთ ბანერისთვის
+  isHeroBanner?: boolean; // 🟢 მთავარი ბანერი
 }
