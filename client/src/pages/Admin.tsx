@@ -427,13 +427,57 @@ export default function Admin() {
 
       {activeTab === "orders" && (
         <div>
-          <h3>შემოსული შეკვეთები</h3>
+          <h3 style={{ marginBottom: "15px" }}>
+            შემოსული შეკვეთები ({orders.length})
+          </h3>
           {loadingOrders ? (
             <p>იტვირთება...</p>
           ) : orders.length === 0 ? (
             <p>შეკვეთები არ არის.</p>
           ) : (
-            <p>შეკვეთების სია წარმატებით იტვირთება ({orders.length})</p>
+            <div style={{ display: "grid", gap: "15px" }}>
+              {orders.map((order, index) => (
+                <div
+                  key={order._id || index}
+                  style={{
+                    background: "#1e293b",
+                    padding: "20px",
+                    borderRadius: "8px",
+                    border: "1px solid #334155",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <span style={{ color: "#38bdf8", fontWeight: "bold" }}>
+                      შეკვეთის ID: {order._id}
+                    </span>
+                    <span style={{ color: "#10b981", fontWeight: "bold" }}>
+                      სულ თანხა: {order.totalAmount || order.totalPrice || 0} ₾
+                    </span>
+                  </div>
+                  <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
+                    <strong>მომხმარებელი:</strong>{" "}
+                    {order.shippingAddress?.fullName ||
+                      order.fullName ||
+                      "უცნობი"}
+                  </p>
+                  <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
+                    <strong>ქალაქი / მისამართი:</strong>{" "}
+                    {order.shippingAddress?.city},{" "}
+                    {order.shippingAddress?.address}
+                  </p>
+                  <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
+                    <strong>ტელეფონი:</strong>{" "}
+                    {order.shippingAddress?.phone || order.phone}
+                  </p>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}

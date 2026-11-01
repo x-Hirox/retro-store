@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// ვქმნით axios-ის ინსტანსს ბექენდის ძირითადი URL-ით (გადართულია Render-ის ლაივ სერვერზე)
 const API = axios.create({
   baseURL: "https://retro-store.onrender.com/api",
   headers: {
@@ -8,13 +7,29 @@ const API = axios.create({
   },
 });
 
-// ტოკენის ავტომატურად მიმაგრება მოთხოვნებზე
+// მოთხოვნის გაგზავნისას ტოკენის მიმაგრება
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // 🟢 პირდაპირ ვკითხულობთ "token"-ს
+  const token = localStorage.getItem("token");
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// პასუხის დამუშავება და 401 შეცდომის ავტომატური დაჭერა
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // თუ ტოკენი ვადაგასულია ან არასწორია
+      localStorage.removeItem("token");
+      // გადავამისამართოთ ლოგინზე მხოლოდ მაშინ, თუ უკვე იქ არ არის
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  },
+);
 
 export default API;
