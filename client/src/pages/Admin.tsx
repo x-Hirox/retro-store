@@ -466,6 +466,7 @@ export default function Admin() {
                       order.shippingAddress?.fullName ||
                       order.customerName ||
                       order.user?.name ||
+                      order.user?.email ||
                       "უცნობი"}
                   </p>
                   <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
