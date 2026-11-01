@@ -81,7 +81,10 @@ export const getOrders = async (
 ): Promise<void> => {
   try {
     const orders = await Order.find({})
-      .populate("user", "name email")
+      .populate({
+        path: "user",
+        select: "name fullName email", // ვამოწმებთ როგორც name-ს, ისე fullName-სა და email-ს
+      })
       .sort({ createdAt: -1 });
     res.status(200).json(orders);
   } catch (error: any) {
