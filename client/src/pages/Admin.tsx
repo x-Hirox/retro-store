@@ -462,18 +462,20 @@ export default function Admin() {
                   </div>
                   <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
                     <strong>მომხმარებელი:</strong>{" "}
-                    {order.shippingAddress?.fullName ||
-                      order.fullName ||
+                    {order.fullName ||
+                      order.shippingAddress?.fullName ||
+                      order.customerName ||
+                      order.user?.name ||
                       "უცნობი"}
                   </p>
                   <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
                     <strong>ქალაქი / მისამართი:</strong>{" "}
-                    {order.shippingAddress?.city},{" "}
-                    {order.shippingAddress?.address}
+                    {order.shippingAddress?.city || order.city || ""},{" "}
+                    {order.shippingAddress?.address || order.address || ""}
                   </p>
                   <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
                     <strong>ტელეფონი:</strong>{" "}
-                    {order.shippingAddress?.phone || order.phone}
+                    {order.shippingAddress?.phone || order.phone || ""}
                   </p>
                 </div>
               ))}
