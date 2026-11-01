@@ -63,6 +63,7 @@ export default function OrderSuccess() {
       }}
     >
       <div
+        id="printable-invoice"
         style={{
           maxWidth: "700px",
           margin: "0 auto",
@@ -95,7 +96,9 @@ export default function OrderSuccess() {
           </h3>
           <p>
             <strong>სახელი:</strong>{" "}
-            {order.shippingAddress?.fullName || "მომხმარებელი"}
+            {order.shippingAddress?.fullName ||
+              order.fullName ||
+              "მომხმარებელი"}
           </p>
           <p>
             <strong>ქალაქი / მისამართი:</strong> {order.shippingAddress?.city},{" "}
@@ -156,7 +159,10 @@ export default function OrderSuccess() {
           </span>
         </div>
 
-        <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
+        <div
+          className="no-print"
+          style={{ display: "flex", gap: "15px", justifyContent: "center" }}
+        >
           <button
             onClick={() => window.print()}
             style={{
@@ -186,6 +192,31 @@ export default function OrderSuccess() {
           </Link>
         </div>
       </div>
+
+      {/* პრინტისთვის განკუთვნილი სტილები */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-invoice, #printable-invoice * {
+            visibility: visible;
+          }
+          #printable-invoice {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+            background: white !important;
+            color: black !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
