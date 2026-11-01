@@ -2,6 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 
+import authRoutes from "./routes/authRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+
 export interface IProduct {
   _id: string;
   title: string;
@@ -17,6 +21,11 @@ export interface IProduct {
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// 🟢 როუტერების მიერთება
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
 
 const PORT = process.env.PORT || 10000;
 const MONGO_URI = process.env.MONGO_URI || "";
