@@ -7,9 +7,12 @@ import {
 } from "../services/productService";
 import type { IProduct } from "../types";
 import API from "../services/api";
+import AdminContent from "./AdminContent";
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<"products" | "orders">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "orders" | "content">(
+    "products",
+  );
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
@@ -27,6 +30,9 @@ export default function Admin() {
   const [imageUrl, setImageUrl] = useState("");
   const [category, setCategory] = useState("PlayStation");
   const [isHeroBanner, setIsHeroBanner] = useState(false);
+  const [platform, setPlatform] = useState("");
+  const [genre, setGenre] = useState("");
+  const [isBestSeller, setIsBestSeller] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -67,6 +73,9 @@ export default function Admin() {
         imageUrl,
         category: isHeroBanner ? "banner-hero" : category,
         isHeroBanner,
+        platform: isHeroBanner ? "" : platform,
+        genre: isHeroBanner ? "" : genre,
+        isBestSeller: isHeroBanner ? false : isBestSeller,
       };
 
       if (editingId) {
@@ -97,6 +106,9 @@ export default function Admin() {
     setImageUrl(p.imageUrl || "");
     setCategory(p.category || "PlayStation");
     setIsHeroBanner(!!p.isHeroBanner);
+    setPlatform(p.platform || "");
+    setGenre(p.genre || "");
+    setIsBestSeller(!!p.isBestSeller);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -111,6 +123,9 @@ export default function Admin() {
     setImageUrl("");
     setCategory("PlayStation");
     setIsHeroBanner(false);
+    setPlatform("");
+    setGenre("");
+    setIsBestSeller(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -175,6 +190,20 @@ export default function Admin() {
           }}
         >
           📋 შეკვეთები
+        </button>
+        <button
+          onClick={() => setActiveTab("content")}
+          style={{
+            padding: "10px 20px",
+            background: activeTab === "content" ? "#10b981" : "#1e293b",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          🧩 საიტის კონტენტი
         </button>
       </div>
 
@@ -303,14 +332,46 @@ export default function Admin() {
               />
 
               {!isHeroBanner && (
-                <input
-                  type="text"
-                  placeholder="კატეგორია (მაგ: Nintendo, Sega, PlayStation)"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                  style={inputStyle}
-                />
+                <>
+                  <input
+                    type="text"
+                    placeholder="კატეგორია (მაგ: Nintendo, Sega, PlayStation)"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                    style={inputStyle}
+                  />
+                  <input
+                    type="text"
+                    placeholder="პლატფორმა / ქვეკატეგორია (მაგ: PS2, NES, Switch)"
+                    value={platform}
+                    onChange={(e) => setPlatform(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <input
+                    type="text"
+                    placeholder="ჟანრი (მაგ: ექშენი, რბოლა, RPG)"
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      color: "#cbd5e1",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isBestSeller}
+                      onChange={(e) => setIsBestSeller(e.target.checked)}
+                    />
+                    🔥 ბესტსელერებში გამოჩენა
+                  </label>
+                </>
               )}
 
               <button
@@ -424,6 +485,8 @@ export default function Admin() {
           )}
         </>
       )}
+
+      {activeTab === "content" && <AdminContent />}
 
       {activeTab === "orders" && (
         <div>

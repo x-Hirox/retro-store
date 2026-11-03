@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
+import { getSalePrice, isBannerProduct } from "../utils/pricing";
 
 interface Props {
   products: IProduct[];
@@ -19,13 +20,7 @@ export default function BestSellersSlider({
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const regularProducts = products.filter((p) => {
-    const isBanner =
-      p.category === "banner-hero" ||
-      p.category === "banner-middle" ||
-      p.category === "banner-bottom" ||
-      p.isHeroBanner;
-
-    if (isBanner) return false;
+    if (isBannerProduct(p)) return false;
 
     if (searchQuery) {
       const matchesTitle = p.title?.toLowerCase().includes(searchQuery);
@@ -127,7 +122,12 @@ export default function BestSellersSlider({
               scrollbarWidth: "none",
             }}
           >
-            {regularProducts.map((product) => (
+            {(regularProducts.some((p) => p.isBestSeller)
+              ? regularProducts.filter((p) => p.isBestSeller)
+              : regularProducts
+            ).map((product) => {
+              const sale = getSalePrice(product);
+              return (
               <div
                 key={product._id}
                 style={{
@@ -158,6 +158,7 @@ export default function BestSellersSlider({
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
+                {sale.discount > 0 && (
                 <span
                   style={{
                     position: "absolute",
@@ -172,8 +173,9 @@ export default function BestSellersSlider({
                     zIndex: 2,
                   }}
                 >
-                  -15%
+                  -{sale.discount}%
                 </span>
+                )}
 
                 <div
                   style={{
@@ -254,8 +256,9 @@ export default function BestSellersSlider({
                         color: "var(--text-h)",
                       }}
                     >
-                      {product.price} ₾
+                      {sale.final} ₾
                     </span>
+                    {sale.discount > 0 && (
                     <span
                       style={{
                         fontSize: "0.85rem",
@@ -263,12 +266,14 @@ export default function BestSellersSlider({
                         textDecoration: "line-through",
                       }}
                     >
-                      {(product.price * 1.2).toFixed(2)} ₾
+                      {sale.original} ₾
                     </span>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
 
           {/* ღილაკები */}

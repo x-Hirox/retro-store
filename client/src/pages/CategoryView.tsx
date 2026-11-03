@@ -1,153 +1,224 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getProducts } from "../services/productService";
-import type { IProduct } from "../types";
+import {
+  getCollectionPage,
+  getPlatformCards,
+} from "../services/contentService";
+import type { ICollectionPage, IPlatformCard, IProduct } from "../types";
+import { isBannerProduct } from "../utils/pricing";
+import ProductCard from "../components/ProductCard";
+import ReviewsSection from "../components/ReviewsSection";
+import FaqSection from "../components/FaqSection";
+import RecentlyViewed from "../components/RecentlyViewed";
+import NewsletterSignup from "../components/NewsletterSignup";
+import BestSellersSlider from "../components/BestSellersSlider";
 
-const subCategoriesMap: Record<
+const fallbackCards: Record<
   string,
-  { name: string; slug: string; image: string }[]
+  { name: string; slug: string; image: string; year?: string }[]
 > = {
   playstation: [
-    {
-      name: "PlayStation 1",
-      slug: "ps1",
-      image:
-        "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400",
-    },
-    {
-      name: "PlayStation 2",
-      slug: "ps2",
-      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
-    },
-    {
-      name: "PlayStation 3",
-      slug: "ps3",
-      image:
-        "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400",
-    },
-    {
-      name: "PlayStation 4",
-      slug: "ps4",
-      image:
-        "https://images.unsplash.com/photo-1605901309584-818e2596098f?w=400",
-    },
-    {
-      name: "PlayStation 5",
-      slug: "ps5",
-      image:
-        "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=400",
-    },
+    { name: "PlayStation 1", slug: "ps1", image: "/ps1.svg", year: "1995" },
+    { name: "PlayStation 2", slug: "ps2", image: "/ps2.svg", year: "2000" },
+    { name: "PlayStation 3", slug: "ps3", image: "/ps3.svg", year: "2006" },
+    { name: "PlayStation 4", slug: "ps4", image: "/ps4.svg", year: "2013" },
+    { name: "PlayStation 5", slug: "ps5", image: "/ps5.svg", year: "2020" },
     {
       name: "PlayStation Portable",
       slug: "psp",
-      image:
-        "https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=400",
+      image: "/psp.svg",
+      year: "2005",
     },
     {
       name: "PlayStation Vita",
       slug: "psvita",
-      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
+      image: "/psvita.svg",
+      year: "2012",
     },
   ],
   nintendo: [
+    { name: "Nintendo NES", slug: "nes", image: "/nes.svg", year: "1985" },
     {
-      name: "Nintendo NES",
-      slug: "nes",
-      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
+      name: "Super Nintendo (SNES)",
+      slug: "snes",
+      image: "/snes.svg",
+      year: "1991",
     },
+    { name: "Nintendo 64", slug: "n64", image: "/n64.svg", year: "1996" },
     {
-      name: "Nintendo 64",
-      slug: "n64",
-      image:
-        "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400",
+      name: "Nintendo GameCube",
+      slug: "gamecube",
+      image: "/gamecube.svg",
+      year: "2001",
     },
+    { name: "Nintendo Wii", slug: "wii", image: "/wii.svg", year: "2006" },
     {
       name: "Nintendo Switch",
       slug: "switch",
-      image:
-        "https://images.unsplash.com/photo-1578303512597-81e6cc155b12?w=400",
+      image: "/switch.svg",
+      year: "2017",
     },
   ],
   xbox: [
-    {
-      name: "Xbox",
-      slug: "xbox",
-      image:
-        "https://images.unsplash.com/photo-1605901309584-818e2596098f?w=400",
-    },
+    { name: "Xbox", slug: "xbox", image: "/xbox.svg" },
+    { name: "Xbox 360", slug: "xbox360", image: "/xbox360.svg" },
+    { name: "Xbox One", slug: "xboxone", image: "/xboxone.svg" },
   ],
-  sega: [
-    {
-      name: "Sega Genesis",
-      slug: "sega-genesis",
-      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
-    },
-  ],
+  sega: [{ name: "Sega Genesis", slug: "sega-genesis", image: "/sega.svg" }],
   "chinese consoles": [
+    { name: "Anbernic", slug: "anbernic", image: "/anbernic.svg" },
+    { name: "Miyoo Mini", slug: "miyoo-mini", image: "/miyoo.svg" },
+    { name: "Powkiddy", slug: "powkiddy", image: "/powkiddy.svg" },
+    { name: "Retroid Pocket", slug: "retroid-pocket", image: "/retroid.svg" },
+  ],
+  bundles: [
     {
-      name: "Anbernic",
-      slug: "anbernic",
-      image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
+      name: "Console + Games Bundle",
+      slug: "console-games-bundle",
+      image: "/bundle.svg",
+    },
+    { name: "Starter Pack", slug: "starter-pack", image: "/starter.svg" },
+    {
+      name: "Collector's Bundle",
+      slug: "collectors-bundle",
+      image: "/collector.svg",
     },
   ],
-  bundles: [],
-  "atari & more": [],
+  "atari & more": [
+    { name: "Atari 2600", slug: "atari-2600", image: "/atari.svg" },
+    { name: "ColecoVision", slug: "colecovision", image: "/coleco.svg" },
+    { name: "TurboGrafx-16", slug: "turbografx-16", image: "/turbografx.svg" },
+  ],
 };
 
-const productTypes = [
-  {
-    name: "თამაშები",
-    slug: "games",
-    image: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=400",
-  },
-  {
-    name: "კონსოლები",
-    slug: "consoles",
-    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400",
-  },
-  {
-    name: "აქსესუარები",
-    slug: "accessories",
-    image: "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?w=400",
-  },
-  {
-    name: "კომპლექტები",
-    slug: "bundle",
-    image: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400",
-  },
-];
+const bannerColors: Record<string, string> = {
+  nintendo: "#c41e3a",
+  playstation: "#003791",
+  xbox: "#107c10",
+  sega: "#1b365d",
+  bundles: "#b45309",
+  "atari & more": "#6b21a8",
+  "chinese consoles": "#334155",
+};
+
+const PAGE_SIZE = 8;
+
+function normalize(value?: string) {
+  return decodeURIComponent(value || "")
+    .toLowerCase()
+    .trim();
+}
+
+function matchesSub(
+  product: IProduct,
+  sub?: string,
+  cards: IPlatformCard[] = [],
+) {
+  if (!sub) return true;
+  const s = normalize(sub);
+  const card = cards.find(
+    (c) => normalize(c.slug) === s || normalize(c.name) === s,
+  );
+  const aliases = [s, card?.name, card?.slug]
+    .filter(Boolean)
+    .map((v) => normalize(String(v)));
+  const hay =
+    `${product.title} ${product.platform || ""} ${product.description}`.toLowerCase();
+  return aliases.some((alias) => hay.includes(alias));
+}
 
 export default function CategoryView() {
   const { platform, sub } = useParams<{ platform: string; sub?: string }>();
   const navigate = useNavigate();
+  const brand = normalize(platform);
 
   const [products, setProducts] = useState<IProduct[]>([]);
+  const [cards, setCards] = useState<IPlatformCard[]>([]);
+  const [collection, setCollection] = useState<ICollectionPage | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [maxPrice, setMaxPrice] = useState(2000);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     setLoading(true);
-    getProducts()
-      .then((data) => {
+    setVisibleCount(PAGE_SIZE);
+    Promise.all([
+      getProducts(),
+      getPlatformCards(brand).catch(() => [] as IPlatformCard[]),
+      getCollectionPage(brand).catch(() => null),
+    ])
+      .then(([data, platformCards, page]) => {
         setProducts(data);
-        setLoading(false);
+        setCards(platformCards);
+        setCollection(page);
       })
-      .catch((err) => {
-        console.error("Error fetching products:", err);
-        setLoading(false);
-      });
-  }, [platform, sub]);
+      .catch((err) => console.error("Error fetching products:", err))
+      .finally(() => setLoading(false));
+  }, [brand]);
 
-  const currentSubCategories = platform
-    ? subCategoriesMap[platform.toLowerCase()] || []
-    : [];
+  const currentCards: IPlatformCard[] =
+    cards.length > 0
+      ? cards
+      : (fallbackCards[brand] || []).map((item, index) => ({
+          _id: item.slug,
+          brand,
+          name: item.name,
+          slug: item.slug,
+          imageUrl: item.image,
+          year: item.year,
+          order: index,
+        }));
 
-  const filteredProducts = products.filter((p) => {
-    if (platform && p.category?.toLowerCase() !== platform.toLowerCase()) {
+  const catalogProducts = products.filter((p) => !isBannerProduct(p));
+
+  const brandProducts = catalogProducts.filter((p) => {
+    if (!brand) return true;
+    return (
+      normalize(p.category) === brand || normalize(p.category).includes(brand)
+    );
+  });
+
+  const genres = useMemo(() => {
+    const set = new Set<string>();
+    brandProducts.forEach((p) => {
+      if (p.genre) set.add(p.genre);
+    });
+    return Array.from(set);
+  }, [brandProducts]);
+
+  const filteredProducts = brandProducts.filter((p) => {
+    if (!matchesSub(p, sub, currentCards)) return false;
+    const price = Number(p.price) || 0;
+    if (price > maxPrice) return false;
+    if (selectedPlatforms.length) {
+      const hay = `${p.platform || ""} ${p.title}`.toLowerCase();
+      if (!selectedPlatforms.some((item) => hay.includes(item.toLowerCase()))) {
+        return false;
+      }
+    }
+    if (selectedGenres.length && !selectedGenres.includes(p.genre || "")) {
       return false;
     }
     return true;
   });
+
+  const visible = filteredProducts.slice(0, visibleCount);
+  const bannerColor =
+    collection?.bannerColor || bannerColors[brand] || "#7c3aed";
+
+  const toggleValue = (
+    list: string[],
+    value: string,
+    setter: (v: string[]) => void,
+  ) => {
+    setter(
+      list.includes(value) ? list.filter((x) => x !== value) : [...list, value],
+    );
+    setVisibleCount(PAGE_SIZE);
+  };
 
   return (
     <div
@@ -155,370 +226,196 @@ export default function CategoryView() {
         minHeight: "100vh",
         backgroundColor: "var(--bg)",
         color: "var(--text)",
-        paddingBottom: "80px",
-        transition: "all 0.3s ease",
+        paddingBottom: "40px",
       }}
     >
-      {/* უკან დაბრუნების ღილაკი */}
+      {/* სრულად შავი ზოლი, სადაც სურათებზე კურსორის მიტანისას ირთვება გლუვი ნეონური განათება */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "20px 40px",
-          backgroundColor: "var(--bg)",
+          background: "#0b0b0e",
+          padding: "30px 20px",
+          overflowX: "auto",
         }}
       >
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            backgroundColor: "transparent",
-            color: "#a855f7",
-            border: "2px solid #a855f7",
-            padding: "10px 20px",
-            borderRadius: "12px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            letterSpacing: "1px",
-            boxShadow: "0 0 15px rgba(168, 85, 247, 0.25)",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#a855f7";
-            e.currentTarget.style.color = "#ffffff";
-            e.currentTarget.style.boxShadow =
-              "0 0 25px rgba(168, 85, 247, 0.5)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "#a855f7";
-            e.currentTarget.style.boxShadow =
-              "0 0 15px rgba(168, 85, 247, 0.25)";
-          }}
-        >
-          ← მთავარ გვერდზე დაბრუნება
-        </button>
-      </div>
-
-      {/* სრულეკრანიანი რეტრო-ფუტურისტული ბანერი (Hero Banner) */}
-      <div
-        style={{
-          position: "relative",
-          background:
-            "linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(236, 72, 153, 0.12) 50%, rgba(59, 130, 246, 0.1) 100%)",
-          padding: "70px 20px",
-          textAlign: "center",
-          overflow: "hidden",
-          borderBottom: "2px solid rgba(168, 85, 247, 0.3)",
-          boxShadow: "inset 0 0 40px rgba(168, 85, 247, 0.1)",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "-50%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "600px",
-            height: "200px",
-            background:
-              "radial-gradient(circle, rgba(168,85,247,0.3) 0%, rgba(0,0,0,0) 70%)",
-            zIndex: 0,
-            pointerEvents: "none",
-          }}
-        />
-
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <span
-            style={{
-              display: "inline-block",
-              padding: "6px 16px",
-              background: "rgba(168, 85, 247, 0.15)",
-              color: "#a855f7",
-              borderRadius: "20px",
-              fontSize: "0.9rem",
-              fontWeight: "bold",
-              letterSpacing: "2px",
-              marginBottom: "15px",
-              border: "1px solid rgba(168, 85, 247, 0.3)",
-              textTransform: "uppercase",
-            }}
-          >
-            Retro Universe 🎮
-          </span>
-
-          <h1
-            style={{
-              color: "var(--text-h)",
-              marginBottom: "35px",
-              textTransform: "uppercase",
-              fontSize: "3rem",
-              letterSpacing: "4px",
-              fontWeight: "900",
-              textShadow: "0 0 25px rgba(168, 85, 247, 0.4)",
-            }}
-          >
-            {sub ? `${sub} — ${platform}` : platform}
-          </h1>
-        </div>
-
-        {/* ქვეკატეგორიების / ტიპების ბარათები ბანერის შიგნით */}
         <div
           style={{
             display: "flex",
+            gap: 18,
             justifyContent: "center",
-            gap: "24px",
-            flexWrap: "wrap",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            position: "relative",
-            zIndex: 1,
+            minWidth: "fit-content",
           }}
         >
-          {!sub &&
-            currentSubCategories.map((item) => {
-              const isHovered = hoveredCard === item.slug;
-              return (
+          {currentCards.map((item) => {
+            const active =
+              normalize(sub) === normalize(item.slug) ||
+              normalize(sub) === normalize(item.name);
+            return (
+              <div
+                key={item._id || item.slug}
+                onClick={() => navigate(`/category/${platform}/${item.slug}`)}
+                style={{
+                  width: 160,
+                  textAlign: "center",
+                  cursor: "pointer",
+                }}
+              >
                 <div
-                  key={item.slug}
-                  onMouseEnter={() => setHoveredCard(item.slug)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  onClick={() => navigate(`/category/${platform}/${item.slug}`)}
                   style={{
-                    backgroundColor: "var(--bg)",
-                    borderRadius: "16px",
-                    width: "170px",
-                    padding: "16px",
-                    cursor: "pointer",
-                    boxShadow: isHovered
-                      ? "0 15px 35px rgba(168, 85, 247, 0.45), 0 0 20px rgba(236, 72, 153, 0.3)"
-                      : "0 6px 20px rgba(0, 0, 0, 0.12)",
-                    transform: isHovered
-                      ? "translateY(-8px) scale(1.04)"
-                      : "translateY(0)",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    textAlign: "center",
-                    border: isHovered
-                      ? "2px solid #a855f7"
-                      : "1px solid rgba(168, 85, 247, 0.3)",
+                    background: "transparent",
+                    padding: 4,
+                    height: 165,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "visible", // აუცილებელია რომ განათება არ მოიჭრას
                   }}
                 >
                   <img
-                    src={item.image}
+                    src={item.imageUrl}
                     alt={item.name}
                     style={{
                       width: "100%",
-                      height: "110px",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                      marginBottom: "12px",
+                      height: "100%",
+                      objectFit: "contain",
+                      borderRadius: 12,
+                      opacity: active ? 1 : 0.85,
+                      transform: active ? "scale(1.05)" : "scale(1)",
+                      filter: active
+                        ? `drop-shadow(0 0 12px ${bannerColor}88)`
+                        : "none",
+                      transition:
+                        "transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.1)";
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.filter = `drop-shadow(0 0 18px ${bannerColor})`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = active
+                        ? "scale(1.05)"
+                        : "scale(1)";
+                      e.currentTarget.style.opacity = active ? "1" : "0.85";
+                      e.currentTarget.style.filter = active
+                        ? `drop-shadow(0 0 12px ${bannerColor}88)`
+                        : "none";
                     }}
                   />
-                  <h4
-                    style={{
-                      margin: 0,
-                      fontSize: "0.95rem",
-                      color: "var(--text-h)",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {item.name}
-                  </h4>
                 </div>
-              );
-            })}
-
-          {sub &&
-            productTypes.map((item) => {
-              const isHovered = hoveredCard === item.slug;
-              return (
-                <div
-                  key={item.slug}
-                  onMouseEnter={() => setHoveredCard(item.slug)}
-                  onMouseLeave={() => setHoveredCard(null)}
+                <h4
                   style={{
-                    backgroundColor: "var(--bg)",
-                    borderRadius: "16px",
-                    width: "170px",
-                    padding: "16px",
-                    cursor: "pointer",
-                    boxShadow: isHovered
-                      ? "0 15px 35px rgba(168, 85, 247, 0.45), 0 0 20px rgba(236, 72, 153, 0.3)"
-                      : "0 6px 20px rgba(0, 0, 0, 0.12)",
-                    transform: isHovered
-                      ? "translateY(-8px) scale(1.04)"
-                      : "translateY(0)",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    textAlign: "center",
-                    border: isHovered
-                      ? "2px solid #a855f7"
-                      : "1px solid rgba(168, 85, 247, 0.3)",
+                    margin: "8px 0 0",
+                    color: active ? "#ffffff" : "#94a3b8",
+                    fontSize: "0.85rem",
+                    fontWeight: active ? 700 : 500,
                   }}
                 >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: "110px",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                      marginBottom: "12px",
-                    }}
-                  />
-                  <h4
-                    style={{
-                      margin: 0,
-                      fontSize: "0.95rem",
-                      color: "var(--text-h)",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {item.name}
-                  </h4>
-                </div>
-              );
-            })}
+                  {item.name}
+                </h4>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* 🟢 `.shop-layout` აკავშირებს მარცხენა ფილტრსა და პროდუქტებს გვერდი-გვერდ */}
-      <div className="shop-layout" style={{ marginTop: "40px" }}>
-        {/* მარცხენა ფილტრების პანელი */}
+      <h1
+        style={{
+          textAlign: "center",
+          color: bannerColor,
+          margin: "28px 0 8px",
+          fontSize: "2.2rem",
+        }}
+      >
+        {collection?.title || platform}
+      </h1>
+      {collection?.subtitle && (
+        <p style={{ textAlign: "center", marginBottom: 10 }}>
+          {collection.subtitle}
+        </p>
+      )}
+
+      <div className="shop-layout" style={{ marginTop: "20px" }}>
         <aside className="filter-sidebar">
           <div className="filter-group">
             <div className="filter-title">
-              PRICE <span>⌄</span>
+              ფასი <span>⌄</span>
             </div>
-            <div style={{ padding: "10px 0" }}>
-              <input
-                type="range"
-                min="0"
-                max="1200"
-                defaultValue="1200"
-                style={{ width: "100%", accentColor: "var(--accent)" }}
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "0.85rem",
-                  marginTop: "5px",
-                  color: "var(--text)",
-                }}
-              >
-                <span>$0.00</span>
-                <span>$1,199.97</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="filter-group">
-            <div className="filter-title">
-              PLATFORM <span>⌄</span>
-            </div>
-            <label className="checkbox-label">
-              <input type="checkbox" /> PS1{" "}
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "0.8rem",
-                  color: "var(--text)",
-                }}
-              >
-                60
-              </span>
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" /> PS2{" "}
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "0.8rem",
-                  color: "var(--text)",
-                }}
-              >
-                885
-              </span>
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" /> PS3{" "}
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "0.8rem",
-                  color: "var(--text)",
-                }}
-              >
-                429
-              </span>
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" /> PS4{" "}
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "0.8rem",
-                  color: "var(--text)",
-                }}
-              >
-                239
-              </span>
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" /> PS5{" "}
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "0.8rem",
-                  color: "var(--text)",
-                }}
-              >
-                58
-              </span>
-            </label>
-            <label className="checkbox-label">
-              <input type="checkbox" /> PSP{" "}
-              <span
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "0.8rem",
-                  color: "var(--text)",
-                }}
-              >
-                279
-              </span>
-            </label>
-          </div>
-        </aside>
-
-        {/* პროდუქტების სია (მარჯვენა მხარე) */}
-        <div style={{ flex: 1, padding: "0 20px" }}>
-          <h2
-            style={{
-              color: "var(--text-h)",
-              marginBottom: "30px",
-              fontSize: "1.8rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <span style={{ color: "#a855f7" }}>📂</span> პროდუქტების სია{" "}
-            <span style={{ fontSize: "1.2rem", color: "#a855f7" }}>
-              ({filteredProducts.length})
-            </span>
-          </h2>
-
-          {loading ? (
-            <p
+            <input
+              type="range"
+              min="0"
+              max="2000"
+              value={maxPrice}
+              onChange={(e) => {
+                setMaxPrice(Number(e.target.value));
+                setVisibleCount(PAGE_SIZE);
+              }}
+              style={{ width: "100%", accentColor: "var(--accent)" }}
+            />
+            <div
               style={{
-                textAlign: "center",
-                color: "var(--text)",
-                fontSize: "1.2rem",
-                padding: "40px",
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: "0.85rem",
+                marginTop: 5,
               }}
             >
+              <span>0 ₾</span>
+              <span>{maxPrice} ₾</span>
+            </div>
+          </div>
+
+          {currentCards.length > 0 && (
+            <div className="filter-group">
+              <div className="filter-title">
+                პლატფორმა <span>⌄</span>
+              </div>
+              {currentCards.map((item) => (
+                <label key={item.slug} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={selectedPlatforms.includes(item.name)}
+                    onChange={() =>
+                      toggleValue(
+                        selectedPlatforms,
+                        item.name,
+                        setSelectedPlatforms,
+                      )
+                    }
+                  />
+                  {item.name}
+                </label>
+              ))}
+            </div>
+          )}
+
+          {genres.length > 0 && (
+            <div className="filter-group">
+              <div className="filter-title">
+                ჟანრი <span>⌄</span>
+              </div>
+              {genres.map((genre) => (
+                <label key={genre} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={selectedGenres.includes(genre)}
+                    onChange={() =>
+                      toggleValue(selectedGenres, genre, setSelectedGenres)
+                    }
+                  />
+                  {genre}
+                </label>
+              ))}
+            </div>
+          )}
+        </aside>
+
+        <div style={{ flex: 1, padding: "0 12px" }}>
+          <p style={{ marginBottom: 18, color: "var(--text)" }}>
+            ნაპოვნია {filteredProducts.length} პროდუქტი
+          </p>
+
+          {loading ? (
+            <p style={{ textAlign: "center", padding: 40 }}>
               იტვირთება რეტრო სამყარო... ✨
             </p>
           ) : filteredProducts.length === 0 ? (
@@ -531,119 +428,64 @@ export default function CategoryView() {
                 border: "1px dashed rgba(168, 85, 247, 0.3)",
               }}
             >
-              <p
-                style={{
-                  color: "var(--text)",
-                  fontSize: "1.2rem",
-                  fontWeight: "500",
-                }}
-              >
-                ამ კატეგორიაში პროდუქტები ჯერ არ მოიძებნა.
-              </p>
+              <p>ამ კატეგორიაში პროდუქტები ჯერ არ მოიძებნა.</p>
             </div>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                gap: "28px",
-              }}
-            >
-              {filteredProducts.map((product) => (
-                <div
-                  key={product._id}
-                  onClick={() => navigate(`/product/${product._id}`)}
-                  style={{
-                    backgroundColor: "var(--bg)",
-                    borderRadius: "18px",
-                    padding: "16px",
-                    cursor: "pointer",
-                    border: "1px solid rgba(168, 85, 247, 0.2)",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-                    transition: "all 0.3s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-8px)";
-                    e.currentTarget.style.boxShadow =
-                      "0 15px 35px rgba(168, 85, 247, 0.35), 0 0 20px rgba(236, 72, 153, 0.2)";
-                    e.currentTarget.style.borderColor = "#a855f7";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow =
-                      "0 4px 15px rgba(0,0,0,0.08)";
-                    e.currentTarget.style.borderColor =
-                      "rgba(168, 85, 247, 0.2)";
-                  }}
-                >
-                  <img
-                    src={product.imageUrl}
-                    alt={product.title}
+            <>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+                  gap: 22,
+                }}
+              >
+                {visible.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </div>
+              {visibleCount < filteredProducts.length && (
+                <div style={{ textAlign: "center", marginTop: 28 }}>
+                  <button
+                    className="load-more-btn"
+                    onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
                     style={{
-                      width: "100%",
-                      height: "190px",
-                      objectFit: "cover",
-                      borderRadius: "12px",
-                    }}
-                  />
-                  <h3
-                    style={{
-                      fontSize: "1.1rem",
-                      margin: "14px 0 10px",
-                      color: "var(--text-h)",
-                      fontWeight: "bold",
+                      background: "transparent",
+                      color: "#2563eb",
+                      border: "2px solid #2563eb",
+                      padding: "10px 28px",
+                      borderRadius: 24,
+                      fontWeight: 800,
+                      cursor: "pointer",
                     }}
                   >
-                    {product.title}
-                  </h3>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#a855f7",
-                        fontWeight: "800",
-                        fontSize: "1.35rem",
-                        textShadow: "0 0 10px rgba(168, 85, 247, 0.3)",
-                      }}
-                    >
-                      {product.price} ₾
-                    </span>
-                    <button
-                      style={{
-                        background:
-                          "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-                        color: "#ffffff",
-                        border: "none",
-                        padding: "8px 16px",
-                        borderRadius: "10px",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                        boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "0.95";
-                        e.currentTarget.style.transform = "scale(1.05)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.transform = "scale(1)";
-                      }}
-                    >
-                      დეტალები
-                    </button>
-                  </div>
+                    მეტის ნახვა
+                  </button>
                 </div>
-              ))}
+              )}
+            </>
+          )}
+
+          {collection?.description && (
+            <div style={{ marginTop: 48, maxWidth: 800 }}>
+              <h2 style={{ color: "var(--text-h)", textTransform: "none" }}>
+                {collection.title} — კონსოლები და თამაშები
+              </h2>
+              <p style={{ lineHeight: 1.7 }}>{collection.description}</p>
             </div>
           )}
         </div>
       </div>
+
+      <ReviewsSection />
+      <BestSellersSlider
+        products={catalogProducts}
+        loading={loading}
+        searchQuery=""
+        selectedCategory=""
+      />
+      <FaqSection />
+      <RecentlyViewed />
+      <NewsletterSignup />
     </div>
   );
 }

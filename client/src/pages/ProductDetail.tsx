@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getProductById } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import type { IProduct } from "../types";
+import { trackRecentlyViewed } from "../utils/recentlyViewed";
+import { getSalePrice } from "../utils/pricing";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +19,7 @@ export default function ProductDetail() {
     getProductById(id)
       .then((data) => {
         setProduct(data);
+        trackRecentlyViewed(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -158,16 +161,53 @@ export default function ProductDetail() {
             >
               {product.description}
             </p>
-            <div
-              style={{
-                fontSize: "1.8rem",
-                fontWeight: "bold",
-                color: "#a855f7",
-                marginBottom: "30px",
-              }}
-            >
-              {product.price} ₾
-            </div>
+            {(() => {
+              const sale = getSalePrice(product);
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: "30px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "1.8rem",
+                      fontWeight: "bold",
+                      color: "#a855f7",
+                    }}
+                  >
+                    {sale.final} ₾
+                  </div>
+                  {sale.discount > 0 && (
+                    <>
+                      <span
+                        style={{
+                          textDecoration: "line-through",
+                          color: "var(--text)",
+                        }}
+                      >
+                        {sale.original} ₾
+                      </span>
+                      <span
+                        style={{
+                          background: "#2563eb",
+                          color: "#fff",
+                          borderRadius: 8,
+                          padding: "2px 8px",
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                        }}
+                      >
+                        -{sale.discount}%
+                      </span>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
 
             <button
               style={{

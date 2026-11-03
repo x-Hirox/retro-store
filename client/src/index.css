@@ -532,3 +532,14 @@ body.dark div[style*="background-color: var(--code-bg)"]:hover {
   height: 16px;
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .shop-layout {
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .filter-sidebar {
+    width: 100%;
+  }
+}

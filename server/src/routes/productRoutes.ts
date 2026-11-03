@@ -58,7 +58,19 @@ router.get("/:id", async (req: Request, res: Response) => {
 // ახალი პროდუქტის დამატება (POST)
 router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
   try {
-    const { title, description, price, category, imageUrl, stock } = req.body;
+    const {
+      title,
+      description,
+      price,
+      category,
+      imageUrl,
+      stock,
+      discount,
+      isHeroBanner,
+      platform,
+      genre,
+      isBestSeller,
+    } = req.body;
 
     const newProduct = new Product({
       title,
@@ -67,6 +79,11 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       category,
       imageUrl,
       stock,
+      discount: discount || 0,
+      isHeroBanner: !!isHeroBanner,
+      platform: platform || "",
+      genre: genre || "",
+      isBestSeller: !!isBestSeller,
     });
 
     const savedProduct = await newProduct.save();

@@ -15,6 +15,8 @@ import Header from "./components/Header";
 import OrderSuccess from "./pages/OrderSuccess";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
+import ChatWidget from "./components/ChatWidget";
+import SiteFooter from "./components/SiteFooter";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -173,6 +175,8 @@ export default function App() {
             <Route path="/order-success/:id" element={<OrderSuccess />} />
           </Routes>
         </div>
+        <SiteFooter />
+        <ChatWidget />
       </div>
     </Router>
   );

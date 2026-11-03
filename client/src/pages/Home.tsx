@@ -9,6 +9,10 @@ import BestSellersSlider from "../components/BestSellersSlider";
 import BrandsSection from "../components/BrandsSection";
 import CategoriesSection from "../components/CategoriesSection";
 import PopularBundlesSlider from "../components/.PopularBundlesSlider"; // 👈 პოპულარული ბუნდლების სლაიდერი
+import ReviewsSection from "../components/ReviewsSection";
+import FaqSection from "../components/FaqSection";
+import RecentlyViewed from "../components/RecentlyViewed";
+import NewsletterSignup from "../components/NewsletterSignup";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -191,6 +195,15 @@ export default function Home() {
             }}
           />
         </div>
+      )}
+
+      {!searchQuery && (
+        <>
+          <ReviewsSection />
+          <FaqSection />
+          <RecentlyViewed />
+          <NewsletterSignup />
+        </>
       )}
     </div>
   );
