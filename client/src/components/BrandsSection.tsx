@@ -6,11 +6,11 @@ export default function BrandsSection() {
   const { t } = useLang();
 
   const brands = [
-    { name: "nintendo", src: "/nintendo.svg", height: "46px" },
-    { name: "playstation", src: "/playstation.svg", height: "40px" },
-    { name: "xbox", src: "/xbox.svg", height: "36px" },
-    { name: "sega", src: "/sega.svg", height: "35px" },
-    { name: "atari", src: "/atari.svg", height: "38px" },
+    { name: "Nintendo", src: "/nintendo.svg", height: "46px" },
+    { name: "PlayStation", src: "/playstation.svg", height: "40px" },
+    { name: "Xbox", src: "/xbox.svg", height: "36px" },
+    { name: "Sega", src: "/sega.svg", height: "35px" },
+    { name: "Atari & More", src: "/atari.svg", height: "38px" },
   ];
 
   return (
@@ -58,7 +58,9 @@ export default function BrandsSection() {
         {brands.map((brand) => (
           <div
             key={brand.name}
-            onClick={() => navigate(`/category/${brand.name}`)}
+            onClick={() =>
+              navigate(`/category/${encodeURIComponent(brand.name)}`)
+            }
             style={{
               cursor: "pointer",
               flexShrink: 0,

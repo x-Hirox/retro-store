@@ -4,7 +4,7 @@ export default function Arcade() {
   return (
     <div className="arcade-page">
       <div className="arcade-wrap">
-        <GameCovers />
+        <GameCovers mode="play" />
       </div>
     </div>
   );

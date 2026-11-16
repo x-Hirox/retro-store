@@ -147,6 +147,9 @@ export default function Header({
             </Link>
             {cat.sub.length > 0 && (
               <div className="dropdown-content">
+                {cat.name === "Atari & More" && (
+                  <Link to="/play">{t("games")}</Link>
+                )}
                 {cat.sub.map((subItem, subIndex) => (
                   <Link
                     key={subIndex}
@@ -159,6 +162,9 @@ export default function Header({
             )}
           </div>
         ))}
+        <Link to="/sell" className="sell-nav-link">
+          {t("sellNav")}
+        </Link>
       </nav>
     </header>
   );

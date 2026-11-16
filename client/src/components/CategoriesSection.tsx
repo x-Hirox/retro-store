@@ -1,195 +1,107 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../i18n/LanguageContext";
+import { getSiteSettings } from "../services/contentService";
 import type { MessageKey } from "../i18n/messages";
+import type { ISiteSettings } from "../types";
+
+const DEFAULTS = {
+  catImageHome: "/images/console-home.png",
+  catImageHand: "/images/handhelds.png",
+  catImageGames: "/images/games.png",
+  catImageAcc: "/images/accessories.png",
+  catImageBundles: "/images/bundles.jpg",
+};
 
 export default function CategoriesSection() {
   const navigate = useNavigate();
   const { t } = useLang();
+  const [settings, setSettings] = useState<Partial<ISiteSettings>>({});
+
+  useEffect(() => {
+    getSiteSettings()
+      .then(setSettings)
+      .catch(() => setSettings({}));
+  }, []);
+
+  const img = (key: keyof typeof DEFAULTS) =>
+    settings[key] || DEFAULTS[key];
 
   const categories: {
     title: MessageKey;
     desc: MessageKey;
     path: string;
     background: string;
-    shadow: string;
-    hoverShadow: string;
-    imagePath: string;
+    imageKey: keyof typeof DEFAULTS;
     gridSpan: string;
+    wide: boolean;
   }[] = [
     {
       title: "catHome",
       desc: "catHomeDesc",
       path: "/category/playstation",
-      // სუფთა, თანაბარი ლურჯი ფონი (მუქი გადასვლების გარეშე)
       background: "#2563eb",
-      shadow: "rgba(37, 99, 235, 0.25)",
-      hoverShadow: "rgba(37, 99, 235, 0.4)",
-      imagePath: "/images/console1.png",
+      imageKey: "catImageHome",
       gridSpan: "span 6",
+      wide: true,
     },
     {
       title: "catHand",
       desc: "catHandDesc",
       path: "/category/nintendo",
-      // სუფთა, თანაბარი იისფერი
       background: "#7c3aed",
-      shadow: "rgba(124, 58, 237, 0.25)",
-      hoverShadow: "rgba(124, 58, 237, 0.4)",
-      imagePath: "/images/console2.png",
+      imageKey: "catImageHand",
       gridSpan: "span 3",
+      wide: false,
     },
     {
       title: "catGames",
       desc: "catGamesDesc",
       path: "/category/sega",
-      // სუფთა, თანაბარი მწვანე
       background: "#059669",
-      shadow: "rgba(5, 150, 105, 0.25)",
-      hoverShadow: "rgba(5, 150, 105, 0.4)",
-      imagePath: "/images/games.png",
+      imageKey: "catImageGames",
       gridSpan: "span 3",
+      wide: false,
     },
     {
       title: "catAcc",
       desc: "catAccDesc",
       path: "/category/accessories",
-      // სუფთა, თანაბარი წითელი
       background: "#dc2626",
-      shadow: "rgba(220, 38, 38, 0.25)",
-      hoverShadow: "rgba(220, 38, 38, 0.4)",
-      imagePath: "/images/accessories.png",
+      imageKey: "catImageAcc",
       gridSpan: "span 4",
+      wide: false,
     },
     {
       title: "catBundles",
       desc: "catBundlesDesc",
       path: "/category/bundles",
-      // სუფთა, თანაბარი ყავისფერი/ოქროსფერი
       background: "#b45309",
-      shadow: "rgba(180, 83, 9, 0.25)",
-      hoverShadow: "rgba(180, 83, 9, 0.4)",
-      imagePath: "/images/bundles.png",
+      imageKey: "catImageBundles",
       gridSpan: "span 8",
+      wide: true,
     },
   ];
 
   return (
-    <div
-      style={{
-        width: "100%",
-        maxWidth: "1400px",
-        margin: "50px auto 0",
-        padding: "0 16px",
-        boxSizing: "border-box",
-      }}
-    >
-      <h2
-        style={{
-          color: "var(--text-h)",
-          textAlign: "center",
-          marginBottom: "40px",
-          fontSize: "clamp(1.25rem, 4vw, 2.2rem)",
-          fontFamily: "'Noto Serif Georgian', serif",
-          fontWeight: "900",
-          letterSpacing: "1.5px",
-        }}
-      >
-        {t("shopByCategory")}
-      </h2>
-
-      {/* 12-სვეტიანი ზუსტი ბადე */}
+    <div className="cats-wrap">
+      <h2 className="section-title cats-title">{t("shopByCategory")}</h2>
       <div className="category-mosaic">
-        {categories.map((cat, index) => {
-          const isWide = index === 0 || index === 4;
-
-          return (
-            <div
-              key={cat.title}
-              className="category-card"
-              onClick={() => navigate(cat.path)}
-              style={{
-                background: cat.background, // სუფთა ფონი ყოველგვარი მუქი ზოლების და გრადიენტების გარეშე
-                borderRadius: "24px",
-                padding: "40px",
-                cursor: "pointer",
-                color: "#fff",
-                minHeight: "260px",
-                position: "relative",
-                overflow: "hidden",
-                boxShadow: `0 10px 25px ${cat.shadow}`,
-                transition: "all 0.3s ease",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gridColumn: cat.gridSpan,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-6px)";
-                e.currentTarget.style.boxShadow = `0 15px 30px ${cat.hoverShadow}`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = `0 10px 25px ${cat.shadow}`;
-              }}
-            >
-              {/* ტექსტური ნაწილი მარცხნივ */}
-              <div
-                className="cat-copy"
-                style={{ zIndex: 2, maxWidth: isWide ? "55%" : "50%" }}
-              >
-                <h3
-                  style={{
-                    fontSize: isWide ? "1.9rem" : "1.5rem",
-                    fontWeight: "900",
-                    marginBottom: "12px",
-                    fontFamily: "'Noto Serif Georgian', serif",
-                    letterSpacing: "0.5px",
-                    lineHeight: "1.2",
-                  }}
-                >
-                  {t(cat.title)}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "0.92rem",
-                    opacity: "0.92",
-                    lineHeight: "1.5",
-                    fontWeight: "500",
-                  }}
-                >
-                  {t(cat.desc)}
-                </p>
-              </div>
-
-              {/* სურათი მარჯვენა მხარეს */}
-              {cat.imagePath && (
-                <div
-                  style={{
-                    zIndex: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <img
-                    src={cat.imagePath}
-                    alt={cat.title}
-                    style={{
-                      maxHeight: isWide ? "180px" : "140px",
-                      maxWidth: isWide ? "260px" : "140px",
-                      objectFit: "contain",
-                      pointerEvents: "none",
-                    }}
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
-                </div>
-              )}
+        {categories.map((cat) => (
+          <button
+            key={cat.title}
+            type="button"
+            className={`category-card ${cat.wide ? "is-wide" : ""}`}
+            onClick={() => navigate(cat.path)}
+            style={{ background: cat.background, gridColumn: cat.gridSpan }}
+          >
+            <div className="cat-copy">
+              <h3>{t(cat.title)}</h3>
+              <p>{t(cat.desc)}</p>
             </div>
-          );
-        })}
+            <img className="cat-art" src={img(cat.imageKey)} alt="" />
+          </button>
+        ))}
       </div>
     </div>
   );

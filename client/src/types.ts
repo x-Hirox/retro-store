@@ -71,6 +71,11 @@ export interface ISiteSettings {
   footerEmail: string;
   footerHours: string;
   footerAddress: string;
+  catImageHome?: string;
+  catImageHand?: string;
+  catImageGames?: string;
+  catImageAcc?: string;
+  catImageBundles?: string;
 }
 
 export interface IChatMessage {

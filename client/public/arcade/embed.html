@@ -2,30 +2,101 @@
 <html lang="ka">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>RetroBit Arcade</title>
     <style>
-      html,
-      body,
-      #player {
+      html, body, #player {
         margin: 0;
         width: 100%;
         height: 100%;
         background: #050508;
         overflow: hidden;
+        touch-action: none;
+      }
+      #player { height: calc(100% - 148px); }
+      #pad {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        height: 148px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px 12px;
+        box-sizing: border-box;
+        background: linear-gradient(transparent, #0b0614 30%);
+        user-select: none;
+        z-index: 20;
+      }
+      .dpad { position: relative; width: 122px; height: 122px; }
+      .btn, .face {
+        position: absolute;
+        width: 42px; height: 42px;
+        border: 0; border-radius: 10px;
+        background: rgba(168, 85, 247, 0.35);
+        color: #fff; font-weight: 800; font-size: 13px;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.15) inset;
+      }
+      .btn.active, .face.active { background: #a855f7; }
+      .u { top: 0; left: 40px; } .d { bottom: 0; left: 40px; }
+      .l { top: 40px; left: 0; } .r { top: 40px; right: 0; }
+      .actions { display: flex; gap: 10px; align-items: center; }
+      .face { position: relative; width: 52px; height: 52px; border-radius: 50%; font-size: 16px; }
+      .meta { display: flex; flex-direction: column; gap: 8px; }
+      .tiny { position: relative; width: auto; height: 34px; padding: 0 12px; border-radius: 999px; font-size: 11px; }
+      @media (min-width: 800px) {
+        #player { height: calc(100% - 160px); }
+        #pad { height: 160px; padding: 10px 28px 16px; }
       }
     </style>
   </head>
   <body>
     <div id="player"></div>
+    <div id="pad">
+      <div class="dpad">
+        <button class="btn u" data-key="ArrowUp">▲</button>
+        <button class="btn d" data-key="ArrowDown">▼</button>
+        <button class="btn l" data-key="ArrowLeft">◀</button>
+        <button class="btn r" data-key="ArrowRight">▶</button>
+      </div>
+      <div class="meta">
+        <button class="btn tiny" data-key="ShiftLeft">SELECT</button>
+        <button class="btn tiny" data-key="Enter">START</button>
+      </div>
+      <div class="actions">
+        <button class="face" data-key="KeyZ">B</button>
+        <button class="face" data-key="KeyX">A</button>
+      </div>
+    </div>
     <script>
       const params = new URLSearchParams(location.search);
       const rom = params.get("rom") || "";
       const core = params.get("core") || "nes";
       const name = params.get("name") || "RetroBit Arcade";
+      const held = new Set();
+
+      function send(code, type) {
+        const ev = new KeyboardEvent(type, { code, key: code.replace("Key",""), bubbles: true });
+        window.dispatchEvent(ev);
+        document.dispatchEvent(ev);
+      }
+      function down(code, el) {
+        if (held.has(code)) return;
+        held.add(code); el.classList.add("active"); send(code, "keydown");
+      }
+      function up(code, el) {
+        if (!held.has(code)) return;
+        held.delete(code); el.classList.remove("active"); send(code, "keyup");
+      }
+      document.querySelectorAll("[data-key]").forEach((el) => {
+        const code = el.getAttribute("data-key");
+        el.addEventListener("pointerdown", (e) => { e.preventDefault(); el.setPointerCapture(e.pointerId); down(code, el); });
+        el.addEventListener("pointerup", (e) => { e.preventDefault(); up(code, el); });
+        el.addEventListener("pointercancel", () => up(code, el));
+        el.addEventListener("lostpointercapture", () => up(code, el));
+      });
+
       if (!rom) {
-        document.body.innerHTML =
-          '<p style="color:#fff;font-family:sans-serif;padding:24px">ROM ვერ მოიძებნა.</p>';
+        document.body.innerHTML = '<p style="color:#fff;font-family:sans-serif;padding:24px">ROM ვერ მოიძებნა.</p>';
       } else {
         window.EJS_player = "#player";
         window.EJS_core = core;
@@ -35,6 +106,16 @@
         window.EJS_startOnLoaded = true;
         window.EJS_color = "#9328e6";
         window.EJS_backgroundColor = "#050508";
+        window.EJS_Buttons = {
+          playPause: true,
+          restart: true,
+          mute: true,
+          settings: true,
+          fullscreen: true,
+          saveState: true,
+          loadState: true,
+          gamepad: true,
+        };
         const script = document.createElement("script");
         script.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
         document.body.appendChild(script);

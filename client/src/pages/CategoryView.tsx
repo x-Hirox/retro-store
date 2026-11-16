@@ -13,6 +13,8 @@ import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
 import BestSellersSlider from "../components/BestSellersSlider";
+import GameCovers from "../components/GameCovers";
+import { brandKey, matchesBrand } from "../utils/brandMatch";
 
 const fallbackCards: Record<
   string,
@@ -53,6 +55,7 @@ const fallbackCards: Record<
       year: "2001",
     },
     { name: "Nintendo Wii", slug: "wii", image: "/wii.svg", year: "2006" },
+    { name: "Nintendo Wii U", slug: "wii-u", image: "/wii.svg", year: "2012" },
     {
       name: "Nintendo Switch",
       slug: "switch",
@@ -131,7 +134,7 @@ function matchesSub(
 export default function CategoryView() {
   const { platform, sub } = useParams<{ platform: string; sub?: string }>();
   const navigate = useNavigate();
-  const brand = normalize(platform);
+  const brand = brandKey(platform);
 
   const [products, setProducts] = useState<IProduct[]>([]);
   const [cards, setCards] = useState<IPlatformCard[]>([]);
@@ -174,12 +177,9 @@ export default function CategoryView() {
 
   const catalogProducts = products.filter((p) => !isBannerProduct(p));
 
-  const brandProducts = catalogProducts.filter((p) => {
-    if (!brand) return true;
-    return (
-      normalize(p.category) === brand || normalize(p.category).includes(brand)
-    );
-  });
+  const brandProducts = catalogProducts.filter((p) =>
+    matchesBrand(p, platform),
+  );
 
   const genres = useMemo(() => {
     const set = new Set<string>();
@@ -229,110 +229,41 @@ export default function CategoryView() {
         paddingBottom: "40px",
       }}
     >
-      {/* სრულად შავი ზოლი, სადაც სურათებზე კურსორის მიტანისას ირთვება გლუვი ნეონური განათება */}
-      <div
-        style={{
-          background: "#0b0b0e",
-          padding: "30px 20px",
-          overflowX: "auto",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: 18,
-            justifyContent: "center",
-            minWidth: "fit-content",
-          }}
-        >
+      <div className="collection-banner" style={{ background: bannerColor }}>
+        <div className="collection-consoles">
           {currentCards.map((item) => {
             const active =
               normalize(sub) === normalize(item.slug) ||
               normalize(sub) === normalize(item.name);
             return (
-              <div
+              <button
                 key={item._id || item.slug}
-                onClick={() => navigate(`/category/${platform}/${item.slug}`)}
-                style={{
-                  width: 160,
-                  textAlign: "center",
-                  cursor: "pointer",
-                }}
+                type="button"
+                className={`collection-console ${active ? "is-active" : ""}`}
+                onClick={() =>
+                  navigate(
+                    `/category/${encodeURIComponent(platform || "")}/${encodeURIComponent(item.slug)}`,
+                  )
+                }
               >
-                <div
-                  style={{
-                    background: "transparent",
-                    padding: 4,
-                    height: 165,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "visible", // აუცილებელია რომ განათება არ მოიჭრას
-                  }}
-                >
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      borderRadius: 12,
-                      opacity: active ? 1 : 0.85,
-                      transform: active ? "scale(1.05)" : "scale(1)",
-                      filter: active
-                        ? `drop-shadow(0 0 12px ${bannerColor}88)`
-                        : "none",
-                      transition:
-                        "transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.1)";
-                      e.currentTarget.style.opacity = "1";
-                      e.currentTarget.style.filter = `drop-shadow(0 0 18px ${bannerColor})`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = active
-                        ? "scale(1.05)"
-                        : "scale(1)";
-                      e.currentTarget.style.opacity = active ? "1" : "0.85";
-                      e.currentTarget.style.filter = active
-                        ? `drop-shadow(0 0 12px ${bannerColor}88)`
-                        : "none";
-                    }}
-                  />
-                </div>
-                <h4
-                  style={{
-                    margin: "8px 0 0",
-                    color: active ? "#ffffff" : "#94a3b8",
-                    fontSize: "0.85rem",
-                    fontWeight: active ? 700 : 500,
-                  }}
-                >
-                  {item.name}
-                </h4>
-              </div>
+                <img src={item.imageUrl} alt={item.name} />
+                <span>{item.name}</span>
+              </button>
             );
           })}
         </div>
       </div>
 
-      <h1
-        style={{
-          textAlign: "center",
-          color: bannerColor,
-          margin: "28px 0 8px",
-          fontSize: "2.2rem",
-        }}
-      >
-        {collection?.title || platform}
+      <h1 className="collection-title" style={{ color: bannerColor }}>
+        {collection?.title || decodeURIComponent(platform || "")}
       </h1>
       {collection?.subtitle && (
         <p style={{ textAlign: "center", marginBottom: 10 }}>
           {collection.subtitle}
         </p>
       )}
+
+      {brand.includes("atari") && <GameCovers mode="play" />}
 
       <div className="shop-layout" style={{ marginTop: "20px" }}>
         <aside className="filter-sidebar">

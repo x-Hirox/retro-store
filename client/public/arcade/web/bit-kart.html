@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Bit Kart</title>
+  <style>
+    html,body{margin:0;height:100%;background:#111;overflow:hidden;touch-action:none;font-family:Tahoma,sans-serif}
+    canvas{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+    #hud{position:fixed;inset:0;pointer-events:none;color:#fff}
+    #lap{position:absolute;top:10px;left:12px;font-size:18px;font-weight:800;text-shadow:0 2px 0 #000}
+    #pos{position:absolute;top:10px;right:12px;font-size:22px;font-weight:800;text-shadow:0 2px 0 #000}
+    #item{position:absolute;top:42px;right:12px;width:42px;height:42px;border:3px solid #fff;background:#222;display:grid;place-items:center;font-size:22px}
+    #pad{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:space-between;padding:0 12px;pointer-events:auto}
+    .pb{width:56px;height:56px;border:0;border-radius:12px;background:rgba(255,255,255,.18);color:#fff;font-weight:800;font-size:20px}
+    .pb.on{background:#a855f7}
+    #start,#over{position:absolute;inset:0;display:grid;place-items:center;pointer-events:auto;background:rgba(0,0,0,.62)}
+    #over{display:none}#over.show{display:grid}#start.hide{display:none}
+    .box{text-align:center;max-width:460px;padding:16px}
+    h1{margin:0 0 8px;color:#fde68a;font-size:34px;letter-spacing:2px}
+    p{opacity:.9;line-height:1.4}
+    button.go{border:0;border-radius:10px;padding:12px 28px;font-weight:800;background:#ef4444;color:#fff;font-size:16px;cursor:pointer}
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="lap">LAP 1/3</div>
+  <div id="pos">1st</div>
+  <div id="item">?</div>
+  <div id="pad">
+    <div>
+      <button class="pb" data-k="l">◀</button>
+      <button class="pb" data-k="r">▶</button>
+    </div>
+    <div>
+      <button class="pb" data-k="b">B</button>
+      <button class="pb" data-k="a">A</button>
+    </div>
+  </div>
+  <div id="start"><div class="box">
+    <h1>BIT KART</h1>
+    <p>SNES Mode-7 სტილის რბოლა. 3 წრე, 4 ქარტი, აითემები. კომპი: ← → ააჩქარე Z, დრიფტი X. ტელეფონი: ◀ ▶ და A.</p>
+    <p>Mario Kart არ არის — ორიგინალი RetroBit თამაშია.</p>
+    <button class="go" id="go">START</button>
+  </div></div>
+  <div id="over"><div class="box">
+    <h1 id="finish">FINISH</h1>
+    <p id="final"></p>
+    <button class="go" id="again">REPLAY</button>
+  </div></div>
+</div>
+<script>
+const C=document.getElementById("c"), ctx=C.getContext("2d");
+const lapEl=document.getElementById("lap"), posEl=document.getElementById("pos"), itemEl=document.getElementById("item");
+let W=400,H=225,TW=1024, track, keys={}, started=false, done=false, camA=0, camX=0, camY=0;
+const karts=[], items=[], shells=[];
+const pal=["#ef4444","#3b82f6","#22c55e","#eab308"];
+function resize(){ C.width=W; C.height=H; }
+function makeTrack(){
+  const t=document.createElement("canvas"); t.width=t.height=TW;
+  const g=t.getContext("2d");
+  g.fillStyle="#166534"; g.fillRect(0,0,TW,TW);
+  g.strokeStyle="#14532d"; g.lineWidth=18;
+  for(let i=0;i<18;i++){g.beginPath();g.moveTo(0,i*60);g.lineTo(TW,i*60);g.stroke();g.beginPath();g.moveTo(i*60,0);g.lineTo(i*60,TW);g.stroke();}
+  g.strokeStyle="#1f2937"; g.lineWidth=118;
+  g.beginPath(); g.ellipse(512,512,340,250,0,0,7); g.stroke();
+  g.strokeStyle="#374151"; g.lineWidth=86;
+  g.beginPath(); g.ellipse(512,512,340,250,0,0,7); g.stroke();
+  g.strokeStyle="#f8fafc"; g.lineWidth=4; g.setLineDash([16,18]);
+  g.beginPath(); g.ellipse(512,512,340,250,0,0,7); g.stroke(); g.setLineDash([]);
+  g.fillStyle="#f8fafc"; g.fillRect(500,230,24,70);
+  g.fillStyle="#ef4444"; g.fillRect(500,230,24,12); g.fillRect(500,254,24,12); g.fillRect(500,278,24,12);
+  return t;
+}
+function angOn(k){return Math.atan2(k.y-512,k.x-512);}
+function reset(){
+  started=true; done=false; items.length=0; shells.length=0;
+  const spawn=[{x:512,y:268,a:-Math.PI/2},{x:538,y:292,a:-Math.PI/2},{x:486,y:292,a:-Math.PI/2},{x:512,y:316,a:-Math.PI/2}];
+  karts.length=0;
+  spawn.forEach((s,i)=>karts.push({...s,s:0,lap:0,prog:0,cpu:i>0,col:pal[i],item:i===0?null:null,boost:0,slip:0,name:["YOU","NANO","PIXEL","BYTE"][i]}));
+  for(let i=0;i<8;i++){const a=i*Math.PI/4; items.push({x:512+Math.cos(a)*340,y:512+Math.sin(a)*250,alive:true,t:0});}
+  document.getElementById("start").classList.add("hide");
+  document.getElementById("over").classList.remove("show");
+}
+function useItem(k){
+  if(!k.item) return;
+  if(k.item==="boost") k.boost=48;
+  if(k.item==="oil") items.push({x:k.x-Math.cos(k.a)*28,y:k.y-Math.sin(k.a)*28,alive:true,oil:true});
+  if(k.item==="shell") shells.push({x:k.x,y:k.y,a:k.a,own:k});
+  k.item=null; if(k===karts[0]) itemEl.textContent="?";
+}
+function stepKart(k){
+  if(k.slip>0){k.slip--; k.a+=0.12; k.s*=0.96; }
+  else if(k.cpu){
+    const want=Math.atan2((512+Math.sin(angOn(k)+0.35)*250)-k.y,(512+Math.cos(angOn(k)+0.35)*340)-k.x);
+    let d=want-k.a; while(d>Math.PI)d-=Math.PI*2; while(d<-Math.PI)d+=Math.PI*2;
+    k.a+=Math.max(-0.045,Math.min(0.045,d));
+    k.s=Math.min(k.s+0.08, 3.1+(k.boost>0?1.6:0));
+    if(k.item && Math.random()<0.01) useItem(k);
+  } else {
+    if(keys.l) k.a-=0.05+(k.s>2?0.01:0);
+    if(keys.r) k.a+=0.05+(k.s>2?0.01:0);
+    if(keys.a) k.s=Math.min(k.s+0.12, 3.4+(k.boost>0?1.8:0));
+    else k.s*=0.985;
+    if(keys.b) k.s*=0.96;
+  }
+  if(k.boost>0){k.boost--; k.s=Math.max(k.s,4.4);}
+  k.x+=Math.cos(k.a)*k.s; k.y+=Math.sin(k.a)*k.s;
+  const dx=k.x-512, dy=k.y-512, rr=Math.hypot(dx/340,dy/250);
+  if(rr<0.78||rr>1.22){ k.s*=0.55; k.x=512+dx*0.99; k.y=512+dy*0.99; }
+  const p=angOn(k); const prev=k.prog; k.prog=(p+Math.PI*2)%(Math.PI*2);
+  if(prev>4.5 && k.prog<1.2) k.lap++;
+  items.forEach(it=>{
+    if(!it.alive) return;
+    if(Math.hypot(it.x-k.x,it.y-k.y)<18){
+      if(it.oil){k.slip=28; it.alive=false;}
+      else if(!k.cpu || !k.item){ k.item=["boost","shell","oil"][Math.floor(Math.random()*3)]; it.alive=false; it.t=180; if(k===karts[0]) itemEl.textContent=k.item==="boost"?"⚡":k.item==="shell"?"◈":"●"; }
+    }
+  });
+  shells.forEach(sh=>{
+    sh.x+=Math.cos(sh.a)*7; sh.y+=Math.sin(sh.a)*7;
+    karts.forEach(o=>{ if(o!==sh.own && Math.hypot(o.x-sh.x,o.y-sh.y)<16){ o.slip=22; o.s*=0.3; sh.dead=1; }});
+  });
+}
+let tdata=null;
+function drawMode7(){
+  if(!tdata) tdata=track.getContext("2d").getImageData(0,0,TW,TW).data;
+  const horizon=Math.floor(H*0.38);
+  const img=ctx.getImageData(0,horizon,W,H-horizon);
+  const data=img.data, fov=140;
+  const sin=Math.sin(camA), cos=Math.cos(camA);
+  for(let sy=1; sy<img.height; sy++){
+    const z=fov/sy*18;
+    for(let sx=0; sx<W; sx++){
+      const px=sx-W/2;
+      const wx=camX+cos*z-sin*px*z*0.018;
+      const wy=camY+sin*z+cos*px*z*0.018;
+      const tx=(wx&1023)|0, ty=(wy&1023)|0;
+      const i=((ty<<10)+tx)<<2, o=((sy*W+sx)<<2);
+      data[o]=tdata[i]; data[o+1]=tdata[i+1]; data[o+2]=tdata[i+2]; data[o+3]=255;
+    }
+  }
+  ctx.putImageData(img,0,horizon);
+}
+function project(x,y){
+  const dx=x-camX, dy=y-camY;
+  const rx=Math.cos(-camA)*dx-Math.sin(-camA)*dy;
+  const ry=Math.sin(-camA)*dx+Math.cos(-camA)*dy;
+  if(ry<8) return null;
+  const s=220/ry;
+  return {x:W/2+rx*s*28, y:H*0.38+s*90, s};
+}
+function loop(){
+  const sky=ctx.createLinearGradient(0,0,0,H*0.38);
+  sky.addColorStop(0,"#7dd3fc"); sky.addColorStop(1,"#fef3c7");
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#fcd34d"; ctx.beginPath(); ctx.arc(W*0.82,H*0.1,28,0,7); ctx.fill();
+  if(started && !done){
+    const p=karts[0];
+    if(keys.item) { useItem(p); keys.item=false; }
+    karts.forEach(stepKart);
+    items.forEach(it=>{ if(!it.alive && it.t>0 && --it.t<=0 && !it.oil){ it.alive=true; }});
+    shells.forEach(s=>{s.life=(s.life||40)-1;});
+    for(let i=shells.length-1;i>=0;i--) if(shells[i].dead||shells[i].life<=0) shells.splice(i,1);
+    camX=p.x-Math.cos(p.a)*42; camY=p.y-Math.sin(p.a)*42; camA=p.a;
+    lapEl.textContent="LAP "+Math.min(3,p.lap+1)+"/3";
+    const order=[...karts].sort((a,b)=> (b.lap-a.lap)||(b.prog-a.prog));
+    const place=order.indexOf(p)+1;
+    posEl.textContent=place+"st".replace("1st","1st").replace("2st","2nd").replace("3st","3rd");
+    posEl.textContent=["1st","2nd","3rd","4th"][place-1];
+    if(p.lap>=3){ done=true; document.getElementById("final").textContent="შენი ადგილი: "+posEl.textContent; document.getElementById("over").classList.add("show"); }
+  }
+  if(started) drawMode7();
+  else { ctx.fillStyle="#14532d"; ctx.fillRect(0,H*0.38,W,H); }
+  if(started){
+    const drawables=[...karts.map(k=>({k,p:project(k.x,k.y)}))];
+    drawables.sort((a,b)=>(a.p?.y||0)-(b.p?.y||0));
+    drawables.forEach(({k,p})=>{
+      if(!p) return;
+      const w=18*p.s, h=14*p.s;
+      ctx.fillStyle="#111"; ctx.fillRect(p.x-w*0.7,p.y,w*0.4,h*0.35); ctx.fillRect(p.x+w*0.3,p.y,w*0.4,h*0.35);
+      ctx.fillStyle=k.col; ctx.fillRect(p.x-w/2,p.y-h,w,h);
+      ctx.fillStyle="#0f172a"; ctx.fillRect(p.x-w*0.22,p.y-h*0.75,w*0.44,h*0.4);
+    });
+    shells.forEach(sh=>{ const p=project(sh.x,sh.y); if(!p) return; ctx.fillStyle="#e2e8f0"; ctx.beginPath(); ctx.arc(p.x,p.y-8,6*p.s,0,7); ctx.fill(); });
+  }
+  requestAnimationFrame(loop);
+}
+track=makeTrack(); resize(); loop();
+addEventListener("resize", resize);
+addEventListener("keydown", e=>{
+  if(e.code==="ArrowLeft"||e.code==="KeyA") keys.l=true;
+  if(e.code==="ArrowRight"||e.code==="KeyD") keys.r=true;
+  if(e.code==="KeyZ"||e.code==="ShiftLeft"||e.code==="ArrowUp") keys.a=true;
+  if(e.code==="KeyX"||e.code==="ArrowDown") keys.b=true;
+  if(e.code==="Space"||e.code==="KeyC") keys.item=true;
+});
+addEventListener("keyup", e=>{
+  if(e.code==="ArrowLeft"||e.code==="KeyA") keys.l=false;
+  if(e.code==="ArrowRight"||e.code==="KeyD") keys.r=false;
+  if(e.code==="KeyZ"||e.code==="ShiftLeft"||e.code==="ArrowUp") keys.a=false;
+  if(e.code==="KeyX"||e.code==="ArrowDown") keys.b=false;
+});
+document.querySelectorAll(".pb").forEach(b=>{
+  const k=b.dataset.k;
+  const set=(on)=>{
+    if(k==="a") keys.a=on;
+    else if(k==="b") keys.item=on;
+    else keys[k]=on;
+    b.classList.toggle("on", on);
+  };
+  b.addEventListener("pointerdown", e=>{ e.preventDefault(); set(true); });
+  b.addEventListener("pointerup", ()=>set(false));
+  b.addEventListener("pointercancel", ()=>set(false));
+});
+document.getElementById("go").onclick=reset;
+document.getElementById("again").onclick=reset;
+</script>
+</body>
+</html>

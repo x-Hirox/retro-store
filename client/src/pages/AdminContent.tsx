@@ -367,6 +367,30 @@ function SettingsAdmin() {
           onChange={(e) => setForm({ ...form, [key]: e.target.value })}
         />
       ))}
+      <h3>კატეგორიების სურათები (მთავარი mosaic)</h3>
+      <p style={{ margin: 0, fontSize: 13, color: "#94a3b8" }}>
+        PNG cutout ატვირთე Cloudinary-ზე — გამჭვირვალე ფონი, კონსოლები მარჯვნივ.
+        ცარიელი რომ დატოვო, ლოკალური სურათი დარჩება.
+      </p>
+      {(
+        [
+          ["catImageHome", "სტაციონარული კონსოლები"],
+          ["catImageHand", "ხელის კონსოლები"],
+          ["catImageGames", "თამაშები (კარტრიჯები)"],
+          ["catImageAcc", "აქსესუარები"],
+          ["catImageBundles", "ბუნდლები"],
+        ] as [keyof ISiteSettings, string][]
+      ).map(([key, label]) => (
+        <div key={key}>
+          <label style={{ fontSize: 13, color: "#cbd5e1" }}>{label}</label>
+          <ImageUrlField
+            required={false}
+            placeholder={`${label} — Cloudinary PNG`}
+            value={String(form[key] || "")}
+            onChange={(imageUrl) => setForm({ ...form, [key]: imageUrl })}
+          />
+        </div>
+      ))}
       <button type="submit" style={{ ...smallBtn("#10b981"), padding: "12px" }}>
         შენახვა
       </button>

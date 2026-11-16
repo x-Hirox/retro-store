@@ -15,6 +15,7 @@ export default function ChatWidget() {
   const [replies, setReplies] = useState<IChatQuickReply[]>([]);
   const [faqs, setFaqs] = useState<IFaq[]>([]);
   const [input, setInput] = useState("");
+  const [visitorEmail, setVisitorEmail] = useState("");
   const [messages, setMessages] = useState<{ from: "bot" | "user"; text: string }[]>(
     [],
   );
@@ -33,13 +34,13 @@ export default function ChatWidget() {
 
   if (location.pathname.startsWith("/admin")) return null;
 
-  const send = async (text: string) => {
+  const send = async (text: string, notify = true) => {
     const trimmed = text.trim();
     if (!trimmed) return;
     setMessages((prev) => [...prev, { from: "user", text: trimmed }]);
     setInput("");
     try {
-      const res = await askChat(trimmed);
+      const res = await askChat(trimmed, undefined, visitorEmail, notify);
       setMessages((prev) => [...prev, { from: "bot", text: res.reply }]);
     } catch {
       setMessages((prev) => [
@@ -117,7 +118,7 @@ export default function ChatWidget() {
             {replies.map((item) => (
               <button
                 key={item._id}
-                onClick={() => send(item.title)}
+                onClick={() => send(item.title, false)}
                 style={{
                   width: "100%",
                   textAlign: "left",
@@ -153,7 +154,7 @@ export default function ChatWidget() {
                 {faqs.map((faq) => (
                   <button
                     key={faq._id}
-                    onClick={() => send(faq.question)}
+                    onClick={() => send(faq.question, false)}
                     style={{
                       width: "100%",
                       textAlign: "left",
@@ -189,6 +190,22 @@ export default function ChatWidget() {
               </div>
             ))}
 
+            <input
+              type="email"
+              value={visitorEmail}
+              onChange={(e) => setVisitorEmail(e.target.value)}
+              placeholder="შენი მეილი (პასუხისთვის)"
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "10px 12px",
+                marginTop: 8,
+                borderRadius: 10,
+                border: "1px solid var(--border)",
+                background: "var(--code-bg)",
+                color: "var(--text-h)",
+              }}
+            />
             <form
               onSubmit={(e) => {
                 e.preventDefault();

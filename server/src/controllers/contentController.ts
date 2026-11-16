@@ -7,6 +7,8 @@ import CollectionPage from "../models/CollectionPage.js";
 import NewsletterSubscriber from "../models/Newsletter.js";
 import SiteSettings from "../models/SiteSettings.js";
 import ChatMessage from "../models/ChatMessage.js";
+import SellQuote from "../models/SellQuote.js";
+import { inboxMail, sendEmail } from "../utils/sendEmail.js";
 
 function crud(Model: any) {
   return {
@@ -175,15 +177,83 @@ export const askChat = async (req: Request, res: Response) => {
         ? best.reply
         : "გმადლობთ შეტყობინებისთვის! გუნდი მალე გიპასუხებთ. ამასობაში შეგიძლია FAQ ან კატეგორიები ნახო.";
 
+    const visitorEmail = String(req.body.email || "").trim();
+    const visitorName = String(req.body.visitorName || "სტუმარი").trim() || "სტუმარი";
+
     await ChatMessage.create({
-      visitorName: req.body.visitorName || "სტუმარი",
-      email: req.body.email || "",
+      visitorName,
+      email: visitorEmail,
       message,
       reply: autoReply,
     });
 
+    if (req.body.notify !== false) {
+      try {
+        await sendEmail({
+          email: inboxMail(),
+          replyTo: visitorEmail || inboxMail(),
+          subject: `RetroBit ჩატი — ${visitorName}`,
+          message: `სტუმარი: ${visitorName}\nმეილი: ${visitorEmail || "არ არის"}\n\n${message}`,
+        });
+      } catch (error) {
+        console.error("Chat email error:", error);
+      }
+    }
+
     res.json({ reply: autoReply });
   } catch {
     res.status(500).json({ message: "ჩატი ამ მომენტში მიუწვდომელია" });
+  }
+};
+
+export const submitSellQuote = async (req: Request, res: Response) => {
+  try {
+    const name = String(req.body.name || "").trim();
+    const phone = String(req.body.phone || "").trim();
+    const items = Array.isArray(req.body.items) ? req.body.items.slice(0, 40) : [];
+    if (!name || !phone || !items.length) {
+      res.status(400).json({ message: "სახელი, ტელეფონი და ერთი ნივთი მაინც საჭიროა." });
+      return;
+    }
+    const quote = await SellQuote.create({
+      name,
+      phone,
+      email: String(req.body.email || "").trim(),
+      city: String(req.body.city || "").trim(),
+      payout: String(req.body.payout || "cash"),
+      comment: String(req.body.comment || "").slice(0, 1000),
+      items: items.map((item: { brand?: string; name?: string; condition?: string; qty?: number }) => ({
+        brand: String(item.brand || "").slice(0, 40),
+        name: String(item.name || "").slice(0, 120),
+        condition: String(item.condition || "used").slice(0, 40),
+        qty: Math.max(1, Number(item.qty) || 1),
+      })),
+    });
+
+    const lines = quote.items
+      .map((item) => `• ${item.brand} — ${item.name} (${item.condition}) x${item.qty}`)
+      .join("\n");
+    try {
+      await sendEmail({
+        email: inboxMail(),
+        replyTo: quote.email || inboxMail(),
+        subject: `RetroBit — გაყიდვის შეთავაზება: ${name}`,
+        message: `${name}\n${phone}\n${quote.email}\n${quote.city}\nგადახდა: ${quote.payout}\n\n${lines}\n\n${quote.comment}`,
+      });
+    } catch (error) {
+      console.error("Sell quote email error:", error);
+    }
+    res.status(201).json({ ok: true, id: quote._id });
+  } catch {
+    res.status(400).json({ message: "შეთავაზება ვერ გაიგზავნა." });
+  }
+};
+
+export const listSellQuotes = async (_req: Request, res: Response) => {
+  try {
+    const items = await SellQuote.find().sort({ createdAt: -1 }).limit(100);
+    res.json(items);
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };

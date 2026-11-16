@@ -5,10 +5,12 @@ export default function ImageUrlField({
   value,
   onChange,
   placeholder = "სურათის Cloudinary ლინკი",
+  required = true,
 }: {
   value: string;
   onChange: (url: string) => void;
   placeholder?: string;
+  required?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   const [hint, setHint] = useState("");
@@ -40,7 +42,7 @@ export default function ImageUrlField({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        required
+        required={required}
       />
       <label className="image-file-btn">
         {busy ? "იტვირთება..." : "ფაილის არჩევა"}

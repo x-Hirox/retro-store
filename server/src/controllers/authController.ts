@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { sendEmail } from "../utils/sendEmail.js";
+import { frontendBaseUrl, sendEmail } from "../utils/sendEmail.js";
 import { OAuth2Client } from "google-auth-library";
 import { getJwtSecret, isAdminEmail } from "../utils/security.js";
 import { publicUser, displayName } from "../utils/publicUser.js";
@@ -54,7 +54,10 @@ export const registerUser = async (
     const firstName = clampText(req.body.firstName || req.body.name, 40);
     const lastName = clampText(req.body.lastName, 40);
     const phone = clampText(req.body.phone, 20);
-    const { email, password } = req.body;
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    const { password } = req.body;
     const name = displayName({ firstName, lastName }) || firstName;
 
     if (!email || !validateEmailFormat(email)) {
@@ -97,24 +100,22 @@ export const registerUser = async (
       verificationToken,
     });
 
-    const frontendUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://retrobit.ge"
-        : "http://localhost:5173";
-
-    const verificationLink = `${frontendUrl}/verify-email?token=${verificationToken}&email=${user.email}`;
+    const frontendUrl = frontendBaseUrl(req.headers.origin);
+    const verificationLink = `${frontendUrl}/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(user.email)}`;
 
     await sendEmail({
       email: user.email,
-      subject: "ანგარიშის აქტივაცია - RetroStore",
-      message: `გამარჯობა! მადლობა RetroStore-ზე დარეგისტრირებისთვის.\n\nგთხოვთ გაააქტიუროთ თქვენი ანგარიში შემდეგ ბმულზე გადასვლით:\n\n${verificationLink}\n\nთუ ეს ანგარიში თქვენ არ შეგიქმნიათ, უბრალოდ უგულებელყავით ეს წერილი.`,
+      subject: "ანგარიშის აქტივაცია - RetroBit",
+      message: `გამარჯობა! მადლობა RetroBit-ზე დარეგისტრირებისთვის.\n\nგაააქტიურე ანგარიში ამ ბმულით:\n\n${verificationLink}\n\nთუ ეს ანგარიში შენ არ შეგიქმნია, უგულებელყავი ეს წერილი.`,
+      html: `<p>გამარჯობა!</p><p>მადლობა RetroBit-ზე დარეგისტრირებისთვის.</p><p><a href="${verificationLink}">ანგარიშის აქტივაცია</a></p><p>თუ ღილაკი არ იხსნება, გახსენი ეს ბმული:<br>${verificationLink}</p>`,
     });
 
     res.status(201).json({
       message:
         "რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ თქვენი ელ-ფოსტა ანგარიშის გასააქტიურებლად. ✉️",
     });
-  } catch {
+  } catch (error) {
+    console.error("Register error:", error);
     res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
@@ -125,7 +126,10 @@ export const verifyEmail = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { token, email } = req.body;
+    const token = String(req.body.token || "");
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
 
     if (!token || !email) {
       res.status(400).json({ message: "არასწორი მოთხოვნა." });
@@ -157,7 +161,10 @@ export const verifyEmail = async (
 // C. შესვლა სისტემაში (Login)
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    const { password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -331,33 +338,36 @@ export const forgotPassword = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { email } = req.body;
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    if (!email || !validateEmailFormat(email)) {
+      res.status(400).json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტა." });
+      return;
+    }
+
     const user = await User.findOne({ email });
 
     if (user) {
       const resetToken = crypto.randomBytes(32).toString("hex");
-
       user.resetPasswordToken = resetToken;
       user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
       await user.save();
 
-      const frontendUrl =
-        process.env.NODE_ENV === "production"
-          ? "https://retrobit.ge"
-          : "http://localhost:5173";
-
-      const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${user.email}`;
+      const frontendUrl = frontendBaseUrl(req.headers.origin);
+      const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(user.email)}`;
 
       await sendEmail({
         email: user.email,
-        subject: "პაროლის აღდგენა - RetroStore",
-        message: `გამარჯობა! მოთხოვნილია პაროლის აღდგენა. გადადი შემდეგ ბმულზე (ლინკი ძალაშია 15 წუთი):\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უბრალოდ იგნორირება გაუკეთე ამ წერილს.`,
+        subject: "პაროლის აღდგენა - RetroBit",
+        message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 15 წუთი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
+        html: `<p>გამარჯობა!</p><p>მოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 15 წუთი.</p><p><a href="${resetLink}" style="display:inline-block;background:#2563eb;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">პაროლის აღდგენა</a></p><p>ან გახსენი ეს ბმული:<br>${resetLink}</p>`,
       });
     }
 
     res.status(200).json({
       message:
-        "თუ აღნიშნული ელ-ფოსტა რეგისტრირებულია, აღდგენის ინსტრუქცია გამოგზავნილია. ✉️",
+        "თუ ეს ელ-ფოსტა რეგისტრირებულია, აღდგენის ლინკი გამოგიგზავნე. შეამოწმე Inbox და Spam. ✉️",
     });
   } catch (error) {
     console.error("Email send error:", error);
@@ -373,7 +383,11 @@ export const resetPassword = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { token, email, newPassword } = req.body;
+    const token = String(req.body.token || "");
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    const { newPassword } = req.body;
 
     const passwordError = validatePasswordBackend(newPassword);
     if (passwordError) {

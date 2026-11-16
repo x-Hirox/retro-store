@@ -37,8 +37,18 @@ export const getSiteSettings = async (): Promise<ISiteSettings> =>
 export const subscribeNewsletter = async (email: string) =>
   (await API.post("/content/newsletter", { email })).data;
 
-export const askChat = async (message: string, visitorName?: string) =>
-  (await API.post("/content/chat/ask", { message, visitorName })).data as {
+export const askChat = async (
+  message: string,
+  visitorName?: string,
+  email?: string,
+  notify?: boolean,
+) =>
+  (await API.post("/content/chat/ask", {
+    message,
+    visitorName,
+    email,
+    notify,
+  })).data as {
     reply: string;
   };
 

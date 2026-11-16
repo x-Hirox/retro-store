@@ -20,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ChatWidget from "./components/ChatWidget";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
+import Sell from "./pages/Sell";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -139,6 +140,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/play" element={<Arcade />} />
+            <Route path="/sell" element={<Sell />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route

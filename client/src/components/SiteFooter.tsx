@@ -18,59 +18,81 @@ export default function SiteFooter() {
   if (location.pathname.startsWith("/admin")) return null;
 
   return (
-    <footer
-      style={{
-        background: "linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%)",
-        color: "#fff",
-        padding: "50px 20px 24px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 28,
-        }}
-      >
+    <footer className="site-footer">
+      <div className="footer-grid">
         <div>
-          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>{t("collections")}</h4>
-          <FooterLink to="/category/nintendo">Nintendo</FooterLink>
-          <FooterLink to="/category/playstation">PlayStation</FooterLink>
-          <FooterLink to="/category/sega">Sega</FooterLink>
-          <FooterLink to="/category/xbox">Xbox</FooterLink>
+          <h4>{t("collections")}</h4>
+          <FooterLink to="/category/Nintendo">Nintendo</FooterLink>
+          <FooterLink to="/category/PlayStation">PlayStation</FooterLink>
+          <FooterLink to="/category/Sega">Sega</FooterLink>
+          <FooterLink to="/category/Xbox">Xbox</FooterLink>
+          <FooterLink to="/category/Atari%20%26%20More">Atari & More</FooterLink>
         </div>
         <div>
-          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>{t("start")}</h4>
+          <h4>{t("start")}</h4>
           <FooterLink to="/">{t("home")}</FooterLink>
           <FooterLink to="/play">{t("games")}</FooterLink>
-          <FooterLink to="/category/bundles">{t("bundles")}</FooterLink>
+          <FooterLink to="/sell">{t("sellNav")}</FooterLink>
+          <FooterLink to="/category/Bundles">{t("bundles")}</FooterLink>
+          <FooterLink to="/login">{t("login")}</FooterLink>
         </div>
         <div>
-          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>{t("contact")}</h4>
-          <p style={{ margin: "0 0 8px" }}>
-            {settings?.footerPhone || "+995 555 00 00 00"}
+          <h4>პოლიტიკა</h4>
+          <FooterLink to="/">{t("home")}</FooterLink>
+          <FooterLink to="/profile">{t("profile")}</FooterLink>
+          <FooterLink to="/cart">{t("cart")}</FooterLink>
+        </div>
+        <div>
+          <h4>დახმარება</h4>
+          <FooterLink to="/profile">{t("myOrders")}</FooterLink>
+          <FooterLink to="/checkout">შეკვეთა</FooterLink>
+          <FooterLink to="/play">{t("games")}</FooterLink>
+        </div>
+        <div className="footer-contact">
+          <h4>{t("contact")}</h4>
+          <p>
+            <a href={`tel:${(settings?.footerPhone || "+995 595 95 00 39").replace(/\s|-/g, "")}`}>
+              {settings?.footerPhone || "+995 595 95 00 39"}
+            </a>
           </p>
-          <p style={{ margin: "0 0 8px" }}>
-            {settings?.footerEmail || "help@retrobit.ge"}
+          <p>
+            <a href={`mailto:${settings?.footerEmail || "retrobit.support@gmail.com"}`}>
+              {settings?.footerEmail || "retrobit.support@gmail.com"}
+            </a>
           </p>
-          <p style={{ margin: "0 0 8px" }}>
-            {settings?.footerHours || "ორშ–კვი 10:00–22:00"}
-          </p>
-          <p style={{ margin: 0 }}>
-            {settings?.footerAddress || "თბილისი, საქართველო"}
-          </p>
+          <p>{settings?.footerHours || "ორშ–კვი 10:00–22:00"}</p>
+          <p>{settings?.footerAddress || "თბილისი, საქართველო"}</p>
+          <div className="footer-socials" aria-label="სოციალური ქსელები">
+            <a href="https://facebook.com" target="_blank" rel="noreferrer">
+              f
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">
+              ig
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noreferrer">
+              yt
+            </a>
+            <a href="https://tiktok.com" target="_blank" rel="noreferrer">
+              tt
+            </a>
+            <a href="https://x.com" target="_blank" rel="noreferrer">
+              x
+            </a>
+          </div>
         </div>
       </div>
-      <p
-        style={{
-          textAlign: "center",
-          marginTop: 32,
-          opacity: 0.8,
-          fontSize: "0.85rem",
-        }}
-      >
+
+      <div className="footer-pay" aria-label="გადახდის მეთოდები">
+        <span className="pay-badge">VISA</span>
+        <span className="pay-badge">Mastercard</span>
+        <span className="pay-badge">Apple Pay</span>
+        <span className="pay-badge">Google Pay</span>
+        <span className="pay-badge">TBC Pay</span>
+        <span className="pay-badge">BOG Pay</span>
+        <span className="pay-badge">ნაღდი</span>
+      </div>
+
+      <p className="footer-copy">
         © {new Date().getFullYear()} RetroBit. {t("rights")}
       </p>
     </footer>

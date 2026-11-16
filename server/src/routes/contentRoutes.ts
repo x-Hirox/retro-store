@@ -15,6 +15,8 @@ import {
   subscribeNewsletter,
   listSubscribers,
   askChat,
+  submitSellQuote,
+  listSellQuotes,
 } from "../controllers/contentController.js";
 
 const router = Router();
@@ -30,6 +32,7 @@ router.get("/settings", getSettings);
 
 router.post("/newsletter", rateLimit(15 * 60 * 1000, 8), subscribeNewsletter);
 router.post("/chat/ask", rateLimit(5 * 60 * 1000, 20), askChat);
+router.post("/sell-quote", rateLimit(15 * 60 * 1000, 8), submitSellQuote);
 
 router.post("/reviews", protect, adminOnly, reviews.create);
 router.put("/reviews/:id", protect, adminOnly, reviews.update);
@@ -56,5 +59,6 @@ router.delete("/collections/:id", protect, adminOnly, collections.remove);
 
 router.put("/settings", protect, adminOnly, updateSettings);
 router.get("/newsletter", protect, adminOnly, listSubscribers);
+router.get("/sell-quotes", protect, adminOnly, listSellQuotes);
 
 export default router;
