@@ -5,6 +5,7 @@ import {
   getOrders,
   getOrderById,
   updateOrderStatus,
+  cancelMyOrder,
 } from "../controllers/orderController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -22,7 +23,7 @@ router.route("/myorders").get(protect, getMyOrders);
 // კონკრეტული შეკვეთის წამოღება ID-ით
 router.route("/:id").get(protect, getOrderById);
 
-// შეკვეთის სტატუსის განახლება (მხოლოდ ადმინისთვის)
+router.route("/:id/cancel").put(protect, cancelMyOrder);
 router.route("/:id/status").put(protect, adminOnly, updateOrderStatus);
 
 export default router;

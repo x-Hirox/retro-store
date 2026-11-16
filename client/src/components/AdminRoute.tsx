@@ -1,20 +1,39 @@
-import React from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
+import { authService } from "../services/authService";
 
-interface AdminRouteProps {
-  children: React.ReactNode;
+function storedIsAdmin(): boolean {
+  try {
+    const stored = localStorage.getItem("user");
+    const user = stored ? JSON.parse(stored) : null;
+    return Boolean(localStorage.getItem("token") && user?.role === "admin");
+  } catch {
+    return false;
+  }
 }
 
-const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  // ვკითხულობთ მომხმარებლის მონაცემებს localStorage-დან (ან გლობალური კონტექსტიდან)
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+export default function AdminRoute({ children }: { children: ReactNode }) {
+  const [status, setStatus] = useState<"loading" | "admin" | "deny">("loading");
 
-  // ვამოწმებთ არის თუ არა ავტორიზებული და აქვს თუ არა admin როლი
-  const isAdmin = user && user.role === "admin";
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setStatus("deny");
+      return;
+    }
 
-  // თუ ადმინია, ვუშვებთ ადმინ პანელში, თუ არა - ვაბრუნებთ მთავარზე ან ლოგინზე
-  return isAdmin ? <>{children}</> : <Navigate to="/" replace />;
-};
+    authService
+      .me()
+      .then((data) => {
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+        setStatus(data.user?.role === "admin" ? "admin" : "deny");
+      })
+      .catch(() => setStatus(storedIsAdmin() ? "admin" : "deny"));
+  }, []);
 
-export default AdminRoute;
+  if (status === "loading") return null;
+  if (status !== "admin") return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}

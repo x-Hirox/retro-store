@@ -6,6 +6,11 @@ export interface IAuthResponse {
     id: string;
     email: string;
     name?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
     role?: string;
   };
 }
@@ -16,6 +21,9 @@ export const authService = {
     email: string;
     password: string;
     name?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
   }) => {
     const response = await API.post("/auth/register", userData);
     return response.data;
@@ -53,5 +61,21 @@ export const authService = {
   googleAuth: async (data: { credential: string }) => {
     const response = await API.post("/auth/google", data);
     return response.data;
+  },
+
+  me: async () => {
+    const response = await API.get("/auth/me");
+    return response.data as { user: IAuthResponse["user"] };
+  },
+
+  updateProfile: async (data: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    address: string;
+    city: string;
+  }) => {
+    const response = await API.put("/auth/me", data);
+    return response.data as { user: IAuthResponse["user"]; message: string };
   },
 };

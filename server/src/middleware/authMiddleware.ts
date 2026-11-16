@@ -1,5 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { getJwtSecret, isAdminEmail } from "../utils/security.js";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -21,19 +23,14 @@ export const protect = (
   ) {
     try {
       token = req.headers.authorization.split(" ")[1];
-
-      const JWT_SECRET: string = process.env.JWT_SECRET || "supersecretkey";
-
-      // ვეუბნებით ტაიპსკრიპტს, რომ ტოკენი აქ აუცილებლად სტრიქონია
-      const decoded = jwt.verify(token as string, JWT_SECRET) as unknown as {
+      const decoded = jwt.verify(token as string, getJwtSecret()) as {
         id: string;
         role: string;
       };
-
       req.user = decoded;
       next();
       return;
-    } catch (error) {
+    } catch {
       res.status(401).json({
         message: "არასწორი ან ვადაგასული ტოკენი, ავტორიზაცია ვერ მოხერხდა",
       });
@@ -41,20 +38,40 @@ export const protect = (
     }
   }
 
-  if (!token) {
-    res.status(401).json({ message: "ტოკენი არ მოიძებნა, წვდომა აკრძალულია" });
-    return;
-  }
+  res.status(401).json({ message: "ტოკენი არ მოიძებნა, წვდომა აკრძალულია" });
 };
 
-export const adminOnly = (
+export const adminOnly = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
-): void => {
-  if (req.user && req.user.role === "admin") {
-    next();
-  } else {
+): Promise<void> => {
+  try {
+    if (!req.user?.id) {
+      res.status(403).json({
+        message: "წვდომა შეზღუდულია: საჭიროა ადმინისტრატორის უფლებები",
+      });
+      return;
+    }
+
+    const user = await User.findById(req.user.id).select("email role");
+    if (
+      user &&
+      (user.role === "admin" || isAdminEmail(user.email))
+    ) {
+      if (user.role !== "admin") {
+        user.role = "admin";
+        await user.save();
+      }
+      req.user.role = "admin";
+      next();
+      return;
+    }
+
+    res.status(403).json({
+      message: "წვდომა შეზღუდულია: საჭიროა ადმინისტრატორის უფლებები",
+    });
+  } catch {
     res.status(403).json({
       message: "წვდომა შეზღუდულია: საჭიროა ადმინისტრატორის უფლებები",
     });

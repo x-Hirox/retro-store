@@ -24,7 +24,7 @@ function crud(Model: any) {
         const item = await Model.create(req.body);
         res.status(201).json(item);
       } catch (error) {
-        res.status(400).json({ message: "არასწორი მონაცემები", error });
+        res.status(400).json({ message: "არასწორი მონაცემები" });
       }
     },
     update: async (req: Request, res: Response) => {
@@ -143,7 +143,7 @@ function scoreMatch(text: string, query: string) {
 
 export const askChat = async (req: Request, res: Response) => {
   try {
-    const message = String(req.body.message || "").trim();
+    const message = String(req.body.message || "").trim().slice(0, 400);
     if (!message) {
       return res.status(400).json({ message: "შეტყობინება ცარიელია" });
     }

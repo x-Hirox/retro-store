@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import API from "../services/api"; // 🟢 ვიყენებთ უკვე გამართულ API ინსტანსს
+import API from "../services/api";
+import { authService } from "../services/authService";
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
@@ -20,6 +21,25 @@ export default function Checkout() {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+
+  useEffect(() => {
+    authService
+      .me()
+      .then(({ user }) => {
+        setFormData((prev) => ({
+          ...prev,
+          fullName:
+            prev.fullName ||
+            `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+            user.name ||
+            "",
+          phone: prev.phone || user.phone || "",
+          address: prev.address || user.address || "",
+          city: prev.city || user.city || prev.city,
+        }));
+      })
+      .catch(() => undefined);
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -65,6 +85,7 @@ export default function Checkout() {
           quantity: item.quantity,
         })),
         shippingAddress: {
+          fullName: formData.fullName,
           address: formData.address,
           city: finalCity,
           postalCode: "0100",

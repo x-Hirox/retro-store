@@ -5,6 +5,8 @@ import { getSalePrice } from "../utils/pricing";
 export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
   const { original, final, discount } = getSalePrice(product);
+  const sold = (product.stock ?? 0) <= 0;
+  const low = !sold && product.stock <= 3;
 
   return (
     <div
@@ -17,7 +19,8 @@ export default function ProductCard({ product }: { product: IProduct }) {
         display: "flex",
         flexDirection: "column",
         transition: "all 0.3s ease",
-        cursor: "pointer",
+        cursor: sold ? "default" : "pointer",
+        opacity: sold ? 0.72 : 1,
         border: "1px solid var(--border)",
         padding: "16px",
         position: "relative",
@@ -31,7 +34,9 @@ export default function ProductCard({ product }: { product: IProduct }) {
         e.currentTarget.style.borderColor = "var(--border)";
       }}
     >
-      {discount > 0 && (
+      {sold && <span className="sold-badge">SOLD</span>}
+      {low && <span className="left-badge">დარჩა {product.stock}</span>}
+      {discount > 0 && !sold && (
         <span
           style={{
             position: "absolute",

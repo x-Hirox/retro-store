@@ -1,12 +1,23 @@
 import type { Request, Response } from "express";
+import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { OAuth2Client } from "google-auth-library";
+import { getJwtSecret, isAdminEmail } from "../utils/security.js";
+import { publicUser, displayName } from "../utils/publicUser.js";
+import { clampText } from "../utils/security.js";
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+function googleClient() {
+  return new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+}
+
+function resolveRole(email: string, role?: string): "admin" | "customer" {
+  if (isAdminEmail(email) || role === "admin") return "admin";
+  return "customer";
+}
 
 // 1. დამხმარე ფუნქცია ელ-ფოსტის ფორმატის შესამოწმებლად (Regex)
 const validateEmailFormat = (email: string): boolean => {
@@ -29,11 +40,7 @@ const validatePasswordBackend = (password: string): string | null => {
 
 // 3. დამხმარე ფუნქცია JWT ტოკენის გენერაციისთვის (7 დღიანი სესია)
 const generateToken = (userId: string, role: string) => {
-  return jwt.sign(
-    { id: userId, role: role },
-    process.env.JWT_SECRET || "super_secret_retro_key_123",
-    { expiresIn: "7d" },
-  );
+  return jwt.sign({ id: userId, role }, getJwtSecret(), { expiresIn: "7d" });
 };
 
 // --- CONTROLLERS ---
@@ -44,7 +51,11 @@ export const registerUser = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    const firstName = clampText(req.body.firstName || req.body.name, 40);
+    const lastName = clampText(req.body.lastName, 40);
+    const phone = clampText(req.body.phone, 20);
+    const { email, password } = req.body;
+    const name = displayName({ firstName, lastName }) || firstName;
 
     if (!email || !validateEmailFormat(email)) {
       res
@@ -70,8 +81,16 @@ export const registerUser = async (
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
 
+    if (!firstName) {
+      res.status(400).json({ message: "სახელი აუცილებელია" });
+      return;
+    }
+
     const user = await User.create({
       name,
+      firstName,
+      lastName,
+      phone,
       email,
       password: hashedPassword,
       isVerified: false,
@@ -95,8 +114,8 @@ export const registerUser = async (
       message:
         "რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ თქვენი ელ-ფოსტა ანგარიშის გასააქტიურებლად. ✉️",
     });
-  } catch (error: any) {
-    res.status(500).json({ message: "სერვერის შეცდომა", error: error.message });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
 
@@ -130,8 +149,8 @@ export const verifyEmail = async (
       message:
         "ანგარიში წარმატებით გააქტიურდა! ახლა შეგიძლიათ შეხვიდეთ სისტემაში.",
     });
-  } catch (error: any) {
-    res.status(500).json({ message: "სერვერის შეცდომა", error: error.message });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
 
@@ -160,20 +179,21 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = generateToken(user._id.toString(), (user as any).role);
+    const role = resolveRole(user.email, user.role);
+    if (user.role !== role) {
+      user.role = role;
+      await user.save();
+    }
+
+    const token = generateToken(user._id.toString(), role);
 
     res.status(200).json({
       message: "წარმატებული ავტორიზაცია",
       token,
-      user: {
-        id: user._id,
-        name: (user as any).name,
-        email: user.email,
-        role: (user as any).role,
-      },
+      user: publicUser(user),
     });
-  } catch (error: any) {
-    res.status(500).json({ message: "სერვერის შეცდომა", error: error.message });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
 
@@ -190,10 +210,14 @@ export const googleAuth = async (
       return;
     }
 
-    // 🟢 დამატებულია await და as string ტიპიზაცია
-    const ticket = await client.verifyIdToken({
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      res.status(500).json({ message: "Google ავტორიზაცია არ არის გამართული." });
+      return;
+    }
+
+    const ticket = await googleClient().verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID as string,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
@@ -202,49 +226,102 @@ export const googleAuth = async (
       return;
     }
 
-    const { email, name } = payload;
+    const { email, name, given_name, family_name } = payload;
+    const firstName = clampText(given_name || name, 40);
+    const lastName = clampText(family_name, 40);
 
     let user = await User.findOne({ email });
+
+    const role = resolveRole(email, user?.role);
 
     if (!user) {
       const salt = await bcrypt.genSalt(10);
       const randomPassword = await bcrypt.hash(
-        Math.random().toString(36).slice(-10),
+        crypto.randomBytes(24).toString("hex"),
         salt,
       );
 
       user = await User.create({
         email,
-        name: name || "Google User",
+        name: displayName({ firstName, lastName }) || name || "Google User",
+        firstName,
+        lastName,
         password: randomPassword,
-        isVerified: true, // Google-ის მეილი უკვე ვერიფიცირებულია
+        isVerified: true,
+        role,
       });
-    } else if (!user.isVerified) {
-      user.isVerified = true;
-      await user.save();
+    } else {
+      let dirty = false;
+      if (!user.isVerified) {
+        user.isVerified = true;
+        dirty = true;
+      }
+      if (user.role !== role) {
+        user.role = role;
+        dirty = true;
+      }
+      if (dirty) await user.save();
     }
 
-    const token = generateToken(
-      user._id.toString(),
-      (user as any).role || "user",
-    );
+    const token = generateToken(user._id.toString(), role);
 
     res.status(200).json({
       message: "წარმატებული ავტორიზაცია Google-ით",
       token,
-      user: {
-        id: user._id,
-        name: (user as any).name,
-        email: user.email,
-        role: (user as any).role || "user",
-      },
+      user: publicUser(user),
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Google Auth Error:", error);
     res.status(500).json({
       message: "სერვერის შეცდომა Google ავტორიზაციისას",
-      error: error.message,
     });
+  }
+};
+
+export const getMe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    const user = await User.findById(userId).select(
+      "name firstName lastName phone address city email role",
+    );
+    if (!user) {
+      res.status(401).json({ message: "მომხმარებელი ვერ მოიძებნა" });
+      return;
+    }
+    const role = resolveRole(user.email, user.role);
+    if (user.role !== role) {
+      user.role = role;
+      await user.save();
+    }
+    res.json({ user: publicUser(user) });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+};
+
+export const updateProfile = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const user = await User.findById(req.user?.id);
+    if (!user) {
+      res.status(401).json({ message: "მომხმარებელი ვერ მოიძებნა" });
+      return;
+    }
+    user.firstName = clampText(req.body.firstName, 40);
+    user.lastName = clampText(req.body.lastName, 40);
+    user.phone = clampText(req.body.phone, 20);
+    user.address = clampText(req.body.address, 120);
+    user.city = clampText(req.body.city, 60);
+    user.name = displayName(user);
+    await user.save();
+    res.json({ message: "პროფილი განახლდა", user: publicUser(user) });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
 
@@ -282,11 +359,10 @@ export const forgotPassword = async (
       message:
         "თუ აღნიშნული ელ-ფოსტა რეგისტრირებულია, აღდგენის ინსტრუქცია გამოგზავნილია. ✉️",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Email send error:", error);
     res.status(500).json({
       message: "სერვერის შეცდომა მეილის გაგზავნისას",
-      error: error.message,
     });
   }
 };
@@ -328,7 +404,7 @@ export const resetPassword = async (
     res.status(200).json({
       message: "პაროლი წარმატებით შეიცვალა! ახლა შეგიძლია შეხვიდე სისტემაში.",
     });
-  } catch (error: any) {
-    res.status(500).json({ message: "სერვერის შეცდომა", error: error.message });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };

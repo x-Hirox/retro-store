@@ -13,7 +13,7 @@ import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
-import { useLang } from "../i18n/LanguageContext";
+import GameCovers from "../components/GameCovers";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -22,7 +22,6 @@ export default function Home() {
   const selectedCategory = searchParams.get("category") || "";
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
   const navigate = useNavigate();
-  const { t } = useLang();
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -63,6 +62,8 @@ export default function Home() {
       {/* 1. მთავარი ბანერი */}
       <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
 
+      {!searchQuery && <GameCovers />}
+
       {/* 2. ბესტსელერები */}
       <div style={{ paddingTop: "25px", overflow: "visible" }}>
         <BestSellersSlider
@@ -72,72 +73,6 @@ export default function Home() {
           selectedCategory={selectedCategory}
         />
       </div>
-
-      {!searchQuery && (
-        <div
-          style={{
-            maxWidth: "1200px",
-            margin: "36px auto 0",
-            padding: "0 20px",
-          }}
-        >
-          <div
-            onClick={() => navigate("/play")}
-            style={{
-              cursor: "pointer",
-              borderRadius: 18,
-              padding: "28px 32px",
-              background:
-                "linear-gradient(120deg, #3b0764 0%, #0f172a 55%, #831843 100%)",
-              color: "#fff",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 20,
-              flexWrap: "wrap",
-              border: "1px solid rgba(192,132,252,0.4)",
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  margin: 0,
-                  fontFamily: "var(--pixel)",
-                  fontSize: "0.65rem",
-                  letterSpacing: "2px",
-                  opacity: 0.85,
-                }}
-              >
-                RETROBIT ARCADE
-              </p>
-              <h3
-                style={{
-                  margin: "10px 0 8px",
-                  fontFamily: "var(--heading)",
-                  fontSize: "clamp(1.15rem, 4vw, 1.6rem)",
-                }}
-              >
-                {t("arcadeHomeTitle")}
-              </h3>
-              <p style={{ margin: 0, opacity: 0.9 }}>
-                {t("arcadeHomeText")}
-              </p>
-            </div>
-            <span
-              style={{
-                background: "#fff",
-                color: "#3b0764",
-                fontWeight: 800,
-                padding: "12px 18px",
-                borderRadius: 12,
-                fontFamily: "var(--heading)",
-              }}
-            >
-              {t("playCta")}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* 3. პოპულარული ბრენდები */}
       {!searchQuery && <BrandsSection />}

@@ -102,14 +102,20 @@ export default function Header({
           </Link>
 
           {token ? (
-            <button
-              type="button"
-              onClick={onLogout}
-              className="neon-btn icon-btn"
-              title={t("logout")}
-            >
-              🚪
-            </button>
+            <>
+              <Link to="/profile" className="neon-btn icon-btn" title={t("profile")}>
+                👤
+                <span className="btn-label">{t("profile")}</span>
+              </Link>
+              <button
+                type="button"
+                onClick={onLogout}
+                className="neon-btn icon-btn"
+                title={t("logout")}
+              >
+                🚪
+              </button>
+            </>
           ) : (
             <>
               <Link to="/login" className="neon-btn icon-btn" title={t("login")}>

@@ -2,6 +2,11 @@ import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
   name?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
   email: string;
   password: string;
   role: "customer" | "admin";
@@ -19,6 +24,11 @@ const userSchema = new Schema<IUser>(
       type: String,
       trim: true,
     },
+    firstName: { type: String, trim: true, default: "" },
+    lastName: { type: String, trim: true, default: "" },
+    phone: { type: String, trim: true, default: "" },
+    address: { type: String, trim: true, default: "" },
+    city: { type: String, trim: true, default: "" },
     email: {
       type: String,
       required: [true, "მეილი აუცილებელია"],

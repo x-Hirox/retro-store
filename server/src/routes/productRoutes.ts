@@ -1,7 +1,8 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import Product from "../models/Product.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js"; // შემოვიტანეთ ჩვენი მიდლვარები
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { escapeRegex } from "../utils/security.js";
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.get("/", async (req: Request, res: Response) => {
 // პროდუქტების ძებნა (SEARCH) - ღიაა ყველასთვის
 router.get("/search", async (req: Request, res: Response) => {
   try {
-    const query = req.query.q as string;
+    const query = escapeRegex(String(req.query.q || "").slice(0, 80));
     if (!query) {
       return res.json([]);
     }
@@ -29,7 +30,7 @@ router.get("/search", async (req: Request, res: Response) => {
         { title: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" } },
       ],
-    });
+    }).limit(40);
     res.json(products);
   } catch (error) {
     console.error("შეცდომა ძებნისას:", error);
@@ -98,9 +99,34 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
 // პროდუქტის განახლება / რედაქტირება (PUT)
 router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
   try {
+    const {
+      title,
+      description,
+      price,
+      category,
+      imageUrl,
+      stock,
+      discount,
+      isHeroBanner,
+      platform,
+      genre,
+      isBestSeller,
+    } = req.body;
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      {
+        title,
+        description,
+        price,
+        category,
+        imageUrl,
+        stock,
+        discount: discount || 0,
+        isHeroBanner: !!isHeroBanner,
+        platform: platform || "",
+        genre: genre || "",
+        isBestSeller: !!isBestSeller,
+      },
       { new: true, runValidators: true },
     );
     if (!updatedProduct) {

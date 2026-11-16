@@ -4,6 +4,9 @@ import mongoose, { Schema, Document } from "mongoose";
 interface IOrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
+  title?: string;
+  price?: number;
+  imageUrl?: string;
 }
 
 // მთავარი ინტერფეისი შეკვეთისთვის
@@ -11,6 +14,7 @@ export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   orderItems: IOrderItem[];
   shippingAddress: {
+    fullName?: string;
     address: string;
     city: string;
     postalCode: string;
@@ -40,9 +44,13 @@ const orderSchema = new Schema<IOrder>(
           required: true,
           min: 1,
         },
+        title: { type: String, default: "" },
+        price: { type: Number, default: 0 },
+        imageUrl: { type: String, default: "" },
       },
     ],
     shippingAddress: {
+      fullName: { type: String, default: "" },
       address: { type: String, required: true },
       city: { type: String, required: true },
       postalCode: { type: String, required: true },

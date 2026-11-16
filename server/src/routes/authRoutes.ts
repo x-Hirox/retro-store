@@ -6,20 +6,22 @@ import {
   googleAuth,
   forgotPassword,
   resetPassword,
+  getMe,
+  updateProfile,
 } from "../controllers/authController.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { rateLimit } from "../utils/security.js";
 
 const router = express.Router();
+const authLimit = rateLimit(15 * 60 * 1000, 12);
 
-// 1. რეგისტრაცია და მეილის დადასტურება
-router.post("/register", registerUser);
-router.post("/verify-email", verifyEmail);
-
-// 2. ავტორიზაცია (רגულარული და Google)
-router.post("/login", loginUser);
-router.post("/google", googleAuth);
-
-// 3. პაროლის აღდგენა
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post("/register", authLimit, registerUser);
+router.post("/verify-email", authLimit, verifyEmail);
+router.post("/login", authLimit, loginUser);
+router.post("/google", authLimit, googleAuth);
+router.post("/forgot-password", authLimit, forgotPassword);
+router.post("/reset-password", authLimit, resetPassword);
+router.get("/me", protect, getMe);
+router.put("/me", protect, updateProfile);
 
 export default router;

@@ -209,6 +209,24 @@ export default function ProductDetail() {
               );
             })()}
 
+            {(product.stock ?? 0) <= 0 ? (
+              <button
+                type="button"
+                disabled
+                style={{
+                  background: "#111",
+                  color: "#fff",
+                  border: "none",
+                  padding: "14px 28px",
+                  borderRadius: "10px",
+                  width: "100%",
+                  fontWeight: "bold",
+                  fontSize: "1.1rem",
+                }}
+              >
+                SOLD
+              </button>
+            ) : (
             <button
               style={{
                 background: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
@@ -236,6 +254,12 @@ export default function ProductDetail() {
             >
               კალათაში დამატება 🛒
             </button>
+            )}
+            {(product.stock ?? 0) > 0 && product.stock <= 3 && (
+              <p style={{ marginTop: 10, color: "#f59e0b", fontWeight: 700 }}>
+                დარჩა {product.stock}
+              </p>
+            )}
           </div>
         </div>
       </div>

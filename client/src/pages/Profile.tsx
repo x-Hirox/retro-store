@@ -1,0 +1,227 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { authService } from "../services/authService";
+import API from "../services/api";
+import { downloadInvoice, itemPrice, itemTitle } from "../utils/invoice";
+import { useLang } from "../i18n/LanguageContext";
+
+type Order = {
+  _id: string;
+  createdAt?: string;
+  status?: string;
+  totalPrice?: number;
+  shippingAddress?: {
+    fullName?: string;
+    address?: string;
+    city?: string;
+    phone?: string;
+  };
+  orderItems?: Array<{
+    title?: string;
+    quantity?: number;
+    price?: number;
+    imageUrl?: string;
+    product?: { title?: string; price?: number; imageUrl?: string };
+  }>;
+};
+
+const STATUS: Record<string, string> = {
+  Pending: "მოლოდინში",
+  Processing: "მუშავდება",
+  Delivered: "ჩაბარებული",
+  Cancelled: "გაუქმებული",
+};
+
+export default function Profile() {
+  const { t } = useLang();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+  });
+
+  const load = async () => {
+    try {
+      let user: {
+        firstName?: string;
+        lastName?: string;
+        name?: string;
+        email?: string;
+        phone?: string;
+        address?: string;
+        city?: string;
+      } | null = null;
+      try {
+        const me = await authService.me();
+        user = me.user;
+        localStorage.setItem("user", JSON.stringify(user));
+      } catch {
+        const stored = localStorage.getItem("user");
+        user = stored ? JSON.parse(stored) : null;
+      }
+      const parts = String(user?.name || "")
+        .trim()
+        .split(/\s+/);
+      setForm({
+        firstName: user?.firstName || parts[0] || "",
+        lastName: user?.lastName || parts.slice(1).join(" ") || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+        address: user?.address || "",
+        city: user?.city || "",
+      });
+      const { data } = await API.get("/orders/myorders");
+      setOrders(data || []);
+    } catch {
+      setMessage("შეკვეთები ვერ ჩაიტვირთა. შესვლა თავიდან სცადე.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage("");
+    try {
+      const data = await authService.updateProfile({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+      });
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setMessage("პროფილი შენახულია");
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || "შენახვა ვერ მოხერხდა");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancelOrder = async (id: string) => {
+    if (!window.confirm("გაუქმდეს ეს შეკვეთა?")) return;
+    try {
+      await API.put(`/orders/${id}/cancel`);
+      await load();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "გაუქმება ვერ მოხერხდა");
+    }
+  };
+
+  if (loading) {
+    return <div className="profile-page">{t("loading")}</div>;
+  }
+
+  return (
+    <div className="profile-page">
+      <h1>{t("profile")}</h1>
+      <p className="profile-lead">შენი მონაცემები და შეკვეთების ისტორია.</p>
+
+      <div className="profile-grid">
+        <form className="profile-card" onSubmit={save}>
+          <h2>პირადი მონაცემები</h2>
+          {message && <p className="profile-msg">{message}</p>}
+          <label>
+            სახელი
+            <input
+              value={form.firstName}
+              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+              required
+            />
+          </label>
+          <label>
+            გვარი
+            <input
+              value={form.lastName}
+              onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+            />
+          </label>
+          <label>
+            ელ-ფოსტა
+            <input value={form.email} disabled />
+          </label>
+          <label>
+            ტელეფონი
+            <input
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+          </label>
+          <label>
+            ქალაქი
+            <input
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+            />
+          </label>
+          <label>
+            მისამართი
+            <input
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+            />
+          </label>
+          <button type="submit" disabled={saving}>
+            {saving ? "ინახება..." : t("saveProfile")}
+          </button>
+        </form>
+
+        <section className="profile-card">
+          <h2>{t("myOrders")}</h2>
+          {orders.length === 0 && <p>შეკვეთები ჯერ არ გაქვს.</p>}
+          <div className="order-list">
+            {orders.map((order) => (
+              <article key={order._id} className="order-card">
+                <div className="order-head">
+                  <strong>#{String(order._id).slice(-8)}</strong>
+                  <span>{STATUS[order.status || ""] || order.status}</span>
+                </div>
+                <p>
+                  {order.createdAt
+                    ? new Date(order.createdAt).toLocaleString("ka-GE")
+                    : ""}
+                </p>
+                <ul>
+                  {(order.orderItems || []).map((item, i) => (
+                    <li key={i}>
+                      {itemTitle(item)} × {item.quantity} —{" "}
+                      {(itemPrice(item) * Number(item.quantity || 1)).toFixed(2)}{" "}
+                      ₾
+                    </li>
+                  ))}
+                </ul>
+                <p className="order-total">
+                  სულ {Number(order.totalPrice || 0).toFixed(2)} ₾
+                </p>
+                <div className="order-actions">
+                  <Link to={`/order-success/${order._id}`}>{t("invoice")}</Link>
+                  <button type="button" onClick={() => downloadInvoice(order)}>
+                    {t("downloadInvoice")}
+                  </button>
+                  {["Pending", "Processing"].includes(order.status || "") && (
+                    <button type="button" onClick={() => cancelOrder(order._id)}>
+                      {t("cancelOrder")}
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}

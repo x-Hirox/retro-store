@@ -8,6 +8,7 @@ import {
 import type { IProduct } from "../types";
 import API from "../services/api";
 import AdminContent from "./AdminContent";
+import ImageUrlField from "../components/ImageUrlField";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<"products" | "orders" | "content">(
@@ -306,29 +307,29 @@ export default function Admin() {
                   />
                   <input
                     type="number"
-                    placeholder="ფასდაკლება % (სეილი)"
+                    placeholder="ფასდაკლება %"
+                    min={0}
+                    max={90}
                     value={discount}
                     onChange={(e) => setDiscount(e.target.value)}
                     style={inputStyle}
                   />
                   <input
                     type="number"
-                    placeholder="მარაგი"
+                    placeholder="მარაგი (რამდენიც არის რეალურად)"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
                     required
+                    min={0}
                     style={inputStyle}
                   />
                 </div>
               )}
 
-              <input
-                type="text"
-                placeholder="სურათის/ვიდეოს URL ლინკი"
+              <ImageUrlField
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                required
-                style={inputStyle}
+                onChange={setImageUrl}
+                placeholder="სურათის Cloudinary ლინკი"
               />
 
               {!isHeroBanner && (
@@ -371,6 +372,11 @@ export default function Admin() {
                     />
                     🔥 ბესტსელერებში გამოჩენა
                   </label>
+                  <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
+                    მარაგი: ჩაწერე რამდენი გაქვს რეალურად. 3 ან ნაკლები —
+                    საიტზე გამოჩნდება „დარჩა X“. 0 — SOLD. ყიდვისას მარაგი
+                    თავისით იკლებს.
+                  </p>
                 </>
               )}
 
@@ -444,7 +450,11 @@ export default function Admin() {
                       >
                         {p.isHeroBanner
                           ? "სარეკლამო ბანერი"
-                          : `ფასი: ${p.price} ₾ ${p.discount ? `(სეილი: -${p.discount}%)` : ""} | მარაგი: ${p.stock}`}
+                          : `ფასი: ${p.price} ₾ ${p.discount ? `(სეილი: -${p.discount}%)` : ""} | ${
+                              (p.stock ?? 0) <= 0
+                                ? "SOLD"
+                                : `მარაგი: ${p.stock}`
+                            }`}
                       </p>
                     </div>
                   </div>

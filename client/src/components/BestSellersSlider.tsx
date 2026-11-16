@@ -153,7 +153,13 @@ export default function BestSellersSlider({
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
-                {sale.discount > 0 && (
+                {(product.stock ?? 0) <= 0 && (
+                  <span className="sold-badge">SOLD</span>
+                )}
+                {(product.stock ?? 0) > 0 && product.stock <= 3 && (
+                  <span className="left-badge">დარჩა {product.stock}</span>
+                )}
+                {sale.discount > 0 && (product.stock ?? 0) > 0 && (
                 <span
                   style={{
                     position: "absolute",

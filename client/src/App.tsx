@@ -10,6 +10,8 @@ import Checkout from "./pages/Checkout";
 import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
 import AdminRoute from "./components/AdminRoute";
+import PrivateRoute from "./components/PrivateRoute";
+import Profile from "./pages/Profile";
 import CategoryView from "./pages/CategoryView";
 import Header from "./components/Header";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -139,6 +141,14 @@ export default function App() {
             <Route path="/play" element={<Arcade />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmail />} />

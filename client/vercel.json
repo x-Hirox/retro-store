@@ -1,7 +1,8 @@
 {
   "build": {
     "env": {
-      "VITE_API_URL": "https://retro-store.onrender.com/api"
+      "VITE_API_URL": "https://retro-store.onrender.com/api",
+      "VITE_GOOGLE_CLIENT_ID": "705256865199-knjkntc2vkcq46n9lapi1kl0savtc1cq.apps.googleusercontent.com"
     }
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/" }],

@@ -22,6 +22,10 @@ API.interceptors.request.use((config) => {
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    const headers = config.headers as { delete?: (key: string) => void };
+    headers.delete?.("Content-Type");
+  }
   return config;
 });
 
@@ -32,9 +36,8 @@ API.interceptors.response.use(
     const url = String(error.config?.url || "");
     const isPublicContent = url.includes("/content/");
     if (error.response && error.response.status === 401 && !isPublicContent) {
-      // თუ ტოკენი ვადაგასულია ან არასწორია
       localStorage.removeItem("token");
-      // გადავამისამართოთ ლოგინზე მხოლოდ მაშინ, თუ უკვე იქ არ არის
+      localStorage.removeItem("user");
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }

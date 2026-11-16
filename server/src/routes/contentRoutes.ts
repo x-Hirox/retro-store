@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { rateLimit } from "../utils/security.js";
 import {
   reviews,
   faqs,
@@ -27,8 +28,8 @@ router.get("/collections", collections.list);
 router.get("/collections/brand/:brand", getCollectionByBrand);
 router.get("/settings", getSettings);
 
-router.post("/newsletter", subscribeNewsletter);
-router.post("/chat/ask", askChat);
+router.post("/newsletter", rateLimit(15 * 60 * 1000, 8), subscribeNewsletter);
+router.post("/chat/ask", rateLimit(5 * 60 * 1000, 20), askChat);
 
 router.post("/reviews", protect, adminOnly, reviews.create);
 router.put("/reviews/:id", protect, adminOnly, reviews.update);

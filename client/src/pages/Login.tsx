@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../services/authService";
+import {
+  afterLoginPath,
+  getGoogleClientId,
+  saveAuthSession,
+} from "../lib/authSession";
 
 // დეკლარაცია Google-ის გლობალური ობიექტისთვის TypeScript-ში
 declare global {
@@ -36,14 +41,9 @@ export default function Login() {
 
     try {
       const data = await authService.login({ email, password });
-      localStorage.setItem("token", data.token);
-      // 🟢 შენახულია user ობიექტი, რომ ფრონტენდმა როლი (admin/user) ზუსტად დაინახოს
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
+      saveAuthSession(data);
       setLoading(false);
-      window.location.href = "/";
+      window.location.href = afterLoginPath(data.user?.role);
     } catch (err: any) {
       setError(err.response?.data?.message || "შეცდომა ავტორიზაციისას");
       setLoading(false);
@@ -60,13 +60,9 @@ export default function Login() {
         const data = await authService.googleAuth({
           credential: response.credential,
         });
-        localStorage.setItem("token", data.token);
-        // 🟢 Google ავტორიზაციისასაც ვინახავთ user ობიექტს
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
+        saveAuthSession(data);
         setLoading(false);
-        window.location.href = "/";
+        window.location.href = afterLoginPath(data.user?.role);
       } catch (err: any) {
         setError(
           err.response?.data?.message || "Google ავტორიზაცია ვერ მოხერხდა",
@@ -75,16 +71,22 @@ export default function Login() {
       }
     };
 
+    const clientId = getGoogleClientId();
+    if (!clientId) {
+      setError("Google შესვლა ჯერ არ არის გამართული.");
+      return;
+    }
+
     const loadGoogleScript = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          client_id: clientId,
           callback: handleGoogleResponse,
         });
 
         window.google.accounts.id.renderButton(
           document.getElementById("google-login-btn"),
-          { theme: "outline", size: "large", width: "100%" },
+          { theme: "filled_blue", size: "large", width: "100%" },
         );
       }
     };

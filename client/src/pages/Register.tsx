@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
+import {
+  afterLoginPath,
+  getGoogleClientId,
+  saveAuthSession,
+} from "../lib/authSession";
 
 export default function Register() {
   const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -46,7 +53,14 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const response = await authService.register({ name, email, password });
+      const response = await authService.register({
+        firstName: name,
+        lastName,
+        phone,
+        name: `${name} ${lastName}`.trim(),
+        email,
+        password,
+      });
       setMessage(
         response.message ||
           "რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ მეილი.",
@@ -71,9 +85,9 @@ export default function Register() {
         const data = await authService.googleAuth({
           credential: response.credential,
         });
-        localStorage.setItem("token", data.token);
+        saveAuthSession(data);
         setLoading(false);
-        window.location.href = "/";
+        window.location.href = afterLoginPath(data.user?.role);
       } catch (err: any) {
         setError(
           err.response?.data?.message || "Google ავტორიზაცია ვერ მოხერხდა",
@@ -82,16 +96,22 @@ export default function Register() {
       }
     };
 
+    const clientId = getGoogleClientId();
+    if (!clientId) {
+      setError("Google შესვლა ჯერ არ არის გამართული.");
+      return;
+    }
+
     const loadGoogleScript = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          client_id: clientId,
           callback: handleGoogleResponse,
         });
 
         window.google.accounts.id.renderButton(
           document.getElementById("google-register-btn"),
-          { theme: "outline", size: "large", width: "100%" },
+          { theme: "filled_blue", size: "large", width: "100%" },
         );
       }
     };
@@ -239,6 +259,65 @@ export default function Register() {
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="შენი სახელი"
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg)",
+                color: "var(--text-h)",
+                fontSize: "1rem",
+                outline: "none",
+              }}
+            />
+          </div>
+
+          <div>
+            <label
+              style={{
+                display: "block",
+                color: "var(--text)",
+                marginBottom: "5px",
+                fontSize: "0.9rem",
+              }}
+            >
+              გვარი
+            </label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              placeholder="შენი გვარი"
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg)",
+                color: "var(--text-h)",
+                fontSize: "1rem",
+                outline: "none",
+              }}
+            />
+          </div>
+
+          <div>
+            <label
+              style={{
+                display: "block",
+                color: "var(--text)",
+                marginBottom: "5px",
+                fontSize: "0.9rem",
+              }}
+            >
+              ტელეფონი
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="599123456"
               style={{
                 width: "100%",
                 padding: "12px",

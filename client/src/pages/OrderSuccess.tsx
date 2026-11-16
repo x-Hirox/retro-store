@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import API from "../services/api";
+import { downloadInvoice, itemPrice, itemTitle } from "../utils/invoice";
 
 export default function OrderSuccess() {
   const { id } = useParams();
@@ -117,7 +118,7 @@ export default function OrderSuccess() {
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             {order.orderItems?.map((item: any, index: number) => {
-              const itemPrice = item.price ?? item.product?.price ?? 0;
+              const price = itemPrice(item);
               return (
                 <div
                   key={index}
@@ -130,10 +131,10 @@ export default function OrderSuccess() {
                   }}
                 >
                   <span>
-                    {item.product?.title || "პროდუქტი"} (x{item.quantity})
+                    {itemTitle(item)} (x{item.quantity})
                   </span>
                   <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
-                    {(itemPrice * item.quantity).toFixed(2)} ₾
+                    {(price * item.quantity).toFixed(2)} ₾
                   </span>
                 </div>
               );
@@ -177,6 +178,34 @@ export default function OrderSuccess() {
           >
             ინვოისის ამობეჭდვა 🖨️
           </button>
+          <button
+            onClick={() => downloadInvoice(order)}
+            style={{
+              backgroundColor: "transparent",
+              color: "var(--text-h)",
+              border: "1px solid var(--border)",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            ჩამოტვირთვა
+          </button>
+          <Link
+            to="/profile"
+            style={{
+              backgroundColor: "transparent",
+              color: "var(--text-h)",
+              border: "1px solid var(--border)",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
+            ჩემი შეკვეთები
+          </Link>
           <Link
             to="/"
             style={{

@@ -26,13 +26,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart]);
 
   const addToCart = (product: IProduct) => {
+    if ((product.stock ?? 0) <= 0) return;
     setCart((prevCart) => {
       const existingIndex = prevCart.findIndex(
         (item) => item._id === product._id,
       );
       if (existingIndex > -1) {
         const updated = [...prevCart];
-        updated[existingIndex].quantity += 1;
+        const nextQty = updated[existingIndex].quantity + 1;
+        if (nextQty > product.stock) return prevCart;
+        updated[existingIndex].quantity = nextQty;
         return updated;
       }
       return [...prevCart, { ...product, quantity: 1 }];

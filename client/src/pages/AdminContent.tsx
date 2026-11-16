@@ -13,6 +13,7 @@ import {
   updateContent,
   updateSettings,
 } from "../services/contentService";
+import ImageUrlField from "../components/ImageUrlField";
 import type {
   IChatMessage,
   IChatQuickReply,
@@ -123,7 +124,7 @@ function ReviewsAdmin() {
       <textarea style={inputStyle} placeholder="ტექსტი" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required />
       <input style={inputStyle} placeholder="ვარსკვლავები 1-5" value={form.stars} onChange={(e) => setForm({ ...form, stars: e.target.value })} />
       <input style={inputStyle} placeholder="ავატარის URL (Cloudinary ან სხვა)" value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} />
-      <input style={inputStyle} placeholder="პროდუქტის სურათის URL" value={form.productImageUrl} onChange={(e) => setForm({ ...form, productImageUrl: e.target.value })} />
+      <ImageUrlField value={form.productImageUrl} onChange={(imageUrl) => setForm({ ...form, productImageUrl: imageUrl })} placeholder="პროდუქტის სურათის Cloudinary ლინკი" />
       <List
         items={items.map((item) => ({
           id: item._id,
@@ -247,7 +248,7 @@ function PlatformsAdmin() {
       <input style={inputStyle} placeholder="ბრენდი: nintendo / playstation / xbox" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} required />
       <input style={inputStyle} placeholder="სახელი, მაგ: Nintendo 64" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
       <input style={inputStyle} placeholder="slug, მაგ: n64" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
-      <input style={inputStyle} placeholder="სურათის URL" value={form.imageUrl} onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} required />
+      <ImageUrlField value={form.imageUrl} onChange={(imageUrl) => setForm({ ...form, imageUrl })} />
       <input style={inputStyle} placeholder="წელი" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
       <List
         items={items.map((item) => ({
