@@ -2,6 +2,7 @@ import express from "express";
 import {
   registerUser,
   verifyEmail,
+  resendVerification,
   loginUser,
   googleAuth,
   forgotPassword,
@@ -17,6 +18,7 @@ const authLimit = rateLimit(15 * 60 * 1000, 12);
 
 router.post("/register", authLimit, registerUser);
 router.post("/verify-email", authLimit, verifyEmail);
+router.post("/resend-verification", authLimit, resendVerification);
 router.post("/login", authLimit, loginUser);
 router.post("/google", authLimit, googleAuth);
 router.post("/forgot-password", authLimit, forgotPassword);

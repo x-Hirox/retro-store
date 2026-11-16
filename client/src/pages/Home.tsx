@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
 
 // კომპონენტები
 import HeroBanner from "../components/HeroBanner";
+import RetroStage from "../components/RetroStage";
 import BestSellersSlider from "../components/BestSellersSlider";
 import BrandsSection from "../components/BrandsSection";
 import CategoriesSection from "../components/CategoriesSection";
@@ -54,18 +55,16 @@ export default function Home() {
         color: "var(--text)",
         paddingBottom: "60px",
         overflowX: "hidden",
-        overflowY: "visible",
+        overflowY: "hidden",
         fontFamily: "'Noto Serif Georgian', sans-serif",
       }}
     >
-      {/* 1. მთავარი ბანერი */}
-      <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
-
-      {!searchQuery && (
-        <Link to="/game" className="mg-home-cta">
-          <span>🧩 Console Crush</span>
-          <em>Match-3 · ითამაშე ახლავე →</em>
-        </Link>
+      {!searchQuery ? (
+        <RetroStage>
+          <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
+        </RetroStage>
+      ) : (
+        <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
       )}
 
       {/* 2. ბესტსელერები */}

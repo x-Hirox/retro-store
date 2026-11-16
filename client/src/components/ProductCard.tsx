@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import type { MouseEvent } from "react";
 import type { IProduct } from "../types";
 import { getSalePrice } from "../utils/pricing";
 
@@ -8,30 +9,21 @@ export default function ProductCard({ product }: { product: IProduct }) {
   const sold = (product.stock ?? 0) <= 0;
   const low = !sold && product.stock <= 3;
 
+  const tilt = (e: MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `translate3d(0,-8px,0) rotateX(${-y * 7}deg) rotateY(${x * 9}deg)`;
+  };
+
   return (
     <div
-      className="product-card"
+      className={`product-card${sold ? " is-sold" : ""}`}
       onClick={() => navigate(`/product/${product._id}`)}
-      style={{
-        backgroundColor: "var(--code-bg)",
-        borderRadius: "16px",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        transition: "all 0.3s ease",
-        cursor: sold ? "default" : "pointer",
-        opacity: sold ? 0.72 : 1,
-        border: "1px solid var(--border)",
-        padding: "16px",
-        position: "relative",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-6px)";
-        e.currentTarget.style.borderColor = "var(--neon-pink)";
-      }}
+      onMouseMove={tilt}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.borderColor = "var(--border)";
+        e.currentTarget.style.transform = "";
       }}
     >
       {sold && <span className="sold-badge">SOLD</span>}

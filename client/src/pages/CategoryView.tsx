@@ -239,7 +239,7 @@ export default function CategoryView() {
               <button
                 key={item._id || item.slug}
                 type="button"
-                className={`collection-console ${active ? "is-active" : ""}`}
+                className={`collection-console arcade-tab ${active ? "is-active" : ""}`}
                 onClick={() =>
                   navigate(
                     `/category/${encodeURIComponent(platform || "")}/${encodeURIComponent(item.slug)}`,
@@ -363,13 +363,7 @@ export default function CategoryView() {
             </div>
           ) : (
             <>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
-                  gap: 22,
-                }}
-              >
+              <div className="arcade-grid">
                 {visible.map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}

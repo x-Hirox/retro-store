@@ -1,22 +1,24 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+import ActivationCodeForm from "../components/ActivationCodeForm";
 import { authService } from "../services/authService";
+import { afterLoginPath, saveAuthSession } from "../lib/authSession";
 
 export function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  const email = searchParams.get("email") || "";
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
+  const [status, setStatus] = useState<"loading" | "success" | "error" | "code">(
+    token ? "loading" : "code",
   );
   const [message, setMessage] = useState("მიმდინარეობს ანგარიშის აქტივაცია...");
 
   useEffect(() => {
     const verifyAccount = async () => {
       if (!token || !email) {
-        setStatus("error");
-        setMessage("არასწორი აქტივაციის ბმული.");
+        setStatus("code");
+        setMessage("შეიყვანე მეილზე მიღებული 6-ნიშნა კოდი.");
         return;
       }
 
@@ -24,6 +26,12 @@ export function VerifyEmail() {
         const response = await authService.verifyEmail({ token, email });
         setStatus("success");
         setMessage(response.message || "ანგარიში წარმატებით გააქტიურდა!");
+        if (response.token && response.user) {
+          saveAuthSession(response);
+          window.setTimeout(() => {
+            window.location.href = afterLoginPath(response.user?.role);
+          }, 800);
+        }
       } catch (err: any) {
         setStatus("error");
         setMessage(err.response?.data?.message || "აქტივაცია ვერ მოხერხდა.");
@@ -41,7 +49,9 @@ export function VerifyEmail() {
             ? "წარმატება! 🎉"
             : status === "error"
               ? "შეცდომა ❌"
-              : "აქტივაცია ⏳"}
+              : status === "code"
+                ? "აქტივაციის კოდი"
+                : "აქტივაცია ⏳"}
         </h2>
         <p
           style={{
@@ -53,7 +63,11 @@ export function VerifyEmail() {
           {message}
         </p>
 
-        {status !== "loading" && (
+        {(status === "code" || status === "error") && email && (
+          <ActivationCodeForm email={email} />
+        )}
+
+        {status === "success" && (
           <Link
             to="/login"
             className="auth-button"

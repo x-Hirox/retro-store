@@ -12,13 +12,21 @@ export function inboxMail(): string {
   return process.env.CONTACT_EMAIL || shopMail();
 }
 
-export function frontendBaseUrl(origin?: string): string {
-  const configured = process.env.FRONTEND_URL?.replace(/\/$/, "");
-  if (configured) return configured;
-  if (origin?.startsWith("http")) return origin.replace(/\/$/, "");
-  return process.env.NODE_ENV === "production"
-    ? "https://retrobit.ge"
-    : "http://127.0.0.1:5173";
+export function frontendBaseUrl(origin?: string | string[]): string {
+  const configured = (
+    process.env.FRONTEND_URL || "https://retrobit.ge"
+  ).replace(/\/$/, "");
+  const raw = Array.isArray(origin) ? origin[0] : origin;
+  const o = String(raw || "").replace(/\/$/, "");
+  const allowed = new Set([
+    configured,
+    "https://retrobit.ge",
+    "https://www.retrobit.ge",
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+  ]);
+  if (o && allowed.has(o)) return o;
+  return configured;
 }
 
 let transporter: nodemailer.Transporter | null = null;
@@ -35,6 +43,9 @@ function mailer() {
       port: 465,
       secure: true,
       auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 8000,
+      socketTimeout: 12000,
     });
   }
   return transporter;

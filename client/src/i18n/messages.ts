@@ -57,7 +57,6 @@ export const messages = {
     catBundles: "პროდუქტების ბუნდლები",
     catBundlesDesc: "კონსოლი, თამაშები და აქსესუარები ერთად.",
     sellNav: "გაყიდე კონსოლი",
-    matchNav: "Console Crush",
   },
   en: {
     topBanner: "🔥 Free delivery in Georgia — used retro consoles",
@@ -115,7 +114,6 @@ export const messages = {
     catBundles: "Bundles",
     catBundlesDesc: "Console, games and accessories together.",
     sellNav: "Sell your console",
-    matchNav: "Console Crush",
   },
 } as const;
 

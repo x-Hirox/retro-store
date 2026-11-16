@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import ActivationCodeForm from "../components/ActivationCodeForm";
 import { authService } from "../services/authService";
 import {
   afterLoginPath,
@@ -21,7 +22,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [pendingEmail, setPendingEmail] = useState("");
 
   const validatePassword = (pass: string) => {
     if (pass.length < 8) return "პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.";
@@ -63,15 +64,18 @@ export default function Register() {
       });
       setMessage(
         response.message ||
-          "რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ მეილი.",
+          "რეგისტრაცია წარმატებულია. შეამოწმე მეილი აქტივაციის კოდისთვის.",
       );
-      setLoading(false);
-
-      setTimeout(() => {
-        navigate("/login");
-      }, 4000);
+      setPendingEmail(response.email || email.trim().toLowerCase());
     } catch (err: any) {
-      setError(err.response?.data?.message || "რეგისტრაციის შეცდომა.");
+      const timedOut = err.code === "ECONNABORTED";
+      setError(
+        err.response?.data?.message ||
+          (timedOut
+            ? "სერვერი დიდხანს პასუხობს. სცადე თავიდან რამდენიმე წამში."
+            : "რეგისტრაციის შეცდომა."),
+      );
+    } finally {
       setLoading(false);
     }
   };
@@ -207,6 +211,10 @@ export default function Register() {
           </div>
         )}
 
+        {pendingEmail ? (
+          <ActivationCodeForm email={pendingEmail} />
+        ) : (
+          <>
         {/* Google რეგისტრაციის ღილაკის კონტეინერი */}
         <div
           style={{
@@ -497,6 +505,8 @@ export default function Register() {
             უკვე გაქვს აკაუნტი? შესვლა →
           </Link>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -83,7 +83,11 @@ export default function Sell() {
     <div className="sell-page">
       <section className="sell-hero">
         <div className="sell-hero-copy">
-          <h1>გაყიდე კონსოლი და თამაშები</h1>
+          <h1>
+            გაყიდე კონსოლი
+            <br />
+            და თამაშები
+          </h1>
           <p>
             სწრაფი შეთავაზება, თბილისში წაყვანა ან გაგზავნა, ნაღდი ან 20%-ით მეტი
             მაღაზიის კრედიტი. კითხვა თუ გაქვს — მოგვწერე:
@@ -102,7 +106,7 @@ export default function Sell() {
             </a>
           </div>
         </div>
-        <img className="sell-chest" src="/images/sell-chest.jpg" alt="" />
+        <img className="sell-chest neon-lift" src="/images/sell-chest.jpg" alt="" />
       </section>
 
       <section className="sell-section">
@@ -115,7 +119,7 @@ export default function Sell() {
             ["4. შემოწმება", "ნივთს შევამოწმებთ. თუ მდგომარეობა განსხვავდება, ახალ ფასს შემოგთავაზებთ."],
             ["5. ანაზღაურება", "ნაღდი ან 20%-ით მეტი მაღაზიის კრედიტი. გადარიცხვა 3–5 სამუშაო დღეში."],
           ].map(([title, text]) => (
-            <article key={title}>
+            <article key={title} className="neon-lift">
               <h3>{title}</h3>
               <p>{text}</p>
             </article>
@@ -331,7 +335,7 @@ export default function Sell() {
             დაგვიკავშირდი
           </a>
         </div>
-        <img src="/images/sell-gameboy.jpg" alt="" />
+        <img className="neon-lift" src="/images/sell-gameboy.jpg" alt="" />
       </section>
 
       <section className="sell-section">

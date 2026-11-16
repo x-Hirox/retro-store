@@ -25,13 +25,27 @@ export const authService = {
     lastName?: string;
     phone?: string;
   }) => {
-    const response = await API.post("/auth/register", userData);
+    const response = await API.post("/auth/register", userData, {
+      timeout: 20000,
+    });
     return response.data;
   },
 
-  // 2. მეილის ვერიფიკაცია / აქტივაცია
-  verifyEmail: async (data: { token: string | null; email: string | null }) => {
-    const response = await API.post("/auth/verify-email", data);
+  verifyEmail: async (data: {
+    token?: string | null;
+    email: string | null;
+    code?: string;
+  }) => {
+    const response = await API.post("/auth/verify-email", data, {
+      timeout: 20000,
+    });
+    return response.data;
+  },
+
+  resendVerification: async (data: { email: string }) => {
+    const response = await API.post("/auth/resend-verification", data, {
+      timeout: 20000,
+    });
     return response.data;
   },
 

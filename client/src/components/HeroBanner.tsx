@@ -13,24 +13,10 @@ export default function HeroBanner({ heroBanner, searchQuery }: Props) {
 
   return (
     <div
+      className="hero-banner"
       onClick={() => navigate("/category/playstation")}
-      style={{
-        width: "100%",
-        cursor: "pointer",
-        overflow: "hidden",
-        marginTop: "15px", // მცირე დაშორება ჰედერიდან
-      }}
     >
-      <img
-        src={heroBanner.imageUrl}
-        alt={heroBanner.title || "Banner"}
-        style={{
-          width: "100%",
-          maxHeight: "480px",
-          objectFit: "cover",
-          display: "block",
-        }}
-      />
+      <img src={heroBanner.imageUrl} alt={heroBanner.title || "Banner"} />
     </div>
   );
 }

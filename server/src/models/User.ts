@@ -12,6 +12,8 @@ export interface IUser extends Document {
   role: "customer" | "admin";
   isVerified: boolean;
   verificationToken?: string | null;
+  verificationCode?: string | null;
+  verificationExpires?: Date | null;
   resetPasswordToken?: string | null;
   resetPasswordExpires?: Date | null;
   createdAt: Date;
@@ -55,6 +57,8 @@ const userSchema = new Schema<IUser>(
       default: false,
     },
     verificationToken: { type: String, default: null },
+    verificationCode: { type: String, default: null },
+    verificationExpires: { type: Date, default: null },
     resetPasswordToken: { type: String, default: null },
     resetPasswordExpires: { type: Date, default: null },
   },

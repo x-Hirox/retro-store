@@ -43,6 +43,45 @@ const generateToken = (userId: string, role: string) => {
   return jwt.sign({ id: userId, role }, getJwtSecret(), { expiresIn: "7d" });
 };
 
+function makeActivation() {
+  return {
+    token: crypto.randomBytes(32).toString("hex"),
+    code: String(crypto.randomInt(100000, 1000000)),
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  };
+}
+
+async function sendActivationEmail(
+  req: Request,
+  user: { email: string; firstName?: string; name?: string },
+  token: string,
+  code: string,
+): Promise<boolean> {
+  const frontendUrl = frontendBaseUrl(req.headers.origin);
+  const link = `${frontendUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
+  const hello = user.firstName || user.name || "";
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: `RetroBit აქტივაციის კოდი: ${code}`,
+      message: `გამარჯობა ${hello}!\n\nშენი აქტივაციის კოდია: ${code}\nკოდი ძალაშია 24 საათი.\n\nან გახსენი ეს ბმული:\n${link}\n\nთუ ეს ანგარიში შენ არ შეგიქმნია, უგულებელყავი ეს წერილი.`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
+        <h2>RetroBit აქტივაცია</h2>
+        <p>გამარჯობა ${hello}!</p>
+        <p>შენი 6-ნიშნა კოდია:</p>
+        <p style="font-size:32px;letter-spacing:8px;font-weight:800;color:#7c3aed">${code}</p>
+        <p>კოდი ძალაშია 24 საათი.</p>
+        <p><a href="${link}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">ანგარიშის აქტივაცია</a></p>
+        <p style="font-size:12px;color:#555">თუ ღილაკი არ იხსნება:<br>${link}</p>
+      </div>`,
+    });
+    return true;
+  } catch (err) {
+    console.error("Activation mail failed:", err);
+    return false;
+  }
+}
+
 // --- CONTROLLERS ---
 
 // A. რეგისტრაცია (Sign Up) - იგზავნება აქტივაციის მეილი
@@ -82,13 +121,12 @@ export const registerUser = async (
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-
     if (!firstName) {
       res.status(400).json({ message: "სახელი აუცილებელია" });
       return;
     }
 
+    const { token, code, expires } = makeActivation();
     const user = await User.create({
       name,
       firstName,
@@ -97,22 +135,19 @@ export const registerUser = async (
       email,
       password: hashedPassword,
       isVerified: false,
-      verificationToken,
+      verificationToken: token,
+      verificationCode: code,
+      verificationExpires: expires,
     });
 
-    const frontendUrl = frontendBaseUrl(req.headers.origin);
-    const verificationLink = `${frontendUrl}/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(user.email)}`;
-
-    await sendEmail({
-      email: user.email,
-      subject: "ანგარიშის აქტივაცია - RetroBit",
-      message: `გამარჯობა! მადლობა RetroBit-ზე დარეგისტრირებისთვის.\n\nგაააქტიურე ანგარიში ამ ბმულით:\n\n${verificationLink}\n\nთუ ეს ანგარიში შენ არ შეგიქმნია, უგულებელყავი ეს წერილი.`,
-      html: `<p>გამარჯობა!</p><p>მადლობა RetroBit-ზე დარეგისტრირებისთვის.</p><p><a href="${verificationLink}">ანგარიშის აქტივაცია</a></p><p>თუ ღილაკი არ იხსნება, გახსენი ეს ბმული:<br>${verificationLink}</p>`,
-    });
+    const mailSent = await sendActivationEmail(req, user, token, code);
 
     res.status(201).json({
-      message:
-        "რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ თქვენი ელ-ფოსტა ანგარიშის გასააქტიურებლად. ✉️",
+      mailSent,
+      email: user.email,
+      message: mailSent
+        ? "რეგისტრაცია წარმატებულია. მეილზე გამოგიგზავნეთ 6-ნიშნა აქტივაციის კოდი."
+        : "ანგარიში შეიქმნა, მაგრამ მეილი ვერ გაიგზავნა. დააჭირე „კოდის ხელახლა გაგზავნა“.",
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -127,33 +162,109 @@ export const verifyEmail = async (
 ): Promise<void> => {
   try {
     const token = String(req.body.token || "");
+    const code = String(req.body.code || "").replace(/\s/g, "");
     const email = String(req.body.email || "")
       .trim()
       .toLowerCase();
 
-    if (!token || !email) {
+    if (!email || (!token && !code)) {
       res.status(400).json({ message: "არასწორი მოთხოვნა." });
       return;
     }
 
-    const user = await User.findOne({ email, verificationToken: token });
+    const existing = await User.findOne({ email });
+    if (!existing) {
+      res.status(400).json({ message: "მომხმარებელი ვერ მოიძებნა." });
+      return;
+    }
+    if (existing.isVerified) {
+      res.status(200).json({
+        already: true,
+        message: "ანგარიში უკვე გააქტიურებულია. შეგიძლია შეხვიდე.",
+      });
+      return;
+    }
+
+    const user = token
+      ? await User.findOne({ email, verificationToken: token })
+      : await User.findOne({ email, verificationCode: code });
 
     if (!user) {
-      res
-        .status(400)
-        .json({ message: "აქტივაციის ბმული არასწორია ან უკვე გამოყენებულია." });
+      res.status(400).json({
+        message: "აქტივაციის კოდი ან ბმული არასწორია.",
+      });
+      return;
+    }
+
+    if (user.verificationExpires && user.verificationExpires < new Date()) {
+      res.status(400).json({
+        message: "კოდს ვადა გაუვიდა. ხელახლა გაგზავნე აქტივაცია.",
+      });
       return;
     }
 
     user.isVerified = true;
-    user.verificationToken = null as any;
+    user.verificationToken = null;
+    user.verificationCode = null;
+    user.verificationExpires = null;
+    const role = resolveRole(user.email, user.role);
+    user.role = role;
     await user.save();
 
     res.status(200).json({
-      message:
-        "ანგარიში წარმატებით გააქტიურდა! ახლა შეგიძლიათ შეხვიდეთ სისტემაში.",
+      message: "ანგარიში გააქტიურდა. ახლა შეგიძლია შეხვიდე.",
+      token: generateToken(user._id.toString(), role),
+      user: publicUser(user),
     });
   } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+};
+
+export const resendVerification = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const email = String(req.body.email || "")
+      .trim()
+      .toLowerCase();
+    if (!email || !validateEmailFormat(email)) {
+      res.status(400).json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტა." });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(200).json({
+        message: "თუ ანგარიში არსებობს, აქტივაციის კოდი გამოგიგზავნით.",
+      });
+      return;
+    }
+    if (user.isVerified) {
+      res.status(200).json({
+        already: true,
+        message: "ანგარიში უკვე გააქტიურებულია. შეგიძლია შეხვიდე.",
+      });
+      return;
+    }
+
+    const { token, code, expires } = makeActivation();
+    user.verificationToken = token;
+    user.verificationCode = code;
+    user.verificationExpires = expires;
+    await user.save();
+
+    const mailSent = await sendActivationEmail(req, user, token, code);
+    res.status(200).json({
+      mailSent,
+      email: user.email,
+      message: mailSent
+        ? "ახალი აქტივაციის კოდი გამოგიგზავნეთ მეილზე."
+        : "კოდი ვერ გაიგზავნა. სცადე რამდენიმე წამში.",
+    });
+  } catch (error) {
+    console.error("Resend verification error:", error);
     res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };

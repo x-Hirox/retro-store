@@ -18,11 +18,10 @@ import OrderSuccess from "./pages/OrderSuccess";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ChatWidget from "./components/ChatWidget";
-import NeonMascot from "./components/NeonMascot";
+import RetroFX from "./components/RetroFX";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
-import MatchGame from "./pages/MatchGame";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -119,8 +118,8 @@ export default function App() {
               transition: all 0.3s ease;
             }
             .neon-btn:hover {
-              box-shadow: 0 0 12px rgba(168, 85, 247, 0.9);
-              transform: translateY(-2px);
+              box-shadow: 0 0 12px #00f3ff88;
+              transform: translateY(-1px);
             }
             @media (max-width: 768px) {
               .main-nav-bar {
@@ -143,7 +142,6 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/play" element={<Arcade />} />
             <Route path="/sell" element={<Sell />} />
-            <Route path="/game" element={<MatchGame />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route
@@ -176,7 +174,7 @@ export default function App() {
           </Routes>
         </div>
         <SiteFooter />
-        <NeonMascot />
+        <RetroFX />
         <ChatWidget />
       </div>
     </Router>

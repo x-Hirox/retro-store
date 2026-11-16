@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import ActivationCodeForm from "../components/ActivationCodeForm";
 import { authService } from "../services/authService";
 import {
   afterLoginPath,
@@ -33,10 +34,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needActivation, setNeedActivation] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setNeedActivation(false);
     setLoading(true);
 
     try {
@@ -45,7 +48,9 @@ export default function Login() {
       setLoading(false);
       window.location.href = afterLoginPath(data.user?.role);
     } catch (err: any) {
-      setError(err.response?.data?.message || "შეცდომა ავტორიზაციისას");
+      const msg = err.response?.data?.message || "შეცდომა ავტორიზაციისას";
+      setError(msg);
+      setNeedActivation(msg.includes("გააქტიურ"));
       setLoading(false);
     }
   };
@@ -262,6 +267,12 @@ export default function Login() {
             {loading ? "იგზავნება..." : "შესვლა"}
           </button>
         </form>
+
+        {needActivation && email && (
+          <div style={{ marginTop: 24 }}>
+            <ActivationCodeForm email={email.trim().toLowerCase()} />
+          </div>
+        )}
 
         <p
           style={{
