@@ -17,6 +17,7 @@ import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ChatWidget from "./components/ChatWidget";
 import SiteFooter from "./components/SiteFooter";
+import Arcade from "./pages/Arcade";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -152,6 +153,7 @@ export default function App() {
         <div style={{ width: "100%", boxSizing: "border-box" }}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/play" element={<Arcade />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/login" element={<Login />} />

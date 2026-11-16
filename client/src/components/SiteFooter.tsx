@@ -42,6 +42,7 @@ export default function SiteFooter() {
         <div>
           <h4 style={{ margin: "0 0 12px", color: "#fff" }}>დაწყება</h4>
           <FooterLink to="/">მთავარი</FooterLink>
+          <FooterLink to="/play">თამაშები</FooterLink>
           <FooterLink to="/category/bundles">კომპლექტები</FooterLink>
         </div>
         <div>

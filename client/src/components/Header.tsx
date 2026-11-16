@@ -167,6 +167,24 @@ export default function Header({
             flexWrap: "wrap",
           }}
         >
+          <Link
+            to="/play"
+            className="neon-btn"
+            title="თამაშები"
+            style={{
+              backgroundColor: "#a855f7",
+              color: "#ffffff",
+              border: "1px solid #c084fc",
+              padding: "8px 14px",
+              borderRadius: "10px",
+              textDecoration: "none",
+              fontWeight: "700",
+              fontSize: "0.9rem",
+            }}
+          >
+            🎮 თამაშები
+          </Link>
+
           <button
             onClick={toggleTheme}
             className="neon-btn"

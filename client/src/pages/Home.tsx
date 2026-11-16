@@ -71,6 +71,72 @@ export default function Home() {
         />
       </div>
 
+      {!searchQuery && (
+        <div
+          style={{
+            maxWidth: "1200px",
+            margin: "36px auto 0",
+            padding: "0 20px",
+          }}
+        >
+          <div
+            onClick={() => navigate("/play")}
+            style={{
+              cursor: "pointer",
+              borderRadius: 18,
+              padding: "28px 32px",
+              background:
+                "linear-gradient(120deg, #3b0764 0%, #0f172a 55%, #831843 100%)",
+              color: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 20,
+              flexWrap: "wrap",
+              border: "1px solid rgba(192,132,252,0.4)",
+            }}
+          >
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--pixel)",
+                  fontSize: "0.65rem",
+                  letterSpacing: "2px",
+                  opacity: 0.85,
+                }}
+              >
+                RETROBIT ARCADE
+              </p>
+              <h3
+                style={{
+                  margin: "10px 0 8px",
+                  fontFamily: "var(--heading)",
+                  fontSize: "1.6rem",
+                }}
+              >
+                ითამაშე NES, Sega Genesis, SNES და GBA ბრაუზერში
+              </h3>
+              <p style={{ margin: 0, opacity: 0.9 }}>
+                ლეგალური homebrew — ერთი კლიკით Play.
+              </p>
+            </div>
+            <span
+              style={{
+                background: "#fff",
+                color: "#3b0764",
+                fontWeight: 800,
+                padding: "12px 18px",
+                borderRadius: 12,
+                fontFamily: "var(--heading)",
+              }}
+            >
+              თამაში →
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 3. პოპულარული ბრენდები */}
       {!searchQuery && <BrandsSection />}
 
