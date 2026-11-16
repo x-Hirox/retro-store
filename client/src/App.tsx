@@ -18,6 +18,7 @@ import OrderSuccess from "./pages/OrderSuccess";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ChatWidget from "./components/ChatWidget";
+import NeonMascot from "./components/NeonMascot";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
@@ -175,6 +176,7 @@ export default function App() {
           </Routes>
         </div>
         <SiteFooter />
+        <NeonMascot />
         <ChatWidget />
       </div>
     </Router>

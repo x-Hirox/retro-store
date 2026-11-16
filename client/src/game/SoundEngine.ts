@@ -7,20 +7,58 @@ function ac() {
   return ctx;
 }
 
-function beep(freq: number, dur: number, type: OscillatorType, gain = 0.08, slide = 0) {
+function envGain(audio: AudioContext, start: number, peak: number, dur: number) {
+  const g = audio.createGain();
+  g.gain.setValueAtTime(0.0001, start);
+  g.gain.exponentialRampToValueAtTime(peak, start + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+  return g;
+}
+
+function tone(
+  freq: number,
+  dur: number,
+  type: OscillatorType,
+  peak = 0.07,
+  slide = 0,
+  delay = 0,
+) {
   if (muted) return;
   const audio = ac();
+  const t = audio.currentTime + delay;
   const osc = audio.createOscillator();
-  const g = audio.createGain();
+  const filter = audio.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(Math.min(4200, freq * 4), t);
   osc.type = type;
-  osc.frequency.setValueAtTime(freq, audio.currentTime);
-  if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), audio.currentTime + dur);
-  g.gain.setValueAtTime(gain, audio.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + dur);
-  osc.connect(g);
+  osc.frequency.setValueAtTime(freq, t);
+  if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+  const g = envGain(audio, t, peak, dur);
+  osc.connect(filter);
+  filter.connect(g);
   g.connect(audio.destination);
-  osc.start();
-  osc.stop(audio.currentTime + dur + 0.02);
+  osc.start(t);
+  osc.stop(t + dur + 0.04);
+}
+
+function noiseBurst(dur: number, peak = 0.05, hp = 400) {
+  if (muted) return;
+  const audio = ac();
+  const t = audio.currentTime;
+  const len = Math.floor(audio.sampleRate * dur);
+  const buffer = audio.createBuffer(1, len, audio.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  const src = audio.createBufferSource();
+  src.buffer = buffer;
+  const hpFilter = audio.createBiquadFilter();
+  hpFilter.type = "highpass";
+  hpFilter.frequency.value = hp;
+  const g = envGain(audio, t, peak, dur);
+  src.connect(hpFilter);
+  hpFilter.connect(g);
+  g.connect(audio.destination);
+  src.start(t);
 }
 
 export const SoundEngine = {
@@ -41,26 +79,36 @@ export const SoundEngine = {
     }
   },
   swap() {
-    beep(420, 0.07, "square", 0.05);
+    tone(880, 0.07, "triangle", 0.05, -120);
+    tone(1320, 0.06, "sine", 0.03, 0, 0.03);
   },
   invalid() {
-    beep(140, 0.12, "sawtooth", 0.05, -80);
+    tone(180, 0.16, "sawtooth", 0.05, -70);
+    noiseBurst(0.08, 0.03, 200);
   },
   match(combo: number) {
-    beep(520 + combo * 80, 0.1, "square", 0.07);
-    setTimeout(() => beep(680 + combo * 60, 0.08, "square", 0.05), 40);
+    const base = 520 + combo * 70;
+    tone(base, 0.11, "triangle", 0.07, 180);
+    tone(base * 1.5, 0.09, "sine", 0.04, 0, 0.04);
+    noiseBurst(0.07, 0.035 + combo * 0.008, 900);
   },
   combo(n: number) {
-    beep(300 + n * 120, 0.16, "triangle", 0.08, 200);
+    tone(320 + n * 90, 0.18, "square", 0.05, 260);
+    tone(640 + n * 90, 0.14, "triangle", 0.04, 200, 0.05);
+    noiseBurst(0.12, 0.06, 300);
   },
   bomb() {
-    beep(90, 0.22, "sawtooth", 0.1, -40);
-    setTimeout(() => beep(180, 0.12, "square", 0.06), 50);
+    noiseBurst(0.22, 0.09, 120);
+    tone(90, 0.28, "sawtooth", 0.08, -30);
+    tone(220, 0.16, "triangle", 0.05, 80, 0.04);
   },
   win() {
-    [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.16, "square", 0.07), i * 110));
+    [523, 659, 784, 1046, 1318].forEach((f, i) => {
+      tone(f, 0.18, "triangle", 0.06, 40, i * 0.09);
+      tone(f * 2, 0.1, "sine", 0.025, 0, i * 0.09 + 0.03);
+    });
   },
   lose() {
-    [392, 330, 262].forEach((f, i) => setTimeout(() => beep(f, 0.18, "triangle", 0.07, -30), i * 140));
+    [392, 311, 247].forEach((f, i) => tone(f, 0.22, "triangle", 0.06, -50, i * 0.12));
   },
 };

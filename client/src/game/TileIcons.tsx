@@ -1,87 +1,139 @@
+import { useId } from "react";
 import type { Kind, Special } from "./types";
 
-function Glow({ color }: { color: string }) {
-  return <rect x="2" y="2" width="44" height="44" rx="10" fill={color} opacity="0.22" />;
-}
+export function TileIcon({ kind, special = "none" }: { kind: Kind; special?: Special }) {
+  const uid = useId().replace(/:/g, "");
+  const overlay =
+    special === "laser-h" ? (
+      <rect x="6" y="28" width="52" height="8" rx="3" fill="#fff" opacity="0.9" />
+    ) : special === "laser-v" ? (
+      <rect x="28" y="6" width="8" height="52" rx="3" fill="#fff" opacity="0.9" />
+    ) : special === "bomb" ? (
+      <circle cx="32" cy="32" r="12" fill="none" stroke="#fff" strokeWidth="3" />
+    ) : special === "color" ? (
+      <circle cx="32" cy="32" r="8" fill="#fff" />
+    ) : null;
 
-export function TileIcon({ kind }: { kind: Kind; special?: Special }) {
   if (kind === 0) {
     return (
-      <svg viewBox="0 0 48 48" aria-hidden>
-        <Glow color="#a78bfa" />
-        <rect x="7" y="16" width="34" height="18" rx="4" fill="#2e1065" stroke="#c4b5fd" strokeWidth="2" />
-        <rect x="10" y="19" width="18" height="11" rx="2" fill="#22d3ee" />
-        <circle cx="34" cy="22" r="2" fill="#fb7185" />
-        <circle cx="38" cy="26" r="2" fill="#fbbf24" />
-        <rect x="14" y="34" width="20" height="3" rx="1.5" fill="#7c3aed" />
+      <svg viewBox="0 0 64 64" aria-hidden>
+        <defs>
+          <linearGradient id={`${uid}psp`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#e879f9" />
+            <stop offset="100%" stopColor="#6d28d9" />
+          </linearGradient>
+        </defs>
+        <rect x="6" y="18" width="52" height="28" rx="8" fill={`url(#${uid}psp)`} stroke="#f5d0fe" strokeWidth="2" />
+        <rect x="12" y="22" width="24" height="16" rx="3" fill="#0f172a" />
+        <rect x="14" y="24" width="20" height="12" rx="2" fill="#67e8f9" />
+        <circle cx="44" cy="27" r="2.2" fill="#fb7185" />
+        <circle cx="50" cy="31" r="2.2" fill="#fde047" />
+        <circle cx="44" cy="35" r="2.2" fill="#4ade80" />
+        <rect x="16" y="40" width="32" height="3" rx="1" fill="#a78bfa" />
+        {overlay}
       </svg>
     );
   }
   if (kind === 1) {
     return (
-      <svg viewBox="0 0 48 48" aria-hidden>
-        <Glow color="#38bdf8" />
-        <path d="M10 20h10v12H12a4 4 0 0 1-2-7.5V20zm18 0h10v4.5A4 4 0 0 1 36 32H28V20z" fill="#0f172a" stroke="#7dd3fc" strokeWidth="2" />
-        <rect x="18" y="18" width="12" height="8" rx="2" fill="#1d4ed8" />
-        <circle cx="16" cy="26" r="3" fill="#64748b" />
-        <circle cx="32" cy="26" r="3" fill="#64748b" />
-        <circle cx="33" cy="22" r="1.4" fill="#f87171" />
-        <circle cx="36" cy="24" r="1.4" fill="#4ade80" />
+      <svg viewBox="0 0 64 64" aria-hidden>
+        <defs>
+          <linearGradient id={`${uid}ds`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#7dd3fc" />
+            <stop offset="100%" stopColor="#0369a1" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M10 24h16c2 0 4 2 4 4v12c0 4-3 8-8 8H14c-4 0-8-4-8-9 0-3 2-6 4-7V24zm28 0h16v8c2 1 4 4 4 7 0 5-4 9-8 9h-8c-5 0-8-4-8-8V28c0-2 2-4 4-4z"
+          fill={`url(#${uid}ds)`}
+          stroke="#e0f2fe"
+          strokeWidth="2"
+        />
+        <circle cx="18" cy="34" r="5" fill="#0f172a" />
+        <circle cx="46" cy="34" r="5" fill="#0f172a" />
+        <circle cx="47" cy="26" r="2" fill="#fb7185" />
+        <circle cx="52" cy="30" r="2" fill="#4ade80" />
+        {overlay}
       </svg>
     );
   }
   if (kind === 2) {
     return (
-      <svg viewBox="0 0 48 48" aria-hidden>
-        <Glow color="#34d399" />
-        <rect x="13" y="8" width="22" height="32" rx="4" fill="#14532d" stroke="#86efac" strokeWidth="2" />
-        <rect x="16" y="12" width="16" height="12" rx="1" fill="#bbf7d0" />
-        <circle cx="20" cy="32" r="3" fill="#166534" />
-        <rect x="27" y="29" width="5" height="5" fill="#22c55e" />
+      <svg viewBox="0 0 64 64" aria-hidden>
+        <defs>
+          <linearGradient id={`${uid}gb`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#86efac" />
+            <stop offset="100%" stopColor="#166534" />
+          </linearGradient>
+        </defs>
+        <rect x="16" y="6" width="32" height="52" rx="8" fill={`url(#${uid}gb)`} stroke="#bbf7d0" strokeWidth="2" />
+        <rect x="20" y="12" width="24" height="18" rx="2" fill="#022c22" />
+        <rect x="22" y="14" width="20" height="14" fill="#4ade80" />
+        <circle cx="26" cy="42" r="4" fill="#14532d" />
+        <rect x="36" y="38" width="7" height="7" fill="#22c55e" />
+        {overlay}
       </svg>
     );
   }
   if (kind === 3) {
     return (
-      <svg viewBox="0 0 48 48" aria-hidden>
-        <Glow color="#a3e635" />
-        <rect x="10" y="14" width="28" height="20" rx="4" fill="#14532d" stroke="#bef264" strokeWidth="2" />
-        <circle cx="24" cy="24" r="6" fill="#0f172a" stroke="#84cc16" strokeWidth="2" />
-        <path d="M22 21h4v6h-4z" fill="#84cc16" />
-        <rect x="14" y="18" width="4" height="4" fill="#d9f99d" />
-        <rect x="30" y="26" width="4" height="4" fill="#d9f99d" />
+      <svg viewBox="0 0 64 64" aria-hidden>
+        <defs>
+          <linearGradient id={`${uid}xb`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#bef264" />
+            <stop offset="100%" stopColor="#3f6212" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M8 28c6-10 14-14 24-14s18 4 24 14c-4 14-14 24-24 24S12 42 8 28z"
+          fill={`url(#${uid}xb)`}
+          stroke="#ecfccb"
+          strokeWidth="2"
+        />
+        <circle cx="32" cy="32" r="9" fill="#0f172a" stroke="#84cc16" strokeWidth="3" />
+        <path d="M26 26l12 12M38 26L26 38" stroke="#a3e635" strokeWidth="3" />
+        {overlay}
       </svg>
     );
   }
   if (kind === 4) {
     return (
-      <svg viewBox="0 0 48 48" aria-hidden>
-        <Glow color="#fb923c" />
-        <rect x="12" y="10" width="24" height="28" rx="3" fill="#9a3412" stroke="#fdba74" strokeWidth="2" />
-        <rect x="16" y="14" width="16" height="8" fill="#fed7aa" />
-        <rect x="15" y="25" width="18" height="2" fill="#fb923c" />
-        <rect x="15" y="29" width="18" height="2" fill="#fb923c" />
-        <rect x="15" y="33" width="12" height="2" fill="#fb923c" />
+      <svg viewBox="0 0 64 64" aria-hidden>
+        <defs>
+          <linearGradient id={`${uid}sg`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#fdba74" />
+            <stop offset="100%" stopColor="#9a3412" />
+          </linearGradient>
+        </defs>
+        <rect x="14" y="8" width="36" height="48" rx="5" fill={`url(#${uid}sg)`} stroke="#ffedd5" strokeWidth="2" />
+        <rect x="18" y="12" width="28" height="12" fill="#fed7aa" />
+        <rect x="18" y="28" width="28" height="3" fill="#fb923c" />
+        <rect x="18" y="34" width="28" height="3" fill="#fb923c" />
+        <rect x="18" y="40" width="18" height="3" fill="#fb923c" />
+        {overlay}
       </svg>
     );
   }
   return (
-    <svg viewBox="0 0 48 48" aria-hidden>
-      <Glow color="#fbbf24" />
+    <svg viewBox="0 0 64 64" aria-hidden>
+      <defs>
+          <linearGradient id={`${uid}st`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fde68a" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+      </defs>
       <polygon
-        points="24,6 28,18 41,18 31,26 35,39 24,31 13,39 17,26 7,18 20,18"
-        fill="#f59e0b"
-        stroke="#fde68a"
+        points="32,6 39,24 58,24 43,36 49,54 32,43 15,54 21,36 6,24 25,24"
+        fill={`url(#${uid}st)`}
+        stroke="#fff7ed"
         strokeWidth="2"
       />
+      {overlay}
     </svg>
   );
 }
 
 export function SpecialMark({ special }: { special: Special }) {
   if (special === "none") return null;
-  if (special === "laser-h") return <span className="mg-special">━━</span>;
-  if (special === "laser-v") return <span className="mg-special">┃</span>;
-  if (special === "bomb") return <span className="mg-special">◈</span>;
-  return <span className="mg-special">★</span>;
+  return <span className="mg-special">{special === "bomb" ? "◈" : special === "color" ? "★" : "━"}</span>;
 }

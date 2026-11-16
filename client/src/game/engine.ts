@@ -367,6 +367,115 @@ function fill(board: Board): Board {
   return next;
 }
 
+export function applyCascadeStep(
+  boardIn: Board,
+  combo = 1,
+  prefer?: { r: number; c: number },
+): {
+  board: Board;
+  cleared: string[];
+  collected: Partial<Record<Kind, number>>;
+  score: number;
+  specialsMade: number;
+} | null {
+  let board = cloneBoard(boardIn);
+  const groups = lineGroups(board);
+  if (!groups.length) return null;
+  const clear = new Set<string>();
+  const spawn: { r: number; c: number; special: Special; kind: Kind }[] = [];
+  const collected: Partial<Record<Kind, number>> = {};
+  let score = 0;
+  let specialsMade = 0;
+
+  for (const g of groups) {
+    for (const p of g.cells) {
+      const cell = board[p.r][p.c];
+      if (cell) fireSpecial(board, p.r, p.c, clear);
+      else add(clear, p.r, p.c);
+    }
+    const len = g.cells.length;
+    const isT = groups.some(
+      (other) =>
+        other !== g &&
+        other.kind === g.kind &&
+        other.cells.some((p) => g.cells.some((q) => q.r === p.r && q.c === p.c)),
+    );
+    let special: Special = "none";
+    if (len >= 5 || isT) special = len >= 5 && !isT ? "color" : "bomb";
+    else if (len === 4) special = g.axis === "h" ? "laser-h" : "laser-v";
+    if (special !== "none") {
+      const at =
+        (prefer && g.cells.find((p) => p.r === prefer.r && p.c === prefer.c)) ||
+        g.cells[Math.floor(g.cells.length / 2)];
+      spawn.push({ ...at, special, kind: g.kind });
+    }
+  }
+
+  const chained = [...clear];
+  for (const k of chained) {
+    const [r, c] = k.split(",").map(Number);
+    const cell = board[r]?.[c];
+    if (cell && cell.special !== "none") fireSpecial(board, r, c, clear);
+  }
+
+  const iceHits = new Set<string>();
+  for (const k of clear) {
+    const [r, c] = k.split(",").map(Number);
+    for (const [dr, dc] of [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ] as const) {
+      iceHits.add(key(r + dr, c + dc));
+    }
+  }
+
+  for (const k of iceHits) {
+    if (clear.has(k)) continue;
+    const [r, c] = k.split(",").map(Number);
+    const cell = inBounds(r, c) ? board[r][c] : null;
+    if (cell?.ice) cell.ice -= 1;
+    if (cell?.blocker) {
+      board[r][c] = null;
+      score += 80 * combo;
+    }
+  }
+
+  const cleared: string[] = [];
+  for (const k of clear) {
+    const [r, c] = k.split(",").map(Number);
+    const cell = board[r]?.[c];
+    if (!cell) continue;
+    if (cell.ice > 0) {
+      cell.ice -= 1;
+      continue;
+    }
+    if (cell.blocker) {
+      board[r][c] = null;
+      score += 80 * combo;
+      cleared.push(k);
+      continue;
+    }
+    collected[cell.kind] = (collected[cell.kind] || 0) + 1;
+    board[r][c] = null;
+    cleared.push(k);
+    score += 60 * combo;
+  }
+
+  for (const s of spawn) {
+    if (!board[s.r][s.c]) {
+      board[s.r][s.c] = makeTile(s.kind, { special: s.special });
+      specialsMade += 1;
+      score += 200 * combo;
+    }
+  }
+
+  board = gravity(board);
+  board = fill(board);
+  return { board, cleared, collected, score, specialsMade };
+}
+
 export function tryMove(
   board: Board,
   a: { r: number; c: number },

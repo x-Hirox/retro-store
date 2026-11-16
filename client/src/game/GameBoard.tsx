@@ -1,4 +1,4 @@
-import { useRef, type PointerEvent } from "react";
+import { useRef, type CSSProperties, type PointerEvent } from "react";
 import Tile from "./Tile";
 import { SIZE, type Board } from "./types";
 
@@ -45,7 +45,7 @@ export default function GameBoard({ board, selected, popping, locked, onSwap, on
 
   return (
     <div
-      className="mg-board"
+      className={`mg-board${popping.size ? " bursting" : ""}`}
       onPointerUp={handleUp}
       onPointerCancel={() => {
         start.current = null;
@@ -62,6 +62,11 @@ export default function GameBoard({ board, selected, popping, locked, onSwap, on
           />
         )),
       )}
+      <div className="mg-sparkles" aria-hidden>
+        {Array.from({ length: 12 }, (_, i) => (
+          <i key={i} style={{ "--i": i } as CSSProperties} />
+        ))}
+      </div>
     </div>
   );
 }

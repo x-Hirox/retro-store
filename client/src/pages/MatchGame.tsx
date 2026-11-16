@@ -5,10 +5,13 @@ import Leaderboard from "../game/Leaderboard";
 import LevelSelector from "../game/LevelSelector";
 import { SoundEngine } from "../game/SoundEngine";
 import {
+  applyCascadeStep,
+  canSwap,
   createBoard,
+  hasMatches,
   hint,
   shuffleBoard,
-  tryMove,
+  swapCells,
 } from "../game/engine";
 import { getLevel, nextLevelId } from "../game/levels";
 import { KIND_META, SIZE, type Board, type Kind, type LevelConfig } from "../game/types";
@@ -45,6 +48,7 @@ export default function MatchGame() {
   const [moves, setMoves] = useState(20);
   const [collect, setCollect] = useState<{ kind: Kind; need: number; have: number }[]>([]);
   const [busy, setBusy] = useState(false);
+  const [popping, setPopping] = useState<Set<string>>(new Set());
   const [muted, setMuted] = useState(SoundEngine.isMuted());
   const [status, setStatus] = useState<"play" | "win" | "lose">("play");
   const [unlocked, setUnlocked] = useState(Number(localStorage.getItem("rb-match-level") || "1"));
@@ -142,30 +146,55 @@ export default function MatchGame() {
     }
   };
 
-  const playSwap = (a: { r: number; c: number }, b: { r: number; c: number }) => {
+  const playSwap = async (a: { r: number; c: number }, b: { r: number; c: number }) => {
     if (busy || status !== "play" || !level) return;
     if (a.r < 0 || a.c < 0 || b.r < 0 || b.c < 0 || a.r >= SIZE || b.r >= SIZE || a.c >= SIZE || b.c >= SIZE) {
       return;
     }
-    const result = tryMove(board, a, b);
-    if (!result) {
+    if (!canSwap(board, a, b)) {
       SoundEngine.invalid();
+      return;
+    }
+    const swapped = swapCells(board, a, b);
+    const ca = board[a.r][a.c];
+    const cb = board[b.r][b.c];
+    const colorBomb = ca?.special === "color" || cb?.special === "color";
+    if (!colorBomb && !hasMatches(swapped)) {
+      SoundEngine.invalid();
+      setBoard(swapped);
+      await new Promise((r) => setTimeout(r, 140));
+      setBoard(board);
       return;
     }
     setBusy(true);
     setMoves((m) => m - 1);
-    setBoard(result.board);
-    setScore((s) => s + result.score);
-    setCollect((prev) =>
-      prev.map((c) => ({
-        ...c,
-        have: c.have + (result.collected[c.kind] || 0),
-      })),
-    );
-    if (result.specialsMade) SoundEngine.bomb();
-    else if (result.combo > 1) SoundEngine.combo(result.combo);
-    else SoundEngine.match(result.combo);
-    setTimeout(() => setBusy(false), 220);
+    setBoard(swapped);
+    SoundEngine.swap();
+    await new Promise((r) => setTimeout(r, 140));
+    let working = swapped;
+    let combo = 0;
+    while (true) {
+      const step = applyCascadeStep(working, combo + 1, combo === 0 ? b : undefined);
+      if (!step) break;
+      combo += 1;
+      setPopping(new Set(step.cleared));
+      if (step.specialsMade) SoundEngine.bomb();
+      else if (combo > 1) SoundEngine.combo(combo);
+      else SoundEngine.match(combo);
+      await new Promise((r) => setTimeout(r, 260));
+      setBoard(step.board);
+      setScore((s) => s + step.score);
+      setCollect((prev) =>
+        prev.map((c) => ({
+          ...c,
+          have: c.have + (step.collected[c.kind] || 0),
+        })),
+      );
+      setPopping(new Set());
+      working = step.board;
+      await new Promise((r) => setTimeout(r, 160));
+    }
+    setBusy(false);
   };
 
   const reshuffle = () => {
@@ -185,7 +214,8 @@ export default function MatchGame() {
   };
 
   return (
-    <div className="mg-page" onPointerDown={() => SoundEngine.unlock()}>
+    <div className={`mg-page${screen === "play" ? " candy" : ""}`} onPointerDown={() => SoundEngine.unlock()}>
+      {screen !== "play" && (
       <header className="mg-hero">
         <p className="mg-kicker">RETROBIT MATCH</p>
         <h1>Console Crush</h1>
@@ -198,13 +228,9 @@ export default function MatchGame() {
           >
             {muted ? "🔇 ხმა" : "🔊 ხმა"}
           </button>
-          {screen === "play" && (
-            <button type="button" className="mg-btn ghost" onClick={() => setScreen("hub")}>
-              ტურები
-            </button>
-          )}
         </div>
       </header>
+      )}
 
       {challenge && (
         <div className="mg-challenge">
@@ -236,54 +262,59 @@ export default function MatchGame() {
       ) : (
         level && (
           <div className="mg-play">
-            <div className="mg-hud">
-              <div>
-                <small>{level.chapter}</small>
-                <strong>{level.name}</strong>
+            <aside className="mg-hud-card">
+              <button type="button" className="mg-btn ghost" onClick={() => setScreen("hub")}>
+                ← ტურები
+              </button>
+              <p className="mg-chapter">{level.chapter}</p>
+              <h2>{level.name}</h2>
+              <div className="mg-moves">{moves}</div>
+              <small>სვლები</small>
+              <div className="mg-stars">
+                <span className={score >= level.targetScore * 0.4 ? "on" : ""}>★</span>
+                <span className={score >= level.targetScore * 0.7 ? "on" : ""}>★</span>
+                <span className={score >= level.targetScore ? "on" : ""}>★</span>
               </div>
-              <div>
-                <small>ქულა</small>
-                <strong>
-                  {score.toLocaleString()} / {level.targetScore.toLocaleString()}
-                </strong>
+              <div className="mg-score-bar">
+                <i style={{ width: `${Math.min(100, (score / level.targetScore) * 100)}%` }} />
               </div>
-              <div>
-                <small>სვლები</small>
-                <strong>{moves}</strong>
+              <strong>{score.toLocaleString()} / {level.targetScore.toLocaleString()}</strong>
+              {!!collect.length && (
+                <div className="mg-collect">
+                  {collect.map((c) => (
+                    <span key={c.kind}>
+                      {KIND_META[c.kind].label} {Math.min(c.have, c.need)}/{c.need}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="mg-tools">
+                <button type="button" className="mg-btn ghost" onClick={() => setMuted(SoundEngine.toggle())}>
+                  {muted ? "🔇" : "🔊"}
+                </button>
+                <button type="button" className="mg-btn ghost" onClick={reshuffle}>
+                  არევა
+                </button>
+                <button
+                  type="button"
+                  className="mg-btn ghost"
+                  onClick={() => {
+                    const h = hint(board);
+                    if (h) setSelected(h[0]);
+                  }}
+                >
+                  ?
+                </button>
               </div>
-            </div>
-            {!!collect.length && (
-              <div className="mg-collect">
-                {collect.map((c) => (
-                  <span key={c.kind}>
-                    {KIND_META[c.kind].label} {Math.min(c.have, c.need)}/{c.need}
-                  </span>
-                ))}
-              </div>
-            )}
+            </aside>
             <GameBoard
               board={board}
               selected={selected}
-              popping={new Set()}
+              popping={popping}
               locked={busy || status !== "play"}
               onSwap={playSwap}
               onSelect={setSelected}
             />
-            <div className="mg-tools">
-              <button type="button" className="mg-btn ghost" onClick={reshuffle}>
-                არევა
-              </button>
-              <button
-                type="button"
-                className="mg-btn ghost"
-                onClick={() => {
-                  const h = hint(board);
-                  if (h) setSelected(h[0]);
-                }}
-              >
-                მინიშნება
-              </button>
-            </div>
           </div>
         )
       )}
