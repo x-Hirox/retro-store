@@ -10,37 +10,40 @@ export async function seedContentIfEmpty() {
     await SiteSettings.create({});
   }
 
-  if ((await Review.countDocuments()) === 0) {
-    await Review.insertMany([
-      {
-        name: "გიორგი მ.",
-        text: "3DS კონსოლი შევუკვეთე RetroBit-ში და სასიამოვნოდ გამიკვირდა, რა სწრაფად მოვიდა. კონსოლი და დამტენი შიგ იყო, პრობლემა თამაშის დროს არ ყოფილა.",
-        stars: 5,
-        verified: true,
-        order: 1,
-      },
-      {
-        name: "ნინო კ.",
-        text: "ორი თვის წინ ვიყიდე PS2. მითხრეს რომ იყო გამოყენებული, მაგრამ იდეალურ მდგომარეობაშია. თუ PS3-ს ეძებ, გირჩევ.",
-        stars: 5,
-        verified: true,
-        order: 2,
-      },
-      {
-        name: "დათო წ.",
-        text: "N64 კონსოლის კომპლექტი და NBA Live შევუკვეთე. სწრაფად მოვიდა და ადვილად ჩავრთე. სურათი ცოტა პიქსელურია, მაგრამ ეს ძველ კონსოლს ახასიათებს.",
-        stars: 4,
-        verified: true,
-        order: 3,
-      },
-      {
-        name: "ანა ს.",
-        text: "3DS XL ავიღე და ვერ ვიქნებოდი უფრო კმაყოფილი. მიწოდება სწრაფი იყო, ხარისხი კი ძალიან კარგი.",
-        stars: 5,
-        verified: true,
-        order: 4,
-      },
-    ]);
+  const geoReviews = [
+    {
+      name: "გიორგი მ.",
+      text: "3DS შევუკვეთე. მეორე დღეს მოვიდა, დამტენით. ჩავრთე და პრობლემა არ ყოფილა.",
+      stars: 5,
+      verified: true,
+      order: 1,
+    },
+    {
+      name: "ნინო კ.",
+      text: "PS2 ავიღე მეორადი. გარეგნულად და ხმით კარგია. იგივე მაღაზიიდან PS3-საც ვუყურებ.",
+      stars: 5,
+      verified: true,
+      order: 2,
+    },
+    {
+      name: "დათო წ.",
+      text: "N64 და ერთი თამაში ერთად მოვიდა. სწრაფად ჩავრთე. სურათი პიქსელურია — ეს ამ კონსოლის სტილია.",
+      stars: 4,
+      verified: true,
+      order: 3,
+    },
+    {
+      name: "ანა ს.",
+      text: "3DS XL-ით კმაყოფილი ვარ. მიწოდება სწრაფი იყო, კონსოლი სუფთაა.",
+      stars: 5,
+      verified: true,
+      order: 4,
+    },
+  ];
+  for (const review of geoReviews) {
+    await Review.findOneAndUpdate({ name: review.name }, review, {
+      upsert: true,
+    });
   }
 
   if ((await Faq.countDocuments()) === 0) {

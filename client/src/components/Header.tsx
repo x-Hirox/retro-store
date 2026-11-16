@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import SoundToggle from "./SoundToggle";
 import { useLang } from "../i18n/LanguageContext";
 
 interface HeaderProps {
@@ -79,6 +80,8 @@ export default function Header({
         </div>
 
         <div className="nav-links-wrapper">
+          <SoundToggle />
+
           <Link to="/play" className="neon-btn play-link">
             <span aria-hidden>🎮</span>
             <span className="btn-label">{t("games")}</span>

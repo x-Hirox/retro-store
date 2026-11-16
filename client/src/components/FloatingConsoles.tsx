@@ -1,7 +1,13 @@
+import { playBootChime } from "../utils/arcadeBeep";
+
 export default function FloatingConsoles() {
   return (
     <div className="float-layer" aria-hidden>
-      <div className="float-console fc-psp">
+      <button
+        type="button"
+        className="float-console fc-psp"
+        onMouseEnter={playBootChime}
+      >
         <svg viewBox="0 0 120 70">
           <rect
             x="6"
@@ -19,9 +25,13 @@ export default function FloatingConsoles() {
           <circle cx="98" cy="38" r="4" fill="#ffe600" />
           <circle cx="86" cy="46" r="4" fill="#00f3ff" />
         </svg>
-      </div>
+      </button>
 
-      <div className="float-console fc-pad">
+      <button
+        type="button"
+        className="float-console fc-pad"
+        onMouseEnter={playBootChime}
+      >
         <svg viewBox="0 0 120 70">
           <path
             d="M10 28h36v10c0 12-8 20-18 20H22C12 58 8 48 8 40c0-5 1-9 2-12zm64 0h36c2 3 4 7 4 12 0 8-4 18-14 18h-10c-12 0-18-8-18-20V28z"
@@ -32,7 +42,7 @@ export default function FloatingConsoles() {
           <circle className="led" cx="28" cy="40" r="7" fill="#1a1a24" stroke="#ff007f" />
           <circle className="led" cx="92" cy="40" r="7" fill="#1a1a24" stroke="#ffe600" />
         </svg>
-      </div>
+      </button>
     </div>
   );
 }

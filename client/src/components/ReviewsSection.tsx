@@ -1,17 +1,7 @@
-import { useEffect, useState } from "react";
-import { getReviews } from "../services/contentService";
-import type { IReview } from "../types";
+import { GEO_REVIEWS } from "../data/reviews";
 
 export default function ReviewsSection() {
-  const [reviews, setReviews] = useState<IReview[]>([]);
-
-  useEffect(() => {
-    getReviews()
-      .then(setReviews)
-      .catch(() => setReviews([]));
-  }, []);
-
-  if (!reviews.length) return null;
+  const reviews = GEO_REVIEWS;
 
   return (
     <div
@@ -33,7 +23,7 @@ export default function ReviewsSection() {
           რას ამბობენ ჩვენი მომხმარებლები
         </h2>
         <p style={{ color: "var(--text)", marginBottom: "30px" }}>
-          ათასობით კმაყოფილი გეიმერი საქართველოში
+          მოკლე შეფასებები მყიდველებისგან საქართველოში
         </p>
         <div
           style={{
@@ -53,44 +43,35 @@ export default function ReviewsSection() {
                 border: "1px solid var(--border)",
               }}
             >
-              <div style={{ fontSize: "1.8rem", color: "var(--text)", marginBottom: 8 }}>
-                “
-              </div>
-              <p style={{ fontSize: "0.95rem", marginBottom: "15px", color: "var(--text)" }}>
+              <p
+                style={{
+                  fontSize: "0.95rem",
+                  marginBottom: "15px",
+                  color: "var(--text)",
+                  lineHeight: 1.55,
+                }}
+              >
                 {item.text}
               </p>
               <div style={{ color: "#f59e0b", marginBottom: "12px" }}>
                 {"★".repeat(item.stars || 5)}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {item.avatarUrl ? (
-                  <img
-                    src={item.avatarUrl}
-                    alt={item.name}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: "50%",
-                      background: "#334155",
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.name.charAt(0)}
-                  </div>
-                )}
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    background: "#334155",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                  }}
+                >
+                  {item.name.charAt(0)}
+                </div>
                 <div>
                   <strong style={{ color: "var(--text-h)" }}>{item.name}</strong>
                   {item.verified && (
@@ -99,19 +80,6 @@ export default function ReviewsSection() {
                     </div>
                   )}
                 </div>
-                {item.productImageUrl && (
-                  <img
-                    src={item.productImageUrl}
-                    alt=""
-                    style={{
-                      width: 48,
-                      height: 48,
-                      objectFit: "cover",
-                      borderRadius: 8,
-                      marginLeft: "auto",
-                    }}
-                  />
-                )}
               </div>
             </div>
           ))}

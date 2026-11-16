@@ -1,7 +1,8 @@
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import type { MouseEvent } from "react";
 import type { IProduct } from "../types";
 import { getSalePrice } from "../utils/pricing";
+import { playConsoleCue } from "../utils/arcadeBeep";
 
 export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
@@ -9,22 +10,15 @@ export default function ProductCard({ product }: { product: IProduct }) {
   const sold = (product.stock ?? 0) <= 0;
   const low = !sold && product.stock <= 3;
 
-  const tilt = (e: MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    el.style.transform = `translate3d(0,-8px,0) rotateX(${-y * 7}deg) rotateY(${x * 9}deg)`;
-  };
-
   return (
-    <div
-      className={`product-card${sold ? " is-sold" : ""}`}
+    <motion.div
+      className={`product-card glass-card${sold ? " is-sold" : ""}`}
       onClick={() => navigate(`/product/${product._id}`)}
-      onMouseMove={tilt}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "";
-      }}
+      onMouseEnter={() =>
+        playConsoleCue(`${product.title} ${product.platform || ""}`)
+      }
+      whileHover={sold ? undefined : { y: -10, scale: 1.03 }}
+      transition={{ type: "spring", stiffness: 420, damping: 22, mass: 0.55 }}
     >
       {sold && <span className="sold-badge">SOLD</span>}
       {low && <span className="left-badge">დარჩა {product.stock}</span>}
@@ -109,6 +103,6 @@ export default function ProductCard({ product }: { product: IProduct }) {
           </span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

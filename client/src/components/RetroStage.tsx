@@ -1,15 +1,27 @@
-import type { ReactNode } from "react";
-import ArcadeHeader from "./ArcadeHeader";
+import { lazy, Suspense, type ReactNode } from "react";
 import FloatingConsoles from "./FloatingConsoles";
 import RetroBackground from "./RetroBackground";
+import SkateRider from "./SkateRider";
+import { useDesktopGL } from "../hooks/useDesktopGL";
+
+const RetroScene3D = lazy(() => import("./RetroScene3D"));
 
 export default function RetroStage({ children }: { children?: ReactNode }) {
+  const useGl = useDesktopGL();
+
   return (
     <section className="retro-stage">
-      <RetroBackground />
+      {useGl ? (
+        <Suspense fallback={<RetroBackground />}>
+          <RetroScene3D />
+        </Suspense>
+      ) : (
+        <RetroBackground />
+      )}
+      <div className="ny-garland" aria-hidden />
       <div className="retro-stage-banner">{children}</div>
-      <ArcadeHeader />
-      <FloatingConsoles />
+      {!useGl && <FloatingConsoles />}
+      <SkateRider />
 
       <svg className="rv-mascot" viewBox="0 0 160 180" aria-hidden>
         <defs>
@@ -53,9 +65,15 @@ export default function RetroStage({ children }: { children?: ReactNode }) {
         <span className="gift g2" />
         <span className="gift g3" />
       </div>
+      <div className="ny-baubles" aria-hidden>
+        <i className="bauble b1" />
+        <i className="bauble b2" />
+        <i className="bauble b3" />
+        <i className="bauble b4" />
+      </div>
       <div className="fx-snow in-stage" aria-hidden>
-        {Array.from({ length: 8 }, (_, i) => (
-          <span key={i} className={`flake n${i % 7}`} />
+        {Array.from({ length: 36 }, (_, i) => (
+          <span key={i} className={`flake n${i % 12}`} />
         ))}
       </div>
     </section>
