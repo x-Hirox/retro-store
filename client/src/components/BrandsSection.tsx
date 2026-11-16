@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useLang } from "../i18n/LanguageContext";
 
 export default function BrandsSection() {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   const brands = [
     { name: "nintendo", src: "/nintendo.svg", height: "46px" },
@@ -32,22 +34,22 @@ export default function BrandsSection() {
           textAlign: "center",
           marginBottom: "35px",
           color: "#fff",
-          fontSize: "2rem",
+          fontSize: "clamp(1.25rem, 4vw, 2rem)",
           letterSpacing: "2.5px",
           fontWeight: "900",
           fontFamily: "'Noto Serif Georgian', serif",
           textShadow: "0 2px 10px rgba(0, 0, 0, 0.7)",
         }}
       >
-        მოძებნე ბრენდის მიხედვით
+        {t("shopByBrand")}
       </h2>
       <div
         style={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          flexWrap: "nowrap",
-          gap: "40px",
+          flexWrap: "wrap",
+          gap: "24px",
           maxWidth: "1250px",
           margin: "0 auto",
           width: "100%",

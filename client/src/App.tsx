@@ -118,26 +118,9 @@ export default function App() {
               transform: translateY(-2px);
             }
             @media (max-width: 768px) {
-              .nav-container {
-                flex-direction: column !important;
-                align-items: stretch !important;
-                padding: 10px 15px !important;
-                gap: 12px;
-              }
-              .search-box-wrapper {
-                max-width: 100% !important;
-                margin: 0 !important;
-                order: 3;
-              }
-              .nav-links-wrapper {
-                justify-content: flex-end;
-                width: 100%;
-              }
               .main-nav-bar {
                 overflow-x: auto;
-                padding: 0 15px !important;
-                gap: 20px !important;
-                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
               }
             }
           `}

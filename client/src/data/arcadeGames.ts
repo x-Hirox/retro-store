@@ -10,7 +10,8 @@ export type ArcadeGame = {
   author: string;
   license: string;
   year: string;
-  description: string;
+  description: { ka: string; en: string };
+  poster: string;
   sourceUrl: string;
 };
 
@@ -37,8 +38,11 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     author: "Shiru",
     license: "Public Domain",
     year: "2011",
-    description:
-      "ლოგიკური puzzle NES-ზე: მილები დააკავშირე და ქსელი ააწყვე.",
+    poster: "linear-gradient(160deg, #1d4ed8 0%, #0f172a 70%)",
+    description: {
+      ka: "ლოგიკური puzzle NES-ზე.",
+      en: "A logic puzzle on NES.",
+    },
     sourceUrl: "https://shiru.untergrund.net/software.shtml",
   },
   {
@@ -51,7 +55,11 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     author: "Shiru",
     license: "Freeware",
     year: "2011",
-    description: "კლასიკური arcade: გაზონი მოაჭერი, ქვებსა და ყვავილებს გაერიდე.",
+    poster: "linear-gradient(160deg, #16a34a 0%, #14532d 70%)",
+    description: {
+      ka: "კლასიკური arcade გაზონზე.",
+      en: "A classic lawn-mower arcade.",
+    },
     sourceUrl: "https://shiru.untergrund.net/software.shtml",
   },
   {
@@ -63,7 +71,11 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     author: "Shiru",
     license: "Freeware",
     year: "2012",
-    description: "მცირე NES arcade, ავტორის უფასო სასწავლო მაგალითი.",
+    poster: "linear-gradient(160deg, #7c3aed 0%, #1e1b4b 70%)",
+    description: {
+      ka: "მცირე NES arcade.",
+      en: "A short NES arcade game.",
+    },
     sourceUrl: "https://shiru.untergrund.net/software.shtml",
   },
   {
@@ -75,7 +87,11 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     author: "atamurad",
     license: "MIT",
     year: "2021",
-    description: "ცნობილი 2048 Sega Genesis-ზე. ისრებით თამაში, A — დემო.",
+    poster: "linear-gradient(160deg, #f59e0b 0%, #7c2d12 70%)",
+    description: {
+      ka: "2048 Sega Genesis-ზე.",
+      en: "2048 on Sega Genesis.",
+    },
     sourceUrl: "https://github.com/atamurad/sega-2048",
   },
   {
@@ -88,7 +104,11 @@ export const ARCADE_GAMES: ArcadeGame[] = [
     author: "ChronoMoogle & Dieter von Laser",
     license: "Freeware",
     year: "2016",
-    description: "SNES homebrew პლატფორმერი. უფასოდ გამოშვებული ავტორების მიერ.",
+    poster: "linear-gradient(160deg, #dc2626 0%, #111827 70%)",
+    description: {
+      ka: "SNES homebrew პლატფორმერი.",
+      en: "A SNES homebrew platformer.",
+    },
     sourceUrl: "https://superbossgaiden.superfamicom.org/",
   },
 ];

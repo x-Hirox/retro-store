@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useLang } from "../i18n/LanguageContext";
 
 interface HeaderProps {
   categoriesData: Array<{
@@ -17,8 +18,8 @@ export default function Header({
   token,
   onLogout,
 }: HeaderProps) {
+  const { t, lang, setLang } = useLang();
   const [searchQuery, setSearchQuery] = useState("");
-
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -33,10 +34,6 @@ export default function Header({
     }
   }, [isDark]);
 
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
-  };
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -47,244 +44,81 @@ export default function Header({
   };
 
   return (
-    <header
-      style={{
-        width: "100%",
-        backgroundColor: "var(--bg)",
-        color: "var(--text)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-        position: "relative", // 👈 აუცილებელია ზონების გამოსაყოფად
-        zIndex: 1000, // 👈 უზრუნველყოფს, რომ ჰედერი ყოველთვის ზემოდან იყოს
-        transition: "background-color 0.2s ease, color 0.2s ease",
-      }}
-    >
-      {/* ზედა თხელი საინფორმაციო ზოლი */}
-      <div
-        style={{
-          backgroundColor: "#ff6600",
-          color: "#fff",
-          fontSize: "0.85rem",
-          padding: "6px 20px",
-          textAlign: "center",
-          fontWeight: "500",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        🔥 უფასო მიწოდება და 1 წლიანი გარანტია ყველა რეტრო კონსოლზე!
+    <header className="site-header">
+      <div className="top-banner">
+        <span className="top-banner-text">{t("topBanner")}</span>
+        <button
+          type="button"
+          className="lang-toggle"
+          onClick={() => setLang(lang === "ka" ? "en" : "ka")}
+          aria-label="Language"
+        >
+          <span className={lang === "ka" ? "on" : ""}>🇬🇪 ქართ</span>
+          <span className="sep">|</span>
+          <span className={lang === "en" ? "on" : ""}>🇬🇧 Eng</span>
+        </button>
       </div>
 
-      {/* მთავარი ნავბარი */}
-      <div
-        className="nav-container"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          width: "100%",
-          padding: "10px 40px",
-          boxSizing: "border-box",
-        }}
-      >
-        {/* ლოგო */}
-        <Link
-          to="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            textDecoration: "none",
-          }}
-        >
-          <img
-            src="/retrobit.png"
-            alt="RetroBit"
-            style={{
-              height: "75px",
-              width: "auto",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
+      <div className="nav-container">
+        <Link to="/" className="site-logo" aria-label="RetroBit">
+          <img src="/retrobit.png" alt="RetroBit" />
         </Link>
 
-        {/* ძებნის ველი */}
-        <div
-          className="search-box-wrapper"
-          style={{
-            flex: 1,
-            maxWidth: "550px",
-            margin: "0 30px",
-            boxSizing: "border-box",
-          }}
-        >
-          <form
-            onSubmit={handleSearchSubmit}
-            style={{ display: "flex", position: "relative", width: "100%" }}
-          >
+        <div className="search-box-wrapper">
+          <form onSubmit={handleSearchSubmit} className="search-form">
             <input
               type="text"
-              placeholder="მოძებნე თამაშები და კონსოლები..."
+              placeholder={t("search")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 45px 10px 18px",
-                borderRadius: "20px",
-                border: "1px solid var(--border)",
-                outline: "none",
-                fontSize: "0.95rem",
-                backgroundColor: "var(--code-bg)",
-                color: "var(--text)",
-                boxSizing: "border-box",
-              }}
             />
-            <button
-              type="submit"
-              style={{
-                position: "absolute",
-                right: "5px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "1.1rem",
-                padding: "5px 10px",
-              }}
-            >
+            <button type="submit" aria-label={t("search")}>
               🔍
             </button>
           </form>
         </div>
 
-        {/* მარჯვენა იკონები და თემის გადამრთველი ღილაკი */}
-        <div
-          className="nav-links-wrapper"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            flexWrap: "wrap",
-          }}
-        >
-          <Link
-            to="/play"
-            className="neon-btn"
-            title="თამაშები"
-            style={{
-              backgroundColor: "#a855f7",
-              color: "#ffffff",
-              border: "1px solid #c084fc",
-              padding: "8px 14px",
-              borderRadius: "10px",
-              textDecoration: "none",
-              fontWeight: "700",
-              fontSize: "0.9rem",
-            }}
-          >
-            🎮 თამაშები
+        <div className="nav-links-wrapper">
+          <Link to="/play" className="neon-btn play-link">
+            <span aria-hidden>🎮</span>
+            <span className="btn-label">{t("games")}</span>
           </Link>
 
           <button
-            onClick={toggleTheme}
-            className="neon-btn"
-            style={{
-              backgroundColor: "var(--code-bg)",
-              color: "var(--text-h)",
-              border: "1px solid var(--border)",
-              padding: "8px 14px",
-              borderRadius: "10px",
-              cursor: "pointer",
-              fontWeight: "600",
-              fontSize: "0.9rem",
-            }}
+            type="button"
+            onClick={() => setIsDark((prev) => !prev)}
+            className="neon-btn icon-btn"
+            title={isDark ? t("lightMode") : t("darkMode")}
           >
-            {isDark ? "☀️ ღია რეჟიმი" : "🌙 მუქი რეჟიმი"}
+            {isDark ? "☀️" : "🌙"}
+            <span className="btn-label">
+              {isDark ? t("lightMode") : t("darkMode")}
+            </span>
           </button>
 
-          <Link
-            to="/cart"
-            className="neon-btn"
-            title="კალათა"
-            style={{
-              backgroundColor: "var(--code-bg)",
-              color: "#c084fc",
-              border: "1px solid #a855f7",
-              padding: "8px 12px",
-              borderRadius: "10px",
-              textDecoration: "none",
-              fontWeight: "600",
-              fontSize: "1rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            🛒{" "}
-            <span
-              style={{
-                fontSize: "0.85rem",
-                background: "#a855f7",
-                color: "#fff",
-                padding: "1px 6px",
-                borderRadius: "6px",
-              }}
-            >
-              {totalItems}
-            </span>
+          <Link to="/cart" className="neon-btn icon-btn" title={t("cart")}>
+            🛒
+            <span className="cart-count">{totalItems}</span>
           </Link>
 
           {token ? (
             <button
+              type="button"
               onClick={onLogout}
-              className="neon-btn"
-              title="გასვლა"
-              style={{
-                backgroundColor: "var(--code-bg)",
-                color: "#ff6b6b",
-                border: "1px solid #ff4757",
-                padding: "8px 12px",
-                borderRadius: "10px",
-                cursor: "pointer",
-                fontWeight: "600",
-                fontSize: "1rem",
-              }}
+              className="neon-btn icon-btn"
+              title={t("logout")}
             >
               🚪
             </button>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="neon-btn"
-                title="შესვლა"
-                style={{
-                  backgroundColor: "var(--code-bg)",
-                  color: "#c084fc",
-                  border: "1px solid #a855f7",
-                  padding: "8px 12px",
-                  borderRadius: "10px",
-                  textDecoration: "none",
-                  fontWeight: "600",
-                  fontSize: "1rem",
-                }}
-              >
+              <Link to="/login" className="neon-btn icon-btn" title={t("login")}>
                 🔑
               </Link>
               <Link
                 to="/register"
-                className="neon-btn"
-                title="რეგისტრაცია"
-                style={{
-                  backgroundColor: "#a855f7",
-                  color: "#ffffff",
-                  border: "1px solid #c084fc",
-                  padding: "8px 12px",
-                  borderRadius: "10px",
-                  textDecoration: "none",
-                  fontWeight: "600",
-                  fontSize: "1rem",
-                }}
+                className="neon-btn icon-btn play-link"
+                title={t("register")}
               >
                 ⚡
               </Link>
@@ -293,77 +127,24 @@ export default function Header({
         </div>
       </div>
 
-      {/* ქვედა კატეგორიების ჰორიზონტალური მენიუ */}
-      <nav
-        className="main-nav-bar"
-        style={{
-          backgroundColor: "var(--bg)",
-          borderTop: "1px solid var(--border)",
-          borderBottom: "2px solid var(--accent)", // 👈 მკაფიო იასამნისფერი ხაზი ბოლოში, რომელიც სრულად ხურავს ზონას
-          padding: "0 40px",
-          display: "flex",
-          gap: "30px",
-          width: "100%",
-          boxSizing: "border-box",
-          position: "relative",
-          zIndex: 10,
-        }}
-      >
+      <nav className="main-nav-bar">
         {categoriesData.map((cat, index) => (
-          <div
-            key={index}
-            className="dropdown-parent"
-            style={{ position: "relative", padding: "12px 0" }}
-          >
+          <div key={index} className="dropdown-parent">
             <Link
               to={
                 cat.name === "All"
                   ? "/"
                   : `/category/${encodeURIComponent(cat.name)}`
               }
-              style={{
-                color: "var(--text)",
-                fontSize: "0.95rem",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-                fontWeight: "500",
-                textDecoration: "none",
-                display: "block",
-              }}
             >
               {cat.name} {cat.sub.length > 0 && "▾"}
             </Link>
-
             {cat.sub.length > 0 && (
-              <div
-                className="dropdown-content"
-                style={{
-                  display: "none",
-                  position: "absolute",
-                  top: "100%",
-                  left: 0,
-                  backgroundColor: "var(--bg)",
-                  minWidth: "220px",
-                  boxShadow: "var(--shadow)",
-                  zIndex: 100,
-                  borderRadius: "4px",
-                  overflow: "hidden",
-                  border: "1px solid var(--border)",
-                }}
-              >
+              <div className="dropdown-content">
                 {cat.sub.map((subItem, subIndex) => (
                   <Link
                     key={subIndex}
                     to={`/category/${encodeURIComponent(cat.name)}/${encodeURIComponent(subItem)}`}
-                    style={{
-                      color: "var(--text)",
-                      padding: "10px 15px",
-                      textDecoration: "none",
-                      display: "block",
-                      fontSize: "0.9rem",
-                      borderBottom: "1px solid var(--border)",
-                      whiteSpace: "nowrap",
-                    }}
                   >
                     {subItem}
                   </Link>

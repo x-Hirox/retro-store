@@ -13,6 +13,7 @@ import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
+import { useLang } from "../i18n/LanguageContext";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -21,6 +22,7 @@ export default function Home() {
   const selectedCategory = searchParams.get("category") || "";
   const searchQuery = searchParams.get("search")?.toLowerCase() || "";
   const navigate = useNavigate();
+  const { t } = useLang();
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -112,13 +114,13 @@ export default function Home() {
                 style={{
                   margin: "10px 0 8px",
                   fontFamily: "var(--heading)",
-                  fontSize: "1.6rem",
+                  fontSize: "clamp(1.15rem, 4vw, 1.6rem)",
                 }}
               >
-                ითამაშე NES, Sega Genesis, SNES და GBA ბრაუზერში
+                {t("arcadeHomeTitle")}
               </h3>
               <p style={{ margin: 0, opacity: 0.9 }}>
-                ლეგალური homebrew — ერთი კლიკით Play.
+                {t("arcadeHomeText")}
               </p>
             </div>
             <span
@@ -131,7 +133,7 @@ export default function Home() {
                 fontFamily: "var(--heading)",
               }}
             >
-              თამაში →
+              {t("playCta")}
             </span>
           </div>
         </div>

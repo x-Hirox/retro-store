@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getSiteSettings } from "../services/contentService";
 import type { ISiteSettings } from "../types";
+import { useLang } from "../i18n/LanguageContext";
 
 export default function SiteFooter() {
   const location = useLocation();
+  const { t } = useLang();
   const [settings, setSettings] = useState<ISiteSettings | null>(null);
 
   useEffect(() => {
@@ -33,20 +35,20 @@ export default function SiteFooter() {
         }}
       >
         <div>
-          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>კოლექციები</h4>
+          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>{t("collections")}</h4>
           <FooterLink to="/category/nintendo">Nintendo</FooterLink>
           <FooterLink to="/category/playstation">PlayStation</FooterLink>
           <FooterLink to="/category/sega">Sega</FooterLink>
           <FooterLink to="/category/xbox">Xbox</FooterLink>
         </div>
         <div>
-          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>დაწყება</h4>
-          <FooterLink to="/">მთავარი</FooterLink>
-          <FooterLink to="/play">თამაშები</FooterLink>
-          <FooterLink to="/category/bundles">კომპლექტები</FooterLink>
+          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>{t("start")}</h4>
+          <FooterLink to="/">{t("home")}</FooterLink>
+          <FooterLink to="/play">{t("games")}</FooterLink>
+          <FooterLink to="/category/bundles">{t("bundles")}</FooterLink>
         </div>
         <div>
-          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>დაგვიკავშირდი</h4>
+          <h4 style={{ margin: "0 0 12px", color: "#fff" }}>{t("contact")}</h4>
           <p style={{ margin: "0 0 8px" }}>
             {settings?.footerPhone || "+995 555 00 00 00"}
           </p>
@@ -69,7 +71,7 @@ export default function SiteFooter() {
           fontSize: "0.85rem",
         }}
       >
-        © {new Date().getFullYear()} RetroBit. ყველა უფლება დაცულია.
+        © {new Date().getFullYear()} RetroBit. {t("rights")}
       </p>
     </footer>
   );

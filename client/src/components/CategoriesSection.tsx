@@ -1,12 +1,24 @@
 import { useNavigate } from "react-router-dom";
+import { useLang } from "../i18n/LanguageContext";
+import type { MessageKey } from "../i18n/messages";
 
 export default function CategoriesSection() {
   const navigate = useNavigate();
+  const { t } = useLang();
 
-  const categories = [
+  const categories: {
+    title: MessageKey;
+    desc: MessageKey;
+    path: string;
+    background: string;
+    shadow: string;
+    hoverShadow: string;
+    imagePath: string;
+    gridSpan: string;
+  }[] = [
     {
-      title: "სტაციონარული კონსოლები",
-      desc: "აიმაღლე თამაშის ხარისხი ლეგენდარული კონსოლებით. პროფესიონალურად განახლებული.",
+      title: "catHome",
+      desc: "catHomeDesc",
       path: "/category/playstation",
       // სუფთა, თანაბარი ლურჯი ფონი (მუქი გადასვლების გარეშე)
       background: "#2563eb",
@@ -16,8 +28,8 @@ export default function CategoriesSection() {
       gridSpan: "span 6",
     },
     {
-      title: "ხელის კონსოლები",
-      desc: "იქონიე შენი საყვარელი თამაშები თან. შემოწმებული და სანდო.",
+      title: "catHand",
+      desc: "catHandDesc",
       path: "/category/nintendo",
       // სუფთა, თანაბარი იისფერი
       background: "#7c3aed",
@@ -27,8 +39,8 @@ export default function CategoriesSection() {
       gridSpan: "span 3",
     },
     {
-      title: "თამაშები",
-      desc: "მარადიული კლასიკიდან იშვიათ მარგალიტებამდე. გაწმენდილი და შემოწმებული.",
+      title: "catGames",
+      desc: "catGamesDesc",
       path: "/category/sega",
       // სუფთა, თანაბარი მწვანე
       background: "#059669",
@@ -38,8 +50,8 @@ export default function CategoriesSection() {
       gridSpan: "span 3",
     },
     {
-      title: "აქსესუარები",
-      desc: "ყველაფერი შენი კონსოლებისთვის – ჯოისტიკები, კაბელები და დამტენები.",
+      title: "catAcc",
+      desc: "catAccDesc",
       path: "/category/accessories",
       // სუფთა, თანაბარი წითელი
       background: "#dc2626",
@@ -49,8 +61,8 @@ export default function CategoriesSection() {
       gridSpan: "span 4",
     },
     {
-      title: "პროდუქტების ბუნდლები",
-      desc: "მოიგე მეტი შეფუთული ნაკრებებით: კონსოლები, თამაშები და აქსესუარები ერთად.",
+      title: "catBundles",
+      desc: "catBundlesDesc",
       path: "/category/bundles",
       // სუფთა, თანაბარი ყავისფერი/ოქროსფერი
       background: "#b45309",
@@ -67,7 +79,7 @@ export default function CategoriesSection() {
         width: "100%",
         maxWidth: "1400px",
         margin: "50px auto 0",
-        padding: "0 30px",
+        padding: "0 16px",
         boxSizing: "border-box",
       }}
     >
@@ -76,29 +88,24 @@ export default function CategoriesSection() {
           color: "var(--text-h)",
           textAlign: "center",
           marginBottom: "40px",
-          fontSize: "2.2rem",
+          fontSize: "clamp(1.25rem, 4vw, 2.2rem)",
           fontFamily: "'Noto Serif Georgian', serif",
           fontWeight: "900",
           letterSpacing: "1.5px",
         }}
       >
-        მოძებნე კატეგორიის მიხედვით
+        {t("shopByCategory")}
       </h2>
 
       {/* 12-სვეტიანი ზუსტი ბადე */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(12, 1fr)",
-          gap: "24px",
-        }}
-      >
+      <div className="category-mosaic">
         {categories.map((cat, index) => {
           const isWide = index === 0 || index === 4;
 
           return (
             <div
               key={cat.title}
+              className="category-card"
               onClick={() => navigate(cat.path)}
               style={{
                 background: cat.background, // სუფთა ფონი ყოველგვარი მუქი ზოლების და გრადიენტების გარეშე
@@ -126,7 +133,10 @@ export default function CategoriesSection() {
               }}
             >
               {/* ტექსტური ნაწილი მარცხნივ */}
-              <div style={{ zIndex: 2, maxWidth: isWide ? "55%" : "50%" }}>
+              <div
+                className="cat-copy"
+                style={{ zIndex: 2, maxWidth: isWide ? "55%" : "50%" }}
+              >
                 <h3
                   style={{
                     fontSize: isWide ? "1.9rem" : "1.5rem",
@@ -137,7 +147,7 @@ export default function CategoriesSection() {
                     lineHeight: "1.2",
                   }}
                 >
-                  {cat.title}
+                  {t(cat.title)}
                 </h3>
                 <p
                   style={{
@@ -147,7 +157,7 @@ export default function CategoriesSection() {
                     fontWeight: "500",
                   }}
                 >
-                  {cat.desc}
+                  {t(cat.desc)}
                 </p>
               </div>
 

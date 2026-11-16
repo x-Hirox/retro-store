@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
 import { getSalePrice, isBannerProduct } from "../utils/pricing";
+import { useLang } from "../i18n/LanguageContext";
 
 interface Props {
   products: IProduct[];
@@ -18,6 +19,7 @@ export default function BestSellersSlider({
 }: Props) {
   const navigate = useNavigate();
   const sliderRef = useRef<HTMLDivElement>(null);
+  const { t } = useLang();
 
   const regularProducts = products.filter((p) => {
     if (isBannerProduct(p)) return false;
@@ -36,14 +38,7 @@ export default function BestSellersSlider({
   });
 
   return (
-    <div
-      style={{
-        width: "100%",
-        padding: "40px 40px 0 40px",
-        boxSizing: "border-box",
-        overflow: "visible", // 👈 უზრუნველყოფს, რომ შიგთავსი არ ჩაიჭრას
-      }}
-    >
+    <div className="section-gutter" style={{ overflow: "visible" }}>
       <div
         style={{
           marginBottom: "25px",
@@ -54,19 +49,19 @@ export default function BestSellersSlider({
         }}
       >
         <h2
+          className="section-title"
           style={{
             color: "var(--text-h)",
-            fontSize: "2rem",
             fontWeight: "900",
             letterSpacing: "1.5px",
             fontFamily: "'Noto Serif Georgian', serif",
           }}
         >
           {searchQuery
-            ? `🔍 ძებნის შედეგი: "${searchQuery}"`
+            ? `🔍 ${t("searchResult")}: "${searchQuery}"`
             : selectedCategory
               ? `📂 ${selectedCategory}`
-              : "ბესტსელერები"}
+              : t("bestsellers")}
         </h2>
         <span
           style={{
@@ -77,7 +72,7 @@ export default function BestSellersSlider({
           }}
           onClick={() => navigate("/category/playstation")}
         >
-          ყველას ნახვა &gt;
+          {t("seeAll")}
         </span>
       </div>
 
@@ -90,7 +85,7 @@ export default function BestSellersSlider({
             marginTop: "50px",
           }}
         >
-          იტვირთება რეტრო სამყარო...
+          {t("loading")}
         </div>
       ) : regularProducts.length === 0 ? (
         <div
@@ -103,7 +98,7 @@ export default function BestSellersSlider({
           }}
         >
           <p style={{ color: "var(--text)", fontSize: "1.1rem" }}>
-            პროდუქტები ამჟამად არ მოიძებნება.
+            {t("noProducts")}
           </p>
         </div>
       ) : (
