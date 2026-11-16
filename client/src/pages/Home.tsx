@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
 
@@ -60,6 +60,13 @@ export default function Home() {
     >
       {/* 1. მთავარი ბანერი */}
       <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
+
+      {!searchQuery && (
+        <Link to="/game" className="mg-home-cta">
+          <span>🧩 Console Crush</span>
+          <em>Match-3 · ითამაშე ახლავე →</em>
+        </Link>
+      )}
 
       {/* 2. ბესტსელერები */}
       <div style={{ paddingTop: "25px", overflow: "visible" }}>

@@ -21,6 +21,7 @@ import ChatWidget from "./components/ChatWidget";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
+import MatchGame from "./pages/MatchGame";
 
 const categoriesData = [
   { name: "All", sub: [] },
@@ -141,6 +142,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/play" element={<Arcade />} />
             <Route path="/sell" element={<Sell />} />
+            <Route path="/game" element={<MatchGame />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route

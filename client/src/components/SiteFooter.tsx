@@ -32,6 +32,7 @@ export default function SiteFooter() {
           <h4>{t("start")}</h4>
           <FooterLink to="/">{t("home")}</FooterLink>
           <FooterLink to="/play">{t("games")}</FooterLink>
+          <FooterLink to="/game">{t("matchNav")}</FooterLink>
           <FooterLink to="/sell">{t("sellNav")}</FooterLink>
           <FooterLink to="/category/Bundles">{t("bundles")}</FooterLink>
           <FooterLink to="/login">{t("login")}</FooterLink>

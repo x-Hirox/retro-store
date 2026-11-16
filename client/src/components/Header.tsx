@@ -79,6 +79,10 @@ export default function Header({
         </div>
 
         <div className="nav-links-wrapper">
+          <Link to="/game" className="neon-btn play-link">
+            <span aria-hidden>🧩</span>
+            <span className="btn-label">{t("matchNav")}</span>
+          </Link>
           <Link to="/play" className="neon-btn play-link">
             <span aria-hidden>🎮</span>
             <span className="btn-label">{t("games")}</span>
@@ -162,6 +166,9 @@ export default function Header({
             )}
           </div>
         ))}
+        <Link to="/game" className="game-nav-link">
+          {t("matchNav")}
+        </Link>
         <Link to="/sell" className="sell-nav-link">
           {t("sellNav")}
         </Link>

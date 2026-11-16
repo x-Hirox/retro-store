@@ -8,6 +8,7 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import contentRoutes from "./routes/contentRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import gameRoutes from "./routes/gameRoutes.js";
 import { seedContentIfEmpty } from "./utils/seedContent.js";
 import { securityHeaders } from "./utils/security.js";
 
@@ -49,7 +50,7 @@ app.use(express.json({ limit: "80kb" }));
 app.use((req, _res, next) => {
   if (
     !req.url.startsWith("/api/") &&
-    /^\/(products|content|auth|orders)(\/|\?|$)/.test(req.url)
+    /^\/(products|content|auth|orders|game)(\/|\?|$)/.test(req.url)
   ) {
     req.url = `/api${req.url}`;
   }
@@ -61,6 +62,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/content", contentRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/game", gameRoutes);
 
 app.get("/", (_req, res) => {
   res.status(200).send("Retro-Store API is running successfully!");
