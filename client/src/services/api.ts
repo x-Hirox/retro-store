@@ -1,7 +1,16 @@
 import axios from "axios";
 
+const DEFAULT_API_URL = "https://retro-store.onrender.com/api";
+
+function resolveApiBaseUrl(): string {
+  const raw = String(import.meta.env.VITE_API_URL || DEFAULT_API_URL).trim();
+  const trimmed = raw.replace(/\/+$/, "");
+  if (!trimmed) return DEFAULT_API_URL;
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+}
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://retro-store.onrender.com/api",
+  baseURL: resolveApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },

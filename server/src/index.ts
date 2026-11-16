@@ -24,6 +24,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Older frontend builds used the origin without `/api` (e.g. /products).
+app.use((req, _res, next) => {
+  if (
+    !req.url.startsWith("/api/") &&
+    /^\/(products|content|auth|orders)(\/|\?|$)/.test(req.url)
+  ) {
+    req.url = `/api${req.url}`;
+  }
+  next();
+});
+
 // 🟢 როუტერების მიერთება
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
