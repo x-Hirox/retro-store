@@ -17,7 +17,6 @@ import Header from "./components/Header";
 import OrderSuccess from "./pages/OrderSuccess";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
-import ChatWidget from "./components/ChatWidget";
 import CartDrawer from "./components/CartDrawer";
 import RetroFX from "./components/RetroFX";
 import SiteFooter from "./components/SiteFooter";
@@ -177,7 +176,6 @@ export default function App() {
         <SiteFooter />
         <CartDrawer />
         <RetroFX />
-        <ChatWidget />
       </div>
     </Router>
   );
