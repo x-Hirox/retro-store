@@ -2503,12 +2503,20 @@ body:not(.dark) .site-header {
   height: 100%;
   object-fit: cover;
   opacity: 1;
+  display: block;
+  background: #0a0a12;
 }
 
 .hero-banner {
   width: 100%;
   cursor: pointer;
   overflow: hidden;
+}
+.hero-banner-slot {
+  height: 100%;
+  min-height: 100%;
+  background: #0a0a12;
+  cursor: default;
 }
 .hero-banner img {
   width: 100%;

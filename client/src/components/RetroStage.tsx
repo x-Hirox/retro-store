@@ -1,4 +1,13 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  lazy,
+  Suspense,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import FloatingConsoles from "./FloatingConsoles";
 import RetroBackground from "./RetroBackground";
 import SkateRider from "./SkateRider";
@@ -8,18 +17,27 @@ const RetroScene3D = lazy(() => import("./RetroScene3D"));
 
 export default function RetroStage({ children }: { children?: ReactNode }) {
   const useGl = useDesktopGL();
+  const [bannerReady, setBannerReady] = useState(false);
+
+  const banner = Children.map(children, (child) =>
+    isValidElement(child)
+      ? cloneElement(child as ReactElement<{ onReady?: () => void }>, {
+          onReady: () => setBannerReady(true),
+        })
+      : child,
+  );
 
   return (
     <section className="retro-stage">
-      {useGl ? (
-        <Suspense fallback={<RetroBackground />}>
+      {useGl && bannerReady ? (
+        <Suspense fallback={null}>
           <RetroScene3D />
         </Suspense>
       ) : (
         <RetroBackground />
       )}
       <div className="ny-garland" aria-hidden />
-      <div className="retro-stage-banner">{children}</div>
+      <div className="retro-stage-banner">{banner}</div>
       {!useGl && <FloatingConsoles />}
       <SkateRider />
 
