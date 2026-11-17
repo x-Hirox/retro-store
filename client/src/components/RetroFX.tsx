@@ -14,7 +14,7 @@ export default function RetroFX() {
     if (admin) return;
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement | null;
-      if (t?.closest?.(".neon-btn, .product-card, .arcade-tab, .sell-btn, .sell-brand-bar")) {
+      if (t?.closest?.(".neon-btn, .sell-btn, .sell-brand-bar")) {
         arcadeBeep();
       }
     };

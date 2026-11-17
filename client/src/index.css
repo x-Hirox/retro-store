@@ -2258,7 +2258,7 @@ body:not(.dark) .site-header {
   border: 0;
   background: none;
   padding: 0;
-  cursor: pointer;
+  pointer-events: none;
   width: 64px;
   filter: drop-shadow(0 0 10px #ff007f66);
   animation: nbit-float 3.6s ease-in-out infinite;

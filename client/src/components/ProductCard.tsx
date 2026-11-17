@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
 import { getSalePrice } from "../utils/pricing";
-import { playConsoleCue } from "../utils/arcadeBeep";
 
 export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
@@ -14,9 +13,6 @@ export default function ProductCard({ product }: { product: IProduct }) {
     <motion.div
       className={`product-card glass-card${sold ? " is-sold" : ""}`}
       onClick={() => navigate(`/product/${product._id}`)}
-      onMouseEnter={() =>
-        playConsoleCue(`${product.title} ${product.platform || ""}`)
-      }
       whileHover={sold ? undefined : { y: -10, scale: 1.03 }}
       transition={{ type: "spring", stiffness: 420, damping: 22, mass: 0.55 }}
     >

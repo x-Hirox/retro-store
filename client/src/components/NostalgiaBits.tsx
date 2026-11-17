@@ -1,10 +1,3 @@
-import {
-  playCassetteClick,
-  playCoin,
-  playGameBoyBlip,
-  playVhsWhir,
-} from "../utils/arcadeBeep";
-
 export function HolidayLights() {
   return (
     <div className="ny-header-lights" aria-hidden>
@@ -19,23 +12,15 @@ function Bit({
   src,
   title,
   pos,
-  sound,
 }: {
   src: string;
   title: string;
   pos: "left" | "right";
-  sound: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className={`nbit nbit-pos-${pos}`}
-      title={title}
-      onMouseEnter={sound}
-      onClick={sound}
-    >
+    <span className={`nbit nbit-pos-${pos}`} title={title} aria-hidden>
       <img src={src} alt="" />
-    </button>
+    </span>
   );
 }
 
@@ -48,38 +33,32 @@ export function SantaHat() {
 }
 
 export const Tamagotchi = () => (
-  <Bit src="/decor/tamagotchi.svg" title="Tamagotchi" pos="left" sound={playGameBoyBlip} />
+  <Bit src="/decor/tamagotchi.svg" title="Tamagotchi" pos="left" />
 );
 export const FloppyDisk = () => (
-  <Bit src="/decor/floppy.svg" title="3.5″ Floppy" pos="right" sound={playCassetteClick} />
+  <Bit src="/decor/floppy.svg" title="3.5″ Floppy" pos="right" />
 );
 export const Polaroid = () => (
-  <Bit src="/decor/polaroid.svg" title="Polaroid" pos="right" sound={playVhsWhir} />
+  <Bit src="/decor/polaroid.svg" title="Polaroid" pos="right" />
 );
 export const Boombox = () => (
-  <Bit src="/decor/boombox.svg" title="Boombox" pos="left" sound={playCassetteClick} />
+  <Bit src="/decor/boombox.svg" title="Boombox" pos="left" />
 );
 export const Discman = () => (
-  <Bit src="/decor/discman.svg" title="Discman" pos="right" sound={playCassetteClick} />
+  <Bit src="/decor/discman.svg" title="Discman" pos="right" />
 );
 export const Rubik = () => (
-  <Bit src="/decor/rubik.svg" title="Rubik" pos="left" sound={playCoin} />
+  <Bit src="/decor/rubik.svg" title="Rubik" pos="left" />
 );
 export const VhsTape = () => (
-  <Bit src="/decor/vhs.svg" title="VHS" pos="right" sound={playVhsWhir} />
+  <Bit src="/decor/vhs.svg" title="VHS" pos="right" />
 );
 
 export function InsertCoin() {
   return (
-    <button
-      type="button"
-      className="nbit nbit-coin nbit-pos-right"
-      title="INSERT COIN"
-      onMouseEnter={playCoin}
-      onClick={playCoin}
-    >
+    <span className="nbit nbit-coin nbit-pos-right" aria-hidden>
       INSERT COIN
-    </button>
+    </span>
   );
 }
 
