@@ -8,7 +8,16 @@ export function getGoogleClientId(): string {
 
 export function saveAuthSession(data: {
   token: string;
-  user?: { id?: string; name?: string; email?: string; role?: string };
+  user?: {
+    id?: string;
+    name?: string;
+    email?: string;
+    role?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    isVerified?: boolean;
+  };
 }): void {
   localStorage.setItem("token", data.token);
   if (data.user) {
@@ -16,6 +25,13 @@ export function saveAuthSession(data: {
   }
 }
 
-export function afterLoginPath(role?: string): string {
-  return role === "admin" ? "/admin" : "/profile";
+export function afterLoginPath(user?: {
+  role?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}): string {
+  if (user?.role === "admin") return "/admin";
+  const incomplete = !user?.firstName || !user?.lastName || !user?.phone;
+  return incomplete ? "/profile?setup=1" : "/";
 }

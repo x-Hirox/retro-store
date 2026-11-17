@@ -51,7 +51,7 @@ export default function Login() {
       const data = await authService.login({ email, password });
       saveAuthSession(data);
       setLoading(false);
-      window.location.href = afterLoginPath(data.user?.role);
+      window.location.href = afterLoginPath(data.user);
     } catch (err: any) {
       const msg = err.response?.data?.message || "შეცდომა ავტორიზაციისას";
       setError(msg);
@@ -72,7 +72,7 @@ export default function Login() {
         });
         saveAuthSession(data);
         setLoading(false);
-        window.location.href = afterLoginPath(data.user?.role);
+        window.location.href = afterLoginPath(data.user);
       } catch (err: any) {
         setError(
           err.response?.data?.message || "Google ავტორიზაცია ვერ მოხერხდა",

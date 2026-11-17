@@ -35,5 +35,6 @@ export function publicUser(user: IUser) {
     address: user.address || "",
     city: user.city || "",
     role,
+    isVerified: Boolean(user.isVerified),
   };
 }

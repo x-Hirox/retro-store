@@ -19,7 +19,7 @@ export default function ActivationCodeForm({ email }: { email: string }) {
       });
       if (data.token && data.user) {
         saveAuthSession(data);
-        window.location.href = afterLoginPath(data.user?.role);
+        window.location.href = afterLoginPath(data.user);
         return;
       }
       window.location.href = "/login";

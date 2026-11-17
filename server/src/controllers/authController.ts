@@ -16,6 +16,7 @@ import { publicUser, displayName } from "../utils/publicUser.js";
 import { clampText } from "../utils/security.js";
 import {
   isValidEmail,
+  isValidPersonName,
   normalizeGePhone,
   passwordError,
 } from "../utils/validate.js";
@@ -84,12 +85,16 @@ export const registerUser = async (
     const { password } = req.body;
     const name = displayName({ firstName, lastName }) || firstName;
 
-    if (!firstName) {
-      res.status(400).json({ message: "სახელი აუცილებელია" });
+    if (!isValidPersonName(firstName)) {
+      res.status(400).json({
+        message: "სახელი უნდა იყოს მინიმუმ 2 ასო, ციფრის გარეშე (მაგ: ბექა)",
+      });
       return;
     }
-    if (!lastName) {
-      res.status(400).json({ message: "გვარი აუცილებელია" });
+    if (!isValidPersonName(lastName)) {
+      res.status(400).json({
+        message: "გვარი უნდა იყოს მინიმუმ 2 ასო, ციფრის გარეშე",
+      });
       return;
     }
     if (!phone) {
@@ -114,7 +119,11 @@ export const registerUser = async (
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      res.status(400).json({ message: "მომხმარებელი ამ მეილით უკვე არსებობს" });
+      res.status(409).json({
+        exists: true,
+        message:
+          "ეს მეილი უკვე რეგისტრირებულია. შედი ან დააჭირე „დაგავიწყდა პაროლი“.",
+      });
       return;
     }
 
@@ -135,16 +144,19 @@ export const registerUser = async (
       verificationExpires: expires,
     });
 
-    const mailSent = await sendActivationEmail(req, user, token, code);
+    const role = resolveRole(user.email, user.role);
+    const sessionToken = generateToken(user._id.toString(), role);
 
     res.status(201).json({
-      mailSent,
+      token: sessionToken,
+      user: publicUser(user),
       email: user.email,
       mailConfigured: mailConfigured(),
-      message: mailSent
-        ? "რეგისტრაცია წარმატებულია. მეილზე გამოგიგზავნეთ აქტივაციის ბმული და 6-ნიშნა კოდი. შეამოწმე Inbox და Spam."
-        : "ანგარიში შეიქმნა, მაგრამ მეილი ვერ გაიგზავნა. დააჭირე „კოდის ხელახლა გაგზავნა“ ან მოგვწერე retrobit.support@gmail.com",
+      message:
+        "ანგარიში შეიქმნა. შეგიძლია იყიდო ახლავე — მეილზე გამოგიგზავნით დასტურის ბმულს.",
     });
+
+    void sendActivationEmail(req, user, token, code);
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ message: "სერვერის შეცდომა" });
@@ -280,14 +292,6 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
     const user = await User.findOne({ email });
     if (!user) {
       res.status(400).json({ message: "არასწორი მეილი ან პაროლი" });
-      return;
-    }
-
-    if (!user.isVerified) {
-      res.status(400).json({
-        message:
-          "თქვენი ანგარიში ჯერ არ არის გააქტიურებული. გთხოვთ შეამოწმოთ ელ-ფოსტა!",
-      });
       return;
     }
 
@@ -433,8 +437,10 @@ export const updateProfile = async (
     const firstName = clampText(req.body.firstName, 40);
     const lastName = clampText(req.body.lastName, 40);
     const phone = normalizeGePhone(req.body.phone);
-    if (!firstName || !lastName) {
-      res.status(400).json({ message: "სახელი და გვარი აუცილებელია" });
+    if (!isValidPersonName(firstName) || !isValidPersonName(lastName)) {
+      res.status(400).json({
+        message: "სახელი და გვარი უნდა იყოს მინიმუმ 2 ასო, ციფრის გარეშე",
+      });
       return;
     }
     if (!phone) {

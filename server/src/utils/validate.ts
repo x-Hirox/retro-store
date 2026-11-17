@@ -17,6 +17,13 @@ export function normalizeGePhone(value: unknown): string | null {
   return null;
 }
 
+export function isValidPersonName(value: unknown): boolean {
+  const name = String(value || "").trim();
+  if (name.length < 2 || name.length > 40) return false;
+  if (/\d/.test(name)) return false;
+  return /^[\p{L}]+(?:[ '\-][\p{L}]+)*$/u.test(name);
+}
+
 export function passwordError(password: unknown): string | null {
   const pass = String(password || "");
   if (pass.length < 8) return "პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.";

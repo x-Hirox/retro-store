@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ActivationCodeForm from "../components/ActivationCodeForm";
 import { authService } from "../services/authService";
 import {
   afterLoginPath,
@@ -9,6 +8,7 @@ import {
 } from "../lib/authSession";
 import {
   isValidEmail,
+  isValidPersonName,
   normalizeGePhone,
   passwordError,
 } from "../utils/validate";
@@ -27,15 +27,13 @@ export default function Register() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState("");
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
 
-    if (!name.trim() || !lastName.trim()) {
-      setError("სახელი და გვარი აუცილებელია.");
+    if (!isValidPersonName(name) || !isValidPersonName(lastName)) {
+      setError("სახელი და გვარი უნდა იყოს მინიმუმ 2 ასო, ციფრის გარეშე (მაგ: ბექა).");
       return;
     }
     if (!normalizeGePhone(phone)) {
@@ -68,11 +66,12 @@ export default function Register() {
         email,
         password,
       });
-      setMessage(
-        response.message ||
-          "რეგისტრაცია წარმატებულია. შეამოწმე მეილი აქტივაციის კოდისთვის.",
-      );
-      setPendingEmail(response.email || email.trim().toLowerCase());
+      if (response.token && response.user) {
+        saveAuthSession(response);
+        window.location.href = afterLoginPath(response.user);
+        return;
+      }
+      setMessage(response.message || "რეგისტრაცია წარმატებულია.");
     } catch (err: any) {
       const timedOut = err.code === "ECONNABORTED";
       setError(
@@ -97,7 +96,7 @@ export default function Register() {
         });
         saveAuthSession(data);
         setLoading(false);
-        window.location.href = afterLoginPath(data.user?.role);
+        window.location.href = afterLoginPath(data.user);
       } catch (err: any) {
         setError(
           err.response?.data?.message || "Google ავტორიზაცია ვერ მოხერხდა",
@@ -180,8 +179,8 @@ export default function Register() {
             marginBottom: "25px",
           }}
         >
-          სახელი, გვარი, ტელეფონი, მეილი და პაროლი. მეილზე მოგივა აქტივაციის
-          ბმული — დააკლიკე და შედი პროფილში.
+          Google-ით ერთი წამით, ან შეავსე ფორმა. ანგარიში მაშინვე იხსნება —
+          მეილის დასტური მოგივა, მაგრამ ყიდვას არ აყოვნებს.
         </p>
 
         {message && (
@@ -218,10 +217,7 @@ export default function Register() {
           </div>
         )}
 
-        {pendingEmail ? (
-          <ActivationCodeForm email={pendingEmail} />
-        ) : (
-          <>
+        <>
         {/* Google რეგისტრაციის ღილაკის კონტეინერი */}
         <div
           style={{
@@ -273,7 +269,7 @@ export default function Register() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="შენი სახელი"
+              placeholder="ბექა"
               style={{
                 width: "100%",
                 padding: "12px",
@@ -303,7 +299,7 @@ export default function Register() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
-              placeholder="შენი გვარი"
+              placeholder="გრძელიშვილი"
               style={{
                 width: "100%",
                 padding: "12px",
@@ -513,8 +509,7 @@ export default function Register() {
             უკვე გაქვს აკაუნტი? შესვლა →
           </Link>
         </div>
-          </>
-        )}
+        </>
       </div>
     </div>
   );

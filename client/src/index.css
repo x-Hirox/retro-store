@@ -1868,6 +1868,13 @@ body:not(.dark) .site-header {
   margin: 0;
 }
 
+.profile-home-link {
+  text-align: center;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .order-list {
   display: flex;
   flex-direction: column;

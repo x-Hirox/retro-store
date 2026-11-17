@@ -12,6 +12,7 @@ export interface IAuthResponse {
     address?: string;
     city?: string;
     role?: string;
+    isVerified?: boolean;
   };
 }
 
@@ -26,7 +27,7 @@ export const authService = {
     phone?: string;
   }) => {
     const response = await API.post("/auth/register", userData, {
-      timeout: 20000,
+      timeout: 15000,
     });
     return response.data;
   },

@@ -29,7 +29,7 @@ export function VerifyEmail() {
         if (response.token && response.user) {
           saveAuthSession(response);
           window.setTimeout(() => {
-            window.location.href = afterLoginPath(response.user?.role);
+            window.location.href = afterLoginPath(response.user);
           }, 800);
         }
       } catch (err: any) {

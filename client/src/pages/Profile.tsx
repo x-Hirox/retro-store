@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "../services/authService";
 import API from "../services/api";
 import {
@@ -13,7 +13,7 @@ import {
 import { useLang } from "../i18n/LanguageContext";
 import OrderTracker from "../components/OrderTracker";
 import { canCustomerCancel, statusLabel } from "../utils/orderStatus";
-import { normalizeGePhone } from "../utils/validate";
+import { isValidPersonName, normalizeGePhone } from "../utils/validate";
 
 type Order = {
   _id: string;
@@ -42,9 +42,13 @@ type Order = {
 
 export default function Profile() {
   const { t } = useLang();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const setup = params.get("setup") === "1";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [verified, setVerified] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [form, setForm] = useState({
     firstName: "",
@@ -65,6 +69,7 @@ export default function Profile() {
         phone?: string;
         address?: string;
         city?: string;
+        isVerified?: boolean;
       } | null = null;
       try {
         const me = await authService.me();
@@ -77,6 +82,7 @@ export default function Profile() {
       const parts = String(user?.name || "")
         .trim()
         .split(/\s+/);
+      setVerified(user?.isVerified !== false);
       setForm({
         firstName: user?.firstName || parts[0] || "",
         lastName: user?.lastName || parts.slice(1).join(" ") || "",
@@ -103,8 +109,8 @@ export default function Profile() {
     setSaving(true);
     setMessage("");
     const phone = normalizeGePhone(form.phone);
-    if (!form.firstName.trim() || !form.lastName.trim()) {
-      setMessage("სახელი და გვარი აუცილებელია");
+    if (!isValidPersonName(form.firstName) || !isValidPersonName(form.lastName)) {
+      setMessage("სახელი და გვარი უნდა იყოს მინიმუმ 2 ასო, ციფრის გარეშე");
       setSaving(false);
       return;
     }
@@ -123,6 +129,9 @@ export default function Profile() {
       });
       localStorage.setItem("user", JSON.stringify(data.user));
       setMessage("პროფილი შენახულია");
+      if (setup) {
+        window.setTimeout(() => navigate("/"), 700);
+      }
     } catch (err: any) {
       setMessage(err.response?.data?.message || "შენახვა ვერ მოხერხდა");
     } finally {
@@ -147,7 +156,17 @@ export default function Profile() {
   return (
     <div className="profile-page">
       <h1>{t("profile")}</h1>
-      <p className="profile-lead">შენი მონაცემები და შეკვეთების ისტორია.</p>
+      <p className="profile-lead">
+        {setup
+          ? "დაასრულე პროფილი (გვარი და ტელეფონი) — შემდეგ გადახვალ მთავარ გვერდზე."
+          : "შენი მონაცემები და შეკვეთების ისტორია."}
+      </p>
+      {!verified && (
+        <p className="profile-lead">
+          დასტურის ბმული გამოგიგზავნეთ მეილზე. ყიდვა შეგიძლია ახლავე — დააკლიკე
+          ბმულს როცა მოგივა.
+        </p>
+      )}
 
       <div className="profile-grid">
         <form className="profile-card" onSubmit={save}>
@@ -199,6 +218,9 @@ export default function Profile() {
           <button type="submit" disabled={saving}>
             {saving ? "ინახება..." : t("saveProfile")}
           </button>
+          <Link to="/" className="profile-home-link">
+            მთავარ გვერდზე
+          </Link>
         </form>
 
         <section className="profile-card">
