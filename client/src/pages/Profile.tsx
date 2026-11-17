@@ -2,8 +2,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../services/authService";
 import API from "../services/api";
-import { downloadInvoice, itemPrice, itemTitle } from "../utils/invoice";
+import {
+  downloadInvoice,
+  itemPrice,
+  itemTitle,
+  payLabel,
+  payStatusLabel,
+  printInvoice,
+} from "../utils/invoice";
 import { useLang } from "../i18n/LanguageContext";
+import OrderTracker from "../components/OrderTracker";
+import { canCustomerCancel, statusLabel } from "../utils/orderStatus";
 
 type Order = {
   _id: string;
@@ -16,6 +25,11 @@ type Order = {
     city?: string;
     phone?: string;
   };
+  paymentMethod?: string;
+  paymentStatus?: string;
+  paymentProvider?: string;
+  trackingCode?: string;
+  courierName?: string;
   orderItems?: Array<{
     title?: string;
     quantity?: number;
@@ -23,13 +37,6 @@ type Order = {
     imageUrl?: string;
     product?: { title?: string; price?: number; imageUrl?: string };
   }>;
-};
-
-const STATUS: Record<string, string> = {
-  Pending: "მოლოდინში",
-  Processing: "მუშავდება",
-  Delivered: "ჩაბარებული",
-  Cancelled: "გაუქმებული",
 };
 
 export default function Profile() {
@@ -187,13 +194,20 @@ export default function Profile() {
               <article key={order._id} className="order-card">
                 <div className="order-head">
                   <strong>#{String(order._id).slice(-8)}</strong>
-                  <span>{STATUS[order.status || ""] || order.status}</span>
+                  <span>{statusLabel(order.status)}</span>
                 </div>
+                <OrderTracker status={order.status} />
                 <p>
                   {order.createdAt
                     ? new Date(order.createdAt).toLocaleString("ka-GE")
                     : ""}
                 </p>
+                {order.trackingCode && (
+                  <p>
+                    თრექინგი: <strong>{order.trackingCode}</strong>
+                    {order.courierName ? ` · ${order.courierName}` : ""}
+                  </p>
+                )}
                 <ul>
                   {(order.orderItems || []).map((item, i) => (
                     <li key={i}>
@@ -204,14 +218,45 @@ export default function Profile() {
                   ))}
                 </ul>
                 <p className="order-total">
-                  სულ {Number(order.totalPrice || 0).toFixed(2)} ₾
+                  სულ {Number(order.totalPrice || 0).toFixed(2)} ₾ ·{" "}
+                  {payLabel(order.paymentMethod)} ·{" "}
+                  {payStatusLabel(order.paymentStatus)}
                 </p>
                 <div className="order-actions">
                   <Link to={`/order-success/${order._id}`}>{t("invoice")}</Link>
+                  {order.paymentMethod !== "cash" &&
+                    order.paymentStatus !== "paid" && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const { data } = await API.post(
+                              `/orders/${order._id}/pay`,
+                            );
+                            if (data.redirectUrl) {
+                              window.location.assign(data.redirectUrl);
+                            }
+                          } catch (err: unknown) {
+                            const ax = err as {
+                              response?: { data?: { message?: string } };
+                            };
+                            alert(
+                              ax.response?.data?.message ||
+                                "ბანკის გადახდა ვერ დაიწყო",
+                            );
+                          }
+                        }}
+                      >
+                        ბანკით გადახდა
+                      </button>
+                    )}
+                  <button type="button" onClick={() => printInvoice(order)}>
+                    ამობეჭდვა
+                  </button>
                   <button type="button" onClick={() => downloadInvoice(order)}>
                     {t("downloadInvoice")}
                   </button>
-                  {["Pending", "Processing"].includes(order.status || "") && (
+                  {canCustomerCancel(order.status) && (
                     <button type="button" onClick={() => cancelOrder(order._id)}>
                       {t("cancelOrder")}
                     </button>

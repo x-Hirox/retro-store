@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
-  <rect width="400" height="400" fill="#020617"/>
-  <polygon points="200,70 250,180 200,155 150,180" fill="#67e8f9"/>
-  <polygon points="80,90 120,150 70,140" fill="#f472b6"/>
-  <polygon points="320,60 360,120 300,110" fill="#f472b6"/>
-  <rect x="196" y="40" width="8" height="40" fill="#22d3ee"/>
-  <text x="28" y="370" fill="#fff" font-size="34" font-family="Arial Black, sans-serif">NOVA STRIKE</text>
-</svg>

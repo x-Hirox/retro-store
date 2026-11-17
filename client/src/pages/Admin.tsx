@@ -1,4 +1,5 @@
-import { useState, useEffect, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { Link } from "react-router-dom";
 import {
   getProducts,
   createProduct,
@@ -6,29 +7,30 @@ import {
   updateProduct,
 } from "../services/productService";
 import type { IProduct } from "../types";
-import API from "../services/api";
 import AdminContent from "./AdminContent";
-import ImageUrlField from "../components/ImageUrlField";
+import ImageUrlField, { GalleryImagesField } from "../components/ImageUrlField";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminOrders from "./admin/AdminOrders";
+import AdminCustomers from "./admin/AdminCustomers";
+
+type Tab = "overview" | "orders" | "products" | "customers" | "content";
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "content">(
-    "products",
-  );
+  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [orderFilter, setOrderFilter] = useState("all");
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [productQ, setProductQ] = useState("");
+  const [stockFilter, setStockFilter] = useState<"all" | "low" | "sold">("all");
 
-  // რედაქტირებისთვის საჭირო სთეითი
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  // ფორმის სთეითები
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [discount, setDiscount] = useState("");
   const [stock, setStock] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [category, setCategory] = useState("PlayStation");
   const [isHeroBanner, setIsHeroBanner] = useState(false);
   const [platform, setPlatform] = useState("");
@@ -46,18 +48,6 @@ export default function Admin() {
     }
   };
 
-  const fetchOrders = async () => {
-    setLoadingOrders(true);
-    try {
-      const res = await API.get("/orders");
-      setOrders(res.data);
-    } catch (err) {
-      console.error("შეკვეთების წამოღება ვერ მოხერხდა", err);
-    } finally {
-      setLoadingOrders(false);
-    }
-  };
-
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -72,6 +62,7 @@ export default function Admin() {
         discount: isHeroBanner ? 0 : Number(discount) || 0,
         stock: isHeroBanner ? 1 : Number(stock),
         imageUrl,
+        images: isHeroBanner ? [] : images,
         category: isHeroBanner ? "banner-hero" : category,
         isHeroBanner,
         platform: isHeroBanner ? "" : platform,
@@ -81,10 +72,8 @@ export default function Admin() {
 
       if (editingId) {
         await updateProduct(editingId, productData);
-        alert("წარმატებით განახლდა! ✏️");
       } else {
-        await createProduct(productData as any);
-        alert("წარმატებით დაემატა! 🚀");
+        await createProduct(productData as Omit<IProduct, "_id">);
       }
 
       resetForm();
@@ -105,12 +94,12 @@ export default function Admin() {
     );
     setStock(p.stock !== undefined && p.stock !== null ? String(p.stock) : "");
     setImageUrl(p.imageUrl || "");
+    setImages(p.images || []);
     setCategory(p.category || "PlayStation");
     setIsHeroBanner(!!p.isHeroBanner);
     setPlatform(p.platform || "");
     setGenre(p.genre || "");
     setIsBestSeller(!!p.isBestSeller);
-
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -122,6 +111,7 @@ export default function Admin() {
     setDiscount("");
     setStock("");
     setImageUrl("");
+    setImages([]);
     setCategory("PlayStation");
     setIsHeroBanner(false);
     setPlatform("");
@@ -130,131 +120,95 @@ export default function Admin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("ნამდვილად გსურთ წაშლა?")) {
-      try {
-        await deleteProduct(id);
-        setProducts(products.filter((p) => String(p._id) !== String(id)));
-      } catch (err) {
-        console.error("წაშლის შეცდომა:", err);
-      }
+    if (!window.confirm("ნამდვილად გსურთ წაშლა?")) return;
+    try {
+      await deleteProduct(id);
+      setProducts(products.filter((p) => String(p._id) !== String(id)));
+    } catch (err) {
+      console.error("წაშლის შეცდომა:", err);
     }
   };
 
-  return (
-    <div
-      style={{
-        padding: "40px",
-        backgroundColor: "#0f172a",
-        minHeight: "100vh",
-        color: "#fff",
-      }}
-    >
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>
-        🛡️ RetroBit ადმინ პანელი (CRUD)
-      </h1>
+  const visibleProducts = useMemo(() => {
+    return products.filter((p) => {
+      const hay = `${p.title} ${p.category} ${p.platform} ${p.genre}`.toLowerCase();
+      if (productQ && !hay.includes(productQ.toLowerCase())) return false;
+      if (stockFilter === "sold" && (p.isHeroBanner || (p.stock ?? 0) > 0)) return false;
+      if (stockFilter === "low" && (p.isHeroBanner || (p.stock ?? 0) > 3 || (p.stock ?? 0) <= 0))
+        return false;
+      return true;
+    });
+  }, [products, productQ, stockFilter]);
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "10px",
-          marginBottom: "30px",
-        }}
-      >
-        <button
-          onClick={() => setActiveTab("products")}
-          style={{
-            padding: "10px 20px",
-            background: activeTab === "products" ? "#10b981" : "#1e293b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          📦 პროდუქტები და ბანერი
-        </button>
-        <button
-          onClick={() => {
+  const tabs: [Tab, string][] = [
+    ["overview", "მიმოხილვა"],
+    ["orders", "შეკვეთები"],
+    ["products", "პროდუქტები"],
+    ["customers", "მომხმარებლები"],
+    ["content", "საიტის კონტენტი"],
+  ];
+
+  return (
+    <div className="admin-shell">
+      <header className="admin-head">
+        <div>
+          <h1>RetroBit ადმინი</h1>
+          <p>პროდუქტები, მარაგი, შეკვეთების პროცესი და კლიენტები — ერთი პანელიდან.</p>
+        </div>
+        <Link to="/" className="admin-btn ghost">
+          საიტზე დაბრუნება
+        </Link>
+      </header>
+
+      <nav className="admin-tabs">
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={activeTab === id ? "on" : ""}
+            onClick={() => setActiveTab(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === "overview" && (
+        <AdminDashboard
+          onOpenOrders={(status) => {
+            setOrderFilter(status || "all");
             setActiveTab("orders");
-            if (orders.length === 0) fetchOrders();
           }}
-          style={{
-            padding: "10px 20px",
-            background: activeTab === "orders" ? "#10b981" : "#1e293b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          📋 შეკვეთები
-        </button>
-        <button
-          onClick={() => setActiveTab("content")}
-          style={{
-            padding: "10px 20px",
-            background: activeTab === "content" ? "#10b981" : "#1e293b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          🧩 საიტის კონტენტი
-        </button>
-      </div>
+        />
+      )}
+
+      {activeTab === "orders" && <AdminOrders initialStatus={orderFilter} />}
+
+      {activeTab === "customers" && <AdminCustomers />}
+
+      {activeTab === "content" && <AdminContent />}
 
       {activeTab === "products" && (
         <>
           <form
             onSubmit={handleSubmit}
-            style={{
-              background: "#1e293b",
-              padding: "25px",
-              borderRadius: "12px",
-              marginBottom: "40px",
-              border: editingId ? "2px solid #f59e0b" : "1px solid #334155",
-            }}
+            className="admin-form"
+            style={{ borderColor: editingId ? "#f59e0b" : "#334155" }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "15px",
-              }}
-            >
-              <h3
-                style={{ margin: 0, color: editingId ? "#f59e0b" : "#38bdf8" }}
-              >
+            <div className="admin-form-head">
+              <h3 style={{ color: editingId ? "#f59e0b" : "#38bdf8" }}>
                 {editingId
-                  ? "✏️ პროდუქტის რედაქტირება"
-                  : "➕ ახალი პროდუქტის ან მთავარი ბანერის დამატება"}
+                  ? "პროდუქტის რედაქტირება"
+                  : "ახალი პროდუქტი ან მთავარი ბანერი"}
               </h3>
               {editingId && (
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  style={{
-                    background: "#64748b",
-                    color: "#fff",
-                    border: "none",
-                    padding: "5px 10px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                  }}
-                >
+                <button type="button" className="admin-btn ghost" onClick={resetForm}>
                   გაუქმება
                 </button>
               )}
             </div>
 
-            <div style={{ display: "grid", gap: "12px" }}>
+            <div className="admin-form-grid">
               <input
                 type="text"
                 placeholder="სათაური"
@@ -272,31 +226,17 @@ export default function Admin() {
                 style={{ ...inputStyle, resize: "vertical" }}
               />
 
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                  color: "#cbd5e1",
-                }}
-              >
+              <label className="admin-check">
                 <input
                   type="checkbox"
                   checked={isHeroBanner}
                   onChange={(e) => setIsHeroBanner(e.target.checked)}
                 />
-                ⭐ ეს არის მთავარი საიტის ბანერი (Hero Banner)
+                ეს არის მთავარი საიტის ბანერი (Hero Banner)
               </label>
 
               {!isHeroBanner && (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr",
-                    gap: "10px",
-                  }}
-                >
+                <div className="admin-grid-3">
                   <input
                     type="number"
                     placeholder="ფასი (₾)"
@@ -316,7 +256,7 @@ export default function Admin() {
                   />
                   <input
                     type="number"
-                    placeholder="მარაგი (რამდენიც არის რეალურად)"
+                    placeholder="მარაგი"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
                     required
@@ -329,8 +269,11 @@ export default function Admin() {
               <ImageUrlField
                 value={imageUrl}
                 onChange={setImageUrl}
-                placeholder="სურათის Cloudinary ლინკი"
+                placeholder="მთავარი სურათის Cloudinary ლინკი"
               />
+              {!isHeroBanner && (
+                <GalleryImagesField images={images} onChange={setImages} />
+              )}
 
               {!isHeroBanner && (
                 <>
@@ -356,135 +299,90 @@ export default function Admin() {
                     onChange={(e) => setGenre(e.target.value)}
                     style={inputStyle}
                   />
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      cursor: "pointer",
-                      color: "#cbd5e1",
-                    }}
-                  >
+                  <label className="admin-check">
                     <input
                       type="checkbox"
                       checked={isBestSeller}
                       onChange={(e) => setIsBestSeller(e.target.checked)}
                     />
-                    🔥 ბესტსელერებში გამოჩენა
+                    ბესტსელერებში გამოჩენა
                   </label>
-                  <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8" }}>
-                    მარაგი: ჩაწერე რამდენი გაქვს რეალურად. 3 ან ნაკლები —
-                    საიტზე გამოჩნდება „დარჩა X“. 0 — SOLD. ყიდვისას მარაგი
-                    თავისით იკლებს.
+                  <p className="admin-muted">
+                    სურათი ატვირთე Cloudinary-ზე ამ ფორმიდან. მარაგი ყიდვისას
+                    თავისით იკლებს; გაუქმებისას ბრუნდება.
                   </p>
                 </>
               )}
 
-              <button
-                type="submit"
-                style={{
-                  background: editingId ? "#f59e0b" : "#10b981",
-                  color: "#fff",
-                  border: "none",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  marginTop: "10px",
-                }}
-              >
-                {editingId ? "ცვლილებების შენახვა 💾" : "დამატება 🚀"}
+              <button type="submit" className="admin-btn primary">
+                {editingId ? "ცვლილებების შენახვა" : "დამატება"}
               </button>
             </div>
           </form>
 
-          <h3 style={{ marginBottom: "15px" }}>
-            არსებული პროდუქტები ({products.length})
-          </h3>
-          {loading ? (
-            <p>იტვირთება...</p>
-          ) : (
-            <div style={{ display: "grid", gap: "10px" }}>
-              {products.map((p) => (
-                <div
-                  key={String(p._id)}
-                  style={{
-                    background: "#1e293b",
-                    padding: "12px 20px",
-                    borderRadius: "8px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    border: "1px solid #334155",
-                  }}
+          <div className="admin-toolbar">
+            <h3 style={{ margin: 0 }}>პროდუქტები ({visibleProducts.length})</h3>
+            <input
+              className="admin-search"
+              placeholder="ძებნა სათაურით / პლატფორმით"
+              value={productQ}
+              onChange={(e) => setProductQ(e.target.value)}
+            />
+            <div className="admin-pills">
+              {(
+                [
+                  ["all", "ყველა"],
+                  ["low", "დაბალი მარაგი"],
+                  ["sold", "SOLD"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={stockFilter === id ? "on" : ""}
+                  onClick={() => setStockFilter(id)}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    {p.imageUrl && (
-                      <img
-                        src={p.imageUrl}
-                        alt=""
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                      />
-                    )}
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loading ? (
+            <p className="admin-muted">იტვირთება...</p>
+          ) : (
+            <div className="admin-product-list">
+              {visibleProducts.map((p) => (
+                <div key={String(p._id)} className="admin-product-row">
+                  <div className="admin-product-info">
+                    {p.imageUrl && <img src={p.imageUrl} alt="" />}
                     <div>
-                      <h4 style={{ margin: 0 }}>
-                        {p.title} {p.isHeroBanner && " ⭐ [მთავარი ბანერი]"}
+                      <h4>
+                        {p.title} {p.isHeroBanner && " [ბანერი]"}
                       </h4>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "12px",
-                          color: "#94a3b8",
-                        }}
-                      >
+                      <p>
                         {p.isHeroBanner
                           ? "სარეკლამო ბანერი"
-                          : `ფასი: ${p.price} ₾ ${p.discount ? `(სეილი: -${p.discount}%)` : ""} | ${
+                          : `${p.price} ₾ ${p.discount ? `(−${p.discount}%)` : ""} · ${
                               (p.stock ?? 0) <= 0
                                 ? "SOLD"
-                                : `მარაგი: ${p.stock}`
-                            }`}
+                                : `მარაგი ${p.stock}`
+                            }${p.platform ? ` · ${p.platform}` : ""}`}
                       </p>
                     </div>
                   </div>
-
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div className="admin-row-actions">
                     <button
+                      type="button"
+                      className="admin-btn warn"
                       onClick={() => handleEditClick(p)}
-                      style={{
-                        background: "#f59e0b",
-                        color: "#fff",
-                        border: "none",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "600",
-                      }}
                     >
                       რედაქტირება
                     </button>
                     <button
+                      type="button"
+                      className="admin-btn danger"
                       onClick={() => handleDelete(String(p._id))}
-                      style={{
-                        background: "#ef4444",
-                        color: "#fff",
-                        border: "none",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontWeight: "600",
-                      }}
                     >
                       წაშლა
                     </button>
@@ -494,68 +392,6 @@ export default function Admin() {
             </div>
           )}
         </>
-      )}
-
-      {activeTab === "content" && <AdminContent />}
-
-      {activeTab === "orders" && (
-        <div>
-          <h3 style={{ marginBottom: "15px" }}>
-            შემოსული შეკვეთები ({orders.length})
-          </h3>
-          {loadingOrders ? (
-            <p>იტვირთება...</p>
-          ) : orders.length === 0 ? (
-            <p>შეკვეთები არ არის.</p>
-          ) : (
-            <div style={{ display: "grid", gap: "15px" }}>
-              {orders.map((order, index) => (
-                <div
-                  key={order._id || index}
-                  style={{
-                    background: "#1e293b",
-                    padding: "20px",
-                    borderRadius: "8px",
-                    border: "1px solid #334155",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <span style={{ color: "#38bdf8", fontWeight: "bold" }}>
-                      შეკვეთის ID: {order._id}
-                    </span>
-                    <span style={{ color: "#10b981", fontWeight: "bold" }}>
-                      სულ თანხა: {order.totalAmount || order.totalPrice || 0} ₾
-                    </span>
-                  </div>
-                  <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
-                    <strong>მომხმარებელი:</strong>{" "}
-                    {order.fullName ||
-                      order.shippingAddress?.fullName ||
-                      order.customerName ||
-                      order.user?.name ||
-                      order.user?.email ||
-                      "უცნობი"}
-                  </p>
-                  <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
-                    <strong>ქალაქი / მისამართი:</strong>{" "}
-                    {order.shippingAddress?.city || order.city || ""},{" "}
-                    {order.shippingAddress?.address || order.address || ""}
-                  </p>
-                  <p style={{ margin: "5px 0", color: "#cbd5e1" }}>
-                    <strong>ტელეფონი:</strong>{" "}
-                    {order.shippingAddress?.phone || order.phone || ""}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       )}
     </div>
   );

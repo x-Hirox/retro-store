@@ -1,268 +1,244 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getProductById } from "../services/productService";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { getProductById, getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import type { IProduct } from "../types";
 import { trackRecentlyViewed } from "../utils/recentlyViewed";
 import { getSalePrice } from "../utils/pricing";
+import { useLang } from "../i18n/LanguageContext";
+import { suggestAddons } from "../utils/shopAddons";
+import PaymentMarks from "../components/PaymentMarks";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { cart, addToCart, closeCartDrawer } = useCart();
+  const { t } = useLang();
   const [product, setProduct] = useState<IProduct | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [addons, setAddons] = useState<IProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [photo, setPhoto] = useState(0);
+  const [qty, setQty] = useState(1);
 
   useEffect(() => {
     if (!id) return;
+    setPhoto(0);
+    setQty(1);
     getProductById(id)
       .then((data) => {
         setProduct(data);
         trackRecentlyViewed(data);
         setLoading(false);
+        getProducts()
+          .then((list) => setAddons(suggestAddons(data, list, 8)))
+          .catch(() => setAddons([]));
       })
-      .catch((err) => {
-        console.error("პროდუქტის დეტალების წამოღების შეცდომა:", err);
+      .catch(() => {
         setError("პროდუქტი ვერ მოიძებნა.");
         setLoading(false);
       });
   }, [id]);
 
   if (loading) {
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "1.2rem",
-          color: "var(--accent)",
-          marginTop: "100px",
-        }}
-      >
-        იტვირთება პროდუქტის დეტალები...
-      </div>
-    );
+    return <div className="pd-status">{t("loading")}</div>;
   }
 
   if (error || !product) {
     return (
-      <div
-        style={{ textAlign: "center", marginTop: "100px", padding: "0 20px" }}
-      >
-        <h2 style={{ color: "#ff6b6b" }}>{error || "პროდუქტი არ არსებობს"}</h2>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            marginTop: "20px",
-            backgroundColor: "#a855f7",
-            color: "white",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "600",
-          }}
-        >
+      <div className="pd-status">
+        <h2>{error || "პროდუქტი არ არსებობს"}</h2>
+        <button type="button" className="pd-ghost" onClick={() => navigate("/")}>
           მთავარ გვერდზე დაბრუნება
         </button>
       </div>
     );
   }
 
+  const sale = getSalePrice(product);
+  const stock = product.stock ?? 0;
+  const inCart = cart.find((item) => item._id === product._id)?.quantity ?? 0;
+  const maxQty = Math.max(1, stock);
+
+  const add = (goCheckout: boolean) => {
+    addToCart(product, qty, { drawer: !goCheckout });
+    if (goCheckout) {
+      closeCartDrawer();
+      navigate("/checkout");
+    }
+  };
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "var(--bg)",
-        color: "var(--text)",
-        padding: "40px 20px",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          backgroundColor: "var(--code-bg)",
-          borderRadius: "16px",
-          padding: "30px",
-          boxShadow: "var(--shadow)",
-          border: "1px solid var(--border)",
-          boxSizing: "border-box",
-        }}
-      >
-        {/* უკან დასაბრუნებელი ღილაკი */}
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            backgroundColor: "var(--bg)",
-            color: "var(--text-h)",
-            border: "1px solid var(--border)",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            marginBottom: "20px",
-            fontWeight: "600",
-          }}
-        >
-          ← უკან
-        </button>
+    <div className="pd-page">
+      <button type="button" className="pd-ghost" onClick={() => navigate(-1)}>
+        ← უკან
+      </button>
 
-        {/* გამოყენებულია details-grid კლასი მობილურზე ავტომატური გასწორებისთვის */}
-        <div className="details-grid">
-          {/* სურათის დინამიური გამოტანა ბაზიდან */}
-          <div
-            style={{
-              width: "100%",
-              height: "350px",
-              borderRadius: "12px",
-              overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "var(--border)",
-            }}
-          >
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.title}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <span style={{ fontSize: "3rem" }}>🕹️</span>
+      <div className="pd-layout">
+        <ProductPhotos
+          title={product.title}
+          photos={productPhotos(product)}
+          active={photo}
+          onSelect={setPhoto}
+        />
+
+        <div className="pd-buy">
+          <p className="pd-kicker">{product.platform || product.category}</p>
+          <h1>{product.title}</h1>
+          {stock > 0 && <p className="pd-ok">შემოწმებული და მუშა</p>}
+
+          <div className="pd-price">
+            <strong>{sale.final.toFixed(2)} ₾</strong>
+            {sale.discount > 0 && (
+              <>
+                <s>{sale.original.toFixed(2)} ₾</s>
+                <em>-{sale.discount}%</em>
+              </>
             )}
           </div>
 
-          {/* პროდუქტის ინფორმაცია */}
-          <div style={{ width: "100%" }}>
-            <h1
-              style={{
-                color: "var(--text-h)",
-                fontSize: "1.8rem",
-                marginBottom: "15px",
-                marginTop: "0",
-              }}
-            >
-              {product.title}
-            </h1>
-            <p
-              style={{
-                color: "var(--text)",
-                fontSize: "1rem",
-                lineHeight: "1.6",
-                marginBottom: "25px",
-                opacity: 0.9,
-              }}
-            >
-              {product.description}
-            </p>
-            {(() => {
-              const sale = getSalePrice(product);
-              return (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    marginBottom: "30px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "1.8rem",
-                      fontWeight: "bold",
-                      color: "#a855f7",
-                    }}
-                  >
-                    {sale.final} ₾
-                  </div>
-                  {sale.discount > 0 && (
-                    <>
-                      <span
-                        style={{
-                          textDecoration: "line-through",
-                          color: "var(--text)",
-                        }}
-                      >
-                        {sale.original} ₾
-                      </span>
-                      <span
-                        style={{
-                          background: "#2563eb",
-                          color: "#fff",
-                          borderRadius: 8,
-                          padding: "2px 8px",
-                          fontSize: "0.85rem",
-                          fontWeight: 700,
-                        }}
-                      >
-                        -{sale.discount}%
-                      </span>
-                    </>
-                  )}
-                </div>
-              );
-            })()}
+          <p className="pd-desc">{product.description}</p>
 
-            {(product.stock ?? 0) <= 0 ? (
-              <button
-                type="button"
-                disabled
-                style={{
-                  background: "#111",
-                  color: "#fff",
-                  border: "none",
-                  padding: "14px 28px",
-                  borderRadius: "10px",
-                  width: "100%",
-                  fontWeight: "bold",
-                  fontSize: "1.1rem",
-                }}
-              >
-                SOLD
-              </button>
-            ) : (
-            <button
-              style={{
-                background: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-                color: "white",
-                border: "none",
-                padding: "14px 28px",
-                borderRadius: "10px",
-                cursor: "pointer",
-                fontSize: "1.1rem",
-                fontWeight: "bold",
-                width: "100%",
-                boxShadow: "0 4px 15px rgba(168, 85, 247, 0.4)",
-                transition: "opacity 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "0.9";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "1";
-              }}
-              onClick={() => {
-                addToCart(product);
-                alert("პროდუქტი წარმატებით დაემატა კალათაში! 🛒");
-              }}
-            >
-              კალათაში დამატება 🛒
+          {stock <= 0 ? (
+            <button type="button" className="pd-sold" disabled>
+              {t("sold")}
             </button>
-            )}
-            {(product.stock ?? 0) > 0 && product.stock <= 3 && (
-              <p style={{ marginTop: 10, color: "#f59e0b", fontWeight: 700 }}>
-                დარჩა {product.stock}
-              </p>
-            )}
-          </div>
+          ) : (
+            <>
+              <div className="pd-stepper">
+                <button
+                  type="button"
+                  onClick={() => setQty((n) => Math.max(1, n - 1))}
+                >
+                  −
+                </button>
+                <span>{qty}</span>
+                <button
+                  type="button"
+                  onClick={() => setQty((n) => Math.min(maxQty, n + 1))}
+                >
+                  +
+                </button>
+              </div>
+
+              <div className="pd-cta">
+                <button
+                  type="button"
+                  className="pd-buy-now"
+                  onClick={() => add(true)}
+                >
+                  ახლავე ყიდვა
+                </button>
+                <button
+                  type="button"
+                  className="pd-add-cart"
+                  onClick={() => add(false)}
+                >
+                  {t("addToCart")} +
+                </button>
+              </div>
+              {inCart > 0 && (
+                <p className="pd-incart">
+                  {t("inCart")}: {inCart} {t("pieces")}
+                </p>
+              )}
+              {stock <= 3 && (
+                <p className="pd-low">
+                  {t("left")} {stock}
+                </p>
+              )}
+            </>
+          )}
+
+          <PaymentMarks />
+          <p className="cart-ship-note">
+            მიწოდება: პირობები მალე დაემატება. გარანტია ამ ეტაპზე არ არის.
+          </p>
         </div>
       </div>
+
+      {addons.length > 0 && (
+        <section className="pd-addons">
+          <h2>დაამატე აქსესუარი ან თამაში</h2>
+          <p>შეარჩიე კონტროლერი, კაბელი ან თამაში ამ კონსოლისთვის.</p>
+          <div className="pd-addon-grid">
+            {addons.map((item) => {
+              const itemSale = getSalePrice(item);
+              const added = cart.some((c) => c._id === item._id);
+              return (
+                <article key={item._id} className="pd-addon">
+                  <Link to={`/product/${item._id}`}>
+                    <img src={item.imageUrl || ""} alt={item.title} />
+                    <h3>{item.title}</h3>
+                  </Link>
+                  <div className="pd-addon-row">
+                    <strong>{itemSale.final.toFixed(2)} ₾</strong>
+                    <button
+                      type="button"
+                      disabled={added || (item.stock ?? 0) <= 0}
+                      onClick={() => addToCart(item)}
+                    >
+                      {added ? "კალათაშია" : "დამატება"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+function productPhotos(product: IProduct): string[] {
+  const urls = [product.imageUrl, ...(product.images || [])];
+  const unique: string[] = [];
+  for (const url of urls) {
+    const clean = String(url || "").trim();
+    if (clean && !unique.includes(clean)) unique.push(clean);
+  }
+  return unique;
+}
+
+function ProductPhotos({
+  title,
+  photos,
+  active,
+  onSelect,
+}: {
+  title: string;
+  photos: string[];
+  active: number;
+  onSelect: (index: number) => void;
+}) {
+  const index = photos.length === 0 ? 0 : Math.min(active, photos.length - 1);
+  const current = photos[index];
+
+  return (
+    <div className="pd-gallery">
+      <div className="pd-photo">
+        {current ? (
+          <img src={current} alt={title} />
+        ) : (
+          <span style={{ fontSize: "3rem" }}>🕹️</span>
+        )}
+      </div>
+      {photos.length > 1 && (
+        <div className="pd-thumbs">
+          {photos.map((url, item) => (
+            <button
+              key={url}
+              type="button"
+              className={item === index ? "is-on" : ""}
+              onClick={() => onSelect(item)}
+              aria-label={`${title} ${item + 1}`}
+            >
+              <img src={url} alt="" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

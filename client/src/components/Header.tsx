@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import SoundToggle from "./SoundToggle";
+import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
 
 interface HeaderProps {
@@ -20,6 +21,8 @@ export default function Header({
   onLogout,
 }: HeaderProps) {
   const { t, lang, setLang } = useLang();
+  const { openCartDrawer } = useCart();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark";
@@ -43,6 +46,8 @@ export default function Header({
       window.location.href = "/";
     }
   };
+
+  if (location.pathname.startsWith("/admin")) return null;
 
   return (
     <header className="site-header">
@@ -99,10 +104,17 @@ export default function Header({
             </span>
           </button>
 
-          <Link to="/cart" className="neon-btn icon-btn" title={t("cart")}>
+          <button
+            type="button"
+            className="neon-btn icon-btn"
+            title={t("cart")}
+            onClick={openCartDrawer}
+          >
             🛒
-            <span className="cart-count">{totalItems}</span>
-          </Link>
+            <span key={totalItems} className="cart-count">
+              {totalItems}
+            </span>
+          </button>
 
           {token ? (
             <>

@@ -4,8 +4,10 @@ import {
   getMyOrders,
   getOrders,
   getOrderById,
+  getOrderStats,
   updateOrderStatus,
   cancelMyOrder,
+  retryOrderPayment,
 } from "../controllers/orderController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -17,12 +19,11 @@ router
   .post(protect, addOrderItems)
   .get(protect, adminOnly, getOrders);
 
-// მომხმარებლის საკუთარი შეკვეთების ნახვა (აუცილებლად უნდა იყოს /:id-მდე!)
 router.route("/myorders").get(protect, getMyOrders);
-
-// კონკრეტული შეკვეთის წამოღება ID-ით
+router.route("/stats").get(protect, adminOnly, getOrderStats);
 router.route("/:id").get(protect, getOrderById);
 
+router.route("/:id/pay").post(protect, retryOrderPayment);
 router.route("/:id/cancel").put(protect, cancelMyOrder);
 router.route("/:id/status").put(protect, adminOnly, updateOrderStatus);
 

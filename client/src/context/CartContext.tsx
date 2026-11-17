@@ -8,14 +8,23 @@ export interface CartItem extends IProduct {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: IProduct) => void;
+  addToCart: (
+    product: IProduct,
+    qty?: number,
+    opts?: { drawer?: boolean },
+  ) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
+  drawerOpen: boolean;
+  openCartDrawer: () => void;
+  closeCartDrawer: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem("cart");
     return savedCart ? JSON.parse(savedCart) : [];
@@ -25,20 +34,44 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: IProduct) => {
+  const addToCart = (
+    product: IProduct,
+    qty = 1,
+    opts?: { drawer?: boolean },
+  ) => {
     if ((product.stock ?? 0) <= 0) return;
+    const addBy = Math.max(1, Math.floor(qty));
     setCart((prevCart) => {
       const existingIndex = prevCart.findIndex(
         (item) => item._id === product._id,
       );
       if (existingIndex > -1) {
-        const updated = [...prevCart];
-        const nextQty = updated[existingIndex].quantity + 1;
-        if (nextQty > product.stock) return prevCart;
-        updated[existingIndex].quantity = nextQty;
-        return updated;
+        const current = prevCart[existingIndex];
+        const nextQty = Math.min(product.stock, current.quantity + addBy);
+        if (nextQty === current.quantity) return prevCart;
+        return prevCart.map((item, index) =>
+          index === existingIndex ? { ...item, quantity: nextQty } : item,
+        );
       }
-      return [...prevCart, { ...product, quantity: 1 }];
+      return [
+        ...prevCart,
+        { ...product, quantity: Math.min(product.stock, addBy) },
+      ];
+    });
+    if (opts?.drawer !== false) setDrawerOpen(true);
+  };
+
+  const updateQuantity = (id: string, quantity: number) => {
+    setCart((prevCart) => {
+      const current = prevCart.find((item) => item._id === id);
+      if (!current) return prevCart;
+      if (quantity <= 0) return prevCart.filter((item) => item._id !== id);
+      const max = current.stock ?? quantity;
+      const nextQty = Math.min(quantity, max);
+      if (nextQty === current.quantity) return prevCart;
+      return prevCart.map((item) =>
+        item._id === id ? { ...item, quantity: nextQty } : item,
+      );
     });
   };
 
@@ -52,7 +85,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, clearCart }}
+      value={{
+        cart,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        drawerOpen,
+        openCartDrawer: () => setDrawerOpen(true),
+        closeCartDrawer: () => setDrawerOpen(false),
+      }}
     >
       {children}
     </CartContext.Provider>

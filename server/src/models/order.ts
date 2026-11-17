@@ -1,6 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
+import {
+  ORDER_STATUSES,
+  type OrderStatus,
+} from "../utils/orderStatus.js";
 
-// ინტერფეისი შეკვეთის პროდუქტისთვის
 interface IOrderItem {
   product: mongoose.Types.ObjectId;
   quantity: number;
@@ -9,7 +12,12 @@ interface IOrderItem {
   imageUrl?: string;
 }
 
-// მთავარი ინტერფეისი შეკვეთისთვის
+export interface IStatusEvent {
+  status: OrderStatus;
+  at: Date;
+  note?: string;
+}
+
 export interface IOrder extends Document {
   user: mongoose.Types.ObjectId;
   orderItems: IOrderItem[];
@@ -21,8 +29,21 @@ export interface IOrder extends Document {
     phone: string;
   };
   totalPrice: number;
-  status: "Pending" | "Processing" | "Delivered" | "Cancelled";
+  paymentMethod?: string;
+  paymentStatus?: "unpaid" | "pending" | "paid" | "failed";
+  paymentProvider?: "tbc" | "bog" | null;
+  bankPaymentId?: string | null;
+  paidAt?: Date | null;
+  status: OrderStatus;
+  trackingCode?: string;
+  courierName?: string;
+  adminNote?: string;
+  statusHistory: IStatusEvent[];
+  shippedAt?: Date | null;
+  deliveredAt?: Date | null;
+  cancelledAt?: Date | null;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const orderSchema = new Schema<IOrder>(
@@ -61,12 +82,41 @@ const orderSchema = new Schema<IOrder>(
       required: true,
       default: 0.0,
     },
+    paymentMethod: {
+      type: String,
+      enum: ["card", "cash", "apple_pay", "google_pay"],
+      default: "card",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "pending", "paid", "failed"],
+      default: "unpaid",
+    },
+    paymentProvider: {
+      type: String,
+      enum: ["tbc", "bog"],
+    },
+    bankPaymentId: { type: String, default: null },
+    paidAt: { type: Date, default: null },
     status: {
       type: String,
       required: true,
-      enum: ["Pending", "Processing", "Delivered", "Cancelled"],
+      enum: ORDER_STATUSES,
       default: "Pending",
     },
+    trackingCode: { type: String, default: "" },
+    courierName: { type: String, default: "" },
+    adminNote: { type: String, default: "" },
+    statusHistory: [
+      {
+        status: { type: String, enum: ORDER_STATUSES },
+        at: { type: Date, default: Date.now },
+        note: { type: String, default: "" },
+      },
+    ],
+    shippedAt: { type: Date, default: null },
+    deliveredAt: { type: Date, default: null },
+    cancelledAt: { type: Date, default: null },
   },
   {
     timestamps: true, // ავტომატურად უმატებს შექმნის და განახლების თარიღებს

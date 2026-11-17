@@ -1,20 +1,35 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import API from "../services/api";
-import { downloadInvoice, itemPrice, itemTitle } from "../utils/invoice";
+import {
+  downloadInvoice,
+  itemPrice,
+  itemTitle,
+  payLabel,
+  payStatusLabel,
+  printInvoice,
+} from "../utils/invoice";
+import OrderTracker from "../components/OrderTracker";
+import { statusLabel } from "../utils/orderStatus";
 
 export default function OrderSuccess() {
   const { id } = useParams();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
+    let timer: number | undefined;
     const fetchOrder = async () => {
       try {
         const response = await API.get(`/orders/${id}`);
         setOrder(response.data);
-      } catch (err: any) {
+        setError("");
+        if (response.data?.paymentStatus === "pending") {
+          timer = window.setTimeout(fetchOrder, 2500);
+        }
+      } catch {
         setError("შეკვეთის მონაცემები ვერ მოიძებნა.");
       } finally {
         setLoading(false);
@@ -24,7 +39,29 @@ export default function OrderSuccess() {
     if (id) {
       fetchOrder();
     }
+    return () => {
+      if (timer) window.clearTimeout(timer);
+    };
   }, [id]);
+
+  const retryPay = async () => {
+    if (!id) return;
+    setPaying(true);
+    try {
+      const { data } = await API.post(`/orders/${id}/pay`);
+      if (data.redirectUrl) {
+        window.location.assign(data.redirectUrl);
+        return;
+      }
+      const again = await API.get(`/orders/${id}`);
+      setOrder(again.data);
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      alert(ax.response?.data?.message || "გადახდა ვერ დაიწყო");
+    } finally {
+      setPaying(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -77,7 +114,13 @@ export default function OrderSuccess() {
       >
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
           <h1 style={{ color: "var(--text-h)", marginBottom: "10px" }}>
-            შეკვეთა მიღებულია! 🎉
+            {order.paymentStatus === "paid"
+              ? "გადახდა მიღებულია"
+              : order.paymentStatus === "pending"
+                ? "ბანკში გადახდა მიმდინარეობს"
+                : order.paymentMethod === "cash"
+                  ? "შეკვეთა მიღებულია"
+                  : "შეკვეთა მიღებულია"}
           </h1>
           <p style={{ color: "var(--text)", fontSize: "0.95rem" }}>
             შეკვეთის ნომერი:{" "}
@@ -108,6 +151,37 @@ export default function OrderSuccess() {
           <p>
             <strong>ტელეფონი:</strong> {order.shippingAddress?.phone}
           </p>
+          <p>
+            <strong>გადახდა:</strong> {payLabel(order.paymentMethod)}
+            {order.paymentProvider
+              ? ` · ${String(order.paymentProvider).toUpperCase()}`
+              : ""}
+          </p>
+          <p>
+            <strong>გადახდის სტატუსი:</strong>{" "}
+            {payStatusLabel(order.paymentStatus)}
+          </p>
+          <p>
+            <strong>შეკვეთის პროცესი:</strong> {statusLabel(order.status)}
+          </p>
+          {order.trackingCode && (
+            <p>
+              <strong>თრექინგი:</strong> {order.trackingCode}
+              {order.courierName ? ` · ${order.courierName}` : ""}
+            </p>
+          )}
+          <OrderTracker status={order.status} />
+          {order.paymentMethod !== "cash" && order.paymentStatus !== "paid" && (
+            <button
+              type="button"
+              className="pd-buy-now"
+              style={{ marginTop: 12 }}
+              disabled={paying}
+              onClick={retryPay}
+            >
+              {paying ? "იგზავნება..." : "ბანკით გადახდა"}
+            </button>
+          )}
         </div>
 
         <div style={{ marginBottom: "25px" }}>
@@ -165,7 +239,7 @@ export default function OrderSuccess() {
           style={{ display: "flex", gap: "15px", justifyContent: "center" }}
         >
           <button
-            onClick={() => window.print()}
+            onClick={() => printInvoice(order)}
             style={{
               backgroundColor: "transparent",
               color: "var(--text-h)",

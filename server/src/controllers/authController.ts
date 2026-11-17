@@ -535,3 +535,20 @@ export const resetPassword = async (
     res.status(500).json({ message: "სერვერის შეცდომა" });
   }
 };
+
+export const listUsers = async (
+  _req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const users = await User.find({})
+      .select(
+        "name firstName lastName email phone city address role isVerified createdAt",
+      )
+      .sort({ createdAt: -1 })
+      .limit(500);
+    res.json(users);
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+};

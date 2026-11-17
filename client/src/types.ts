@@ -5,6 +5,7 @@ export interface IProduct {
   price: number;
   discount?: number; // 🟢 ფასდაკლების პროცენტი
   imageUrl?: string;
+  images?: string[];
   category: string;
   stock: number;
   isHeroBanner?: boolean; // 🟢 მთავარი ბანერი

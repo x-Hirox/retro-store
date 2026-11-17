@@ -6,6 +6,18 @@ import { escapeRegex } from "../utils/security.js";
 
 const router = Router();
 
+function cleanImages(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const item of value) {
+    const url = String(item || "").trim();
+    if (!/^https?:\/\//i.test(url) || url.length > 500) continue;
+    if (!out.includes(url)) out.push(url);
+    if (out.length >= 8) break;
+  }
+  return out;
+}
+
 // ყველა პროდუქტის წამოღება (GET) - ღიაა ყველასთვის
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -65,6 +77,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       price,
       category,
       imageUrl,
+      images,
       stock,
       discount,
       isHeroBanner,
@@ -79,6 +92,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       price,
       category,
       imageUrl,
+      images: cleanImages(images),
       stock,
       discount: discount || 0,
       isHeroBanner: !!isHeroBanner,
@@ -105,6 +119,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
       price,
       category,
       imageUrl,
+      images,
       stock,
       discount,
       isHeroBanner,
@@ -120,6 +135,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
         price,
         category,
         imageUrl,
+        images: cleanImages(images),
         stock,
         discount: discount || 0,
         isHeroBanner: !!isHeroBanner,

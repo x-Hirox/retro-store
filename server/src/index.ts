@@ -8,6 +8,11 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import contentRoutes from "./routes/contentRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import {
+  bogCallback,
+  paymentReturn,
+  tbcCallback,
+} from "./controllers/paymentController.js";
 import { seedContentIfEmpty } from "./utils/seedContent.js";
 import { securityHeaders } from "./utils/security.js";
 
@@ -44,7 +49,14 @@ app.use(
   }),
 );
 app.use(securityHeaders);
+app.post(
+  "/api/payments/bog/callback",
+  express.raw({ type: "*/*", limit: "200kb" }),
+  bogCallback,
+);
 app.use(express.json({ limit: "80kb" }));
+app.post("/api/payments/tbc/callback", tbcCallback);
+app.get("/api/payments/return/:orderId", paymentReturn);
 
 app.use((req, _res, next) => {
   if (

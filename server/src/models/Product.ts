@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   discount?: number; // 🟢 ფასდაკლების პროცენტი
   category: string;
   imageUrl: string;
+  images?: string[];
   stock: number;
   isHeroBanner?: boolean; // 🟢 მთავარი ბანერი
   platform?: string;
@@ -22,6 +23,7 @@ const ProductSchema = new Schema<IProduct>({
   discount: { type: Number, default: 0 },
   category: { type: String, required: true },
   imageUrl: { type: String, required: true },
+  images: { type: [String], default: [] },
   stock: { type: Number, required: true, default: 1 },
   isHeroBanner: { type: Boolean, default: false },
   platform: { type: String, default: "" },

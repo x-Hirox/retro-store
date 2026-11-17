@@ -9,8 +9,9 @@ import {
   resetPassword,
   getMe,
   updateProfile,
+  listUsers,
 } from "../controllers/authController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { rateLimit } from "../utils/security.js";
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post("/forgot-password", authLimit, forgotPassword);
 router.post("/reset-password", authLimit, resetPassword);
 router.get("/me", protect, getMe);
 router.put("/me", protect, updateProfile);
+router.get("/users", protect, adminOnly, listUsers);
 
 export default router;

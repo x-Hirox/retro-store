@@ -3,22 +3,25 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import API from "../services/api";
 import { authService } from "../services/authService";
+import { getSalePrice } from "../utils/pricing";
+import PaymentMarks from "../components/PaymentMarks";
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
 
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
     city: "თბილისი",
-    customCity: "", // დამატებულია სხვა რეგიონისთვის
+    customCity: "",
     phone: "",
     paymentMethod: "card",
   });
 
   const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + getSalePrice(item).final * item.quantity,
     0,
   );
 
@@ -72,8 +75,8 @@ export default function Checkout() {
       return;
     }
 
+    setSubmitting(true);
     try {
-      // საბოლოო ქალაქი: თუ არჩეულია "სხვა რეგიონები", ვიღებთ customCity-ს მნიშვნელობას
       const finalCity =
         formData.city === "სხვა რეგიონები"
           ? formData.customCity
@@ -91,24 +94,33 @@ export default function Checkout() {
           postalCode: "0100",
           phone: formData.phone,
         },
+        paymentMethod: formData.paymentMethod,
         totalPrice: totalAmount,
       };
 
-      // 🟢 ვაგზავნით შეკვეთას სერვერზე და ვიღებთ პასუხს (რომელშიც არის შექმნილი შეკვეთის _id)
       const response = await API.post("/orders", orderData);
-      const orderId = response.data._id || response.data.order?._id;
+      const created = response.data;
+      const orderId = created._id || created.order?._id;
 
-      // ვასუფთავებთ კალათას
       clearCart();
 
-      // გადავყავართ ინვოისის/წარმატების გვერდზე შეკვეთის ID-ით
+      if (created.redirectUrl) {
+        window.location.assign(created.redirectUrl);
+        return;
+      }
+      if (created.paymentError) {
+        alert(created.paymentError);
+      }
       if (orderId) {
         navigate(`/order-success/${orderId}`);
       } else {
         navigate("/");
       }
-    } catch (error: any) {
-      alert(error.response?.data?.message || "შეცდომა შეკვეთის გაფორმებისას");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err.response?.data?.message || "შეცდომა შეკვეთის გაფორმებისას");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -353,66 +365,42 @@ export default function Checkout() {
               />
             </div>
 
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  color: "var(--text)",
-                  marginBottom: "5px",
-                }}
-              >
-                გადახდის მეთოდი
-              </label>
-              <select
-                name="paymentMethod"
-                value={formData.paymentMethod}
-                onChange={handleChange}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: "1px solid var(--border)",
-                  backgroundColor: "var(--code-bg)",
-                  color: "var(--text-h)",
-                  boxSizing: "border-box",
-                }}
-              >
-                <option
-                  value="card"
-                  style={{
-                    backgroundColor: "var(--bg)",
-                    color: "var(--text-h)",
-                  }}
-                >
-                  ბარათით გადახდა (TBC / BOG) 💳
-                </option>
-                <option
-                  value="cash"
-                  style={{
-                    backgroundColor: "var(--bg)",
-                    color: "var(--text-h)",
-                  }}
-                >
-                  ნაღდი ანგარიშსწორება კურიერთან 💵
-                </option>
-              </select>
-            </div>
+            <fieldset className="pay-methods">
+              <legend>გადახდა</legend>
+              {(
+                [
+                  ["card", "ბარათი — Visa / Mastercard"],
+                  ["apple_pay", "Apple Pay"],
+                  ["google_pay", "Google Pay"],
+                  ["cash", "კურიერთან გადახდა"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value} className={formData.paymentMethod === value ? "on" : ""}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={value}
+                    checked={formData.paymentMethod === value}
+                    onChange={handleChange}
+                  />
+                  {label}
+                </label>
+              ))}
+              <PaymentMarks />
+              <p className="cart-ship-note">
+                {formData.paymentMethod === "cash"
+                  ? "თანხას კურიერს გადაუხდი ჩაბარებისას."
+                  : "დადასტურების შემდეგ TBC ან BOG-ის უსაფრთხო გვერდზე გადახვალ. Visa, Mastercard, Apple Pay და Google Pay იქ ირჩევა."}
+              </p>
+            </fieldset>
 
             <button
               type="submit"
-              style={{
-                backgroundColor: "var(--accent)",
-                color: "white",
-                border: "none",
-                padding: "14px",
-                borderRadius: "8px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                fontSize: "1.1rem",
-                marginTop: "15px",
-              }}
+              disabled={submitting}
+              className="pd-buy-now"
+              style={{ width: "100%", marginTop: 8 }}
             >
-              შეკვეთის დადასტურება და გადახდა
+              {submitting ? "იგზავნება..." : "შეკვეთის დადასტურება"}
             </button>
           </form>
 
@@ -455,7 +443,7 @@ export default function Checkout() {
                     {item.title} (x{item.quantity})
                   </span>
                   <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
-                    {item.price * item.quantity} ₾
+                    {(getSalePrice(item).final * item.quantity).toFixed(2)} ₾
                   </span>
                 </div>
               ))}
@@ -481,6 +469,7 @@ export default function Checkout() {
                 {totalAmount.toFixed(2)} ₾
               </span>
             </div>
+            <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
           </div>
         </div>
       </div>

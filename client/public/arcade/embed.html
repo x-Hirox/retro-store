@@ -44,8 +44,8 @@
       .meta { display: flex; flex-direction: column; gap: 8px; }
       .tiny { position: relative; width: auto; height: 34px; padding: 0 12px; border-radius: 999px; font-size: 11px; }
       @media (min-width: 800px) {
-        #player { height: calc(100% - 160px); }
-        #pad { height: 160px; padding: 10px 28px 16px; }
+        #player { height: 100%; }
+        #pad { display: none; }
       }
     </style>
   </head>
@@ -63,8 +63,10 @@
         <button class="btn tiny" data-key="Enter">START</button>
       </div>
       <div class="actions">
+        <button class="btn tiny" data-key="KeyA" style="position:relative">L</button>
         <button class="face" data-key="KeyZ">B</button>
         <button class="face" data-key="KeyX">A</button>
+        <button class="btn tiny" data-key="KeyS" style="position:relative">R</button>
       </div>
     </div>
     <script>
