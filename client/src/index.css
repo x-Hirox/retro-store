@@ -2263,7 +2263,10 @@ body:not(.dark) .site-header {
   filter: drop-shadow(0 0 10px #ff007f66);
   animation: nbit-float 3.6s ease-in-out infinite;
 }
-.nbit svg { display: block; width: 100%; height: auto; }
+.nbit svg,
+.nbit img { display: block; width: 100%; height: auto; }
+.ny-hat img,
+.ny-gift-stack img { display: block; width: 100%; height: auto; }
 .nbit-pos-left { left: 8px; top: 8px; }
 .nbit-pos-right { right: 10px; top: 10px; }
 .nbit-coin {
@@ -2307,12 +2310,13 @@ body:not(.dark) .site-header {
 .site-logo { position: relative; }
 .ny-hat {
   position: absolute;
-  left: -6px;
-  top: -10px;
-  width: 28px;
+  left: -8px;
+  top: -14px;
+  width: 36px;
   pointer-events: none;
   z-index: 2;
 }
+.ny-gift-stack img { width: 92px; }
 .ny-title { position: relative; display: inline-block; padding-left: 28px; }
 .ny-title::before {
   content: "";
