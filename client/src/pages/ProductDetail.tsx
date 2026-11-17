@@ -8,6 +8,7 @@ import { getSalePrice } from "../utils/pricing";
 import { useLang } from "../i18n/LanguageContext";
 import { suggestAddons } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
+import { Polaroid } from "../components/NostalgiaBits";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -69,7 +70,8 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="pd-page">
+    <div className="pd-page nbit-slot">
+      <Polaroid />
       <button type="button" className="pd-ghost" onClick={() => navigate(-1)}>
         ← უკან
       </button>

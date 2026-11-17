@@ -4,6 +4,7 @@ import { SELL_BRANDS, SELL_FAQS } from "../data/sellCatalog";
 import ReviewsSection from "../components/ReviewsSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
+import { Boombox } from "../components/NostalgiaBits";
 
 type QuoteItem = {
   id: string;
@@ -81,7 +82,8 @@ export default function Sell() {
 
   return (
     <div className="sell-page">
-      <section className="sell-hero">
+      <section className="sell-hero nbit-slot">
+        <Boombox />
         <div className="sell-hero-copy">
           <h1>
             გაყიდე კონსოლი

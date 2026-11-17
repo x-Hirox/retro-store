@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import type { Group, PointLight, ShaderMaterial } from "three";
 import { Color, DoubleSide } from "three";
 
@@ -67,14 +67,12 @@ function HoloConsole({
     const g = ref.current;
     if (!g) return;
     const t = state.clock.elapsedTime;
-    const mx = pointer.x;
-    const my = pointer.y;
     const [x, y, z] = base.current;
-    g.position.x = x + mx * 0.4;
-    g.position.y = y + Math.sin(t * 1.1 + x) * 0.12 + my * 0.18;
+    g.position.x = x;
+    g.position.y = y + Math.sin(t * 1.1 + x) * 0.12;
     g.position.z = z;
-    g.rotation.y = mx * 0.45 + t * 0.12;
-    g.rotation.x = -my * 0.22;
+    g.rotation.y = t * 0.12;
+    g.rotation.x = Math.sin(t * 0.4 + x) * 0.08;
   });
 
   return (
@@ -143,14 +141,13 @@ function HoloConsole({
   );
 }
 
-const pointer = { x: 0, y: 0 };
-
 function Scene() {
   const light = useRef<PointLight>(null);
-  useFrame(() => {
+  useFrame((state) => {
     if (!light.current) return;
-    light.current.position.x = pointer.x * 2;
-    light.current.position.y = 1.2 + pointer.y;
+    const t = state.clock.elapsedTime;
+    light.current.position.x = Math.sin(t * 0.4) * 1.2;
+    light.current.position.y = 1.2;
   });
   return (
     <>
@@ -169,15 +166,6 @@ function Scene() {
 }
 
 export default function RetroScene3D() {
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener("mousemove", onMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMove);
-  }, []);
-
   return (
     <div className="retro-gl">
       <Canvas

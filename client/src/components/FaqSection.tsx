@@ -17,6 +17,7 @@ export default function FaqSection() {
   return (
     <div style={{ maxWidth: "900px", margin: "60px auto", padding: "0 20px" }}>
       <h2
+        className="ny-title"
         style={{
           textAlign: "center",
           fontSize: "2rem",

@@ -7,7 +7,6 @@ import {
 } from "../services/contentService";
 import type { ICollectionPage, IPlatformCard, IProduct } from "../types";
 import { isBannerProduct } from "../utils/pricing";
-import CrtMonitor from "../components/CrtMonitor";
 import ProductCard from "../components/ProductCard";
 import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
@@ -255,11 +254,12 @@ export default function CategoryView() {
         </div>
       </div>
 
-      <div className="shop-crt-row">
-        <CrtMonitor variant="inline" />
+      <div className="shop-title-row">
+        <span className="ny-orb" aria-hidden />
         <h1 className="collection-title" style={{ color: bannerColor }}>
           {collection?.title || decodeURIComponent(platform || "")}
         </h1>
+        <span className="ny-orb ny-orb-alt" aria-hidden />
       </div>
       {collection?.subtitle && (
         <p style={{ textAlign: "center", marginBottom: 10 }}>

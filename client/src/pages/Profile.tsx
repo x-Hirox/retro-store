@@ -14,6 +14,7 @@ import { useLang } from "../i18n/LanguageContext";
 import OrderTracker from "../components/OrderTracker";
 import { canCustomerCancel, statusLabel } from "../utils/orderStatus";
 import { isValidPersonName, normalizeGePhone } from "../utils/validate";
+import { GiftStack } from "../components/NostalgiaBits";
 
 type Order = {
   _id: string;
@@ -154,8 +155,9 @@ export default function Profile() {
   }
 
   return (
-    <div className="profile-page">
-      <h1>{t("profile")}</h1>
+    <div className="profile-page nbit-slot">
+      <GiftStack />
+      <h1 className="ny-title">{t("profile")}</h1>
       <p className="profile-lead">
         {setup
           ? "დაასრულე პროფილი (გვარი და ტელეფონი) — შემდეგ გადახვალ მთავარ გვერდზე."

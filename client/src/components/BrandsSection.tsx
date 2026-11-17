@@ -30,6 +30,7 @@ export default function BrandsSection() {
       }}
     >
       <h2
+        className="ny-title"
         style={{
           textAlign: "center",
           marginBottom: "35px",

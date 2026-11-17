@@ -10,7 +10,6 @@ import {
 } from "react";
 import FloatingConsoles from "./FloatingConsoles";
 import RetroBackground from "./RetroBackground";
-import SkateRider from "./SkateRider";
 import { useDesktopGL } from "../hooks/useDesktopGL";
 
 const RetroScene3D = lazy(() => import("./RetroScene3D"));
@@ -39,7 +38,6 @@ export default function RetroStage({ children }: { children?: ReactNode }) {
       <div className="ny-garland" aria-hidden />
       <div className="retro-stage-banner">{banner}</div>
       {!useGl && <FloatingConsoles />}
-      <SkateRider />
 
       <svg className="rv-mascot" viewBox="0 0 160 180" aria-hidden>
         <defs>

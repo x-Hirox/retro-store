@@ -14,6 +14,7 @@ import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
+import { Tamagotchi, FloppyDisk, Rubik } from "../components/NostalgiaBits";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -68,7 +69,8 @@ export default function Home() {
       )}
 
       {/* 2. ბესტსელერები */}
-      <div style={{ paddingTop: "25px", overflow: "visible" }}>
+      <div className="nbit-slot" style={{ paddingTop: "25px", overflow: "visible" }}>
+        <Tamagotchi />
         <BestSellersSlider
           products={products}
           loading={loading}
@@ -78,10 +80,20 @@ export default function Home() {
       </div>
 
       {/* 3. პოპულარული ბრენდები */}
-      {!searchQuery && <BrandsSection />}
+      {!searchQuery && (
+        <div className="nbit-slot">
+          <FloppyDisk />
+          <BrandsSection />
+        </div>
+      )}
 
       {/* 4. კატეგორიები */}
-      {!searchQuery && <CategoriesSection />}
+      {!searchQuery && (
+        <div className="nbit-slot">
+          <Rubik />
+          <CategoriesSection />
+        </div>
+      )}
 
       {/* 6. SHOP BY POPULAR BUNDLES */}
       {!searchQuery && <PopularBundlesSlider products={products} />}

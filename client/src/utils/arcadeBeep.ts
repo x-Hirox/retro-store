@@ -126,6 +126,53 @@ export function playArcadeTune() {
   }
 }
 
+export function playCoin() {
+  if (!gated(280)) return;
+  try {
+    const t = audio().currentTime;
+    tone(1318.5, t, 0.07, "square", 0.028);
+    tone(1760, t + 0.06, 0.16, "square", 0.022);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function playGameBoyBlip() {
+  if (!gated(400)) return;
+  try {
+    const t = audio().currentTime;
+    tone(784, t, 0.08, "square", 0.022);
+    tone(1046.5, t + 0.09, 0.12, "square", 0.02);
+    tone(1318.5, t + 0.2, 0.18, "square", 0.016);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function playCassetteClick() {
+  if (!gated(450)) return;
+  try {
+    const t = audio().currentTime;
+    noiseBurst(t, 0.05, 0.03);
+    tone(180, t + 0.04, 0.22, "sawtooth", 0.018);
+    tone(90, t + 0.12, 0.35, "sine", 0.02);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function playVhsWhir() {
+  if (!gated(600)) return;
+  try {
+    const t = audio().currentTime;
+    noiseBurst(t, 0.12, 0.028);
+    tone(140, t + 0.05, 0.4, "sawtooth", 0.016);
+    tone(220, t + 0.18, 0.28, "triangle", 0.014);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function playConsoleCue(label: string) {
   const k = label.toLowerCase();
   if (

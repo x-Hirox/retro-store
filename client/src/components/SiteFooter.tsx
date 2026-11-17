@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { getSiteSettings } from "../services/contentService";
 import type { ISiteSettings } from "../types";
 import { useLang } from "../i18n/LanguageContext";
+import { GiftStack } from "./NostalgiaBits";
 
 export default function SiteFooter() {
   const location = useLocation();
@@ -19,6 +20,12 @@ export default function SiteFooter() {
 
   return (
     <footer className="site-footer">
+      <div className="ny-header-lights footer-lights" aria-hidden>
+        {Array.from({ length: 18 }, (_, i) => (
+          <i key={i} className={`ny-bulb c${i % 4}`} />
+        ))}
+      </div>
+      <GiftStack />
       <div className="footer-grid">
         <div>
           <h4>{t("collections")}</h4>
