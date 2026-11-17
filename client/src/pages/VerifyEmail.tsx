@@ -69,7 +69,7 @@ export function VerifyEmail() {
 
         {status === "success" && (
           <Link
-            to="/login"
+            to="/profile"
             className="auth-button"
             style={{
               display: "inline-block",
@@ -77,7 +77,7 @@ export function VerifyEmail() {
               textAlign: "center",
             }}
           >
-            შესვლის გვერდზე გადასვლა →
+            პროფილში შესვლა →
           </Link>
         )}
       </div>

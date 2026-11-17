@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
+import { authService } from "../../services/authService";
 
 type Customer = {
   _id: string;
@@ -19,6 +20,7 @@ export default function AdminCustomers() {
   const [users, setUsers] = useState<Customer[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const [mailMsg, setMailMsg] = useState("");
 
   useEffect(() => {
     API.get("/auth/users")
@@ -42,7 +44,24 @@ export default function AdminCustomers() {
           onChange={(e) => setQ(e.target.value)}
         />
         <span className="admin-muted">{filtered.length} ანგარიში</span>
+        <button
+          type="button"
+          className="admin-btn"
+          onClick={async () => {
+            setMailMsg("იგზავნება...");
+            try {
+              const data = await authService.testMail();
+              setMailMsg(data.message);
+            } catch (err: unknown) {
+              const ax = err as { response?: { data?: { message?: string } } };
+              setMailMsg(ax.response?.data?.message || "სატესტო მეილი ვერ გაიგზავნა");
+            }
+          }}
+        >
+          სატესტო მეილი ჩემს მეილზე
+        </button>
       </div>
+      {mailMsg && <p className="admin-muted">{mailMsg}</p>}
       {loading ? (
         <p className="admin-muted">იტვირთება...</p>
       ) : (
@@ -54,6 +73,7 @@ export default function AdminCustomers() {
                 <th>ელ-ფოსტა</th>
                 <th>ტელეფონი</th>
                 <th>ქალაქი</th>
+                <th>სტატუსი</th>
                 <th>როლი</th>
                 <th>რეგისტრაცია</th>
               </tr>
@@ -65,13 +85,11 @@ export default function AdminCustomers() {
                     {`${u.firstName || ""} ${u.lastName || ""}`.trim() ||
                       u.name ||
                       "—"}
-                    {!u.isVerified && (
-                      <small className="admin-muted"> · არააქტიური</small>
-                    )}
                   </td>
                   <td>{u.email}</td>
                   <td>{u.phone || "—"}</td>
                   <td>{u.city || "—"}</td>
+                  <td>{u.isVerified ? "აქტიური" : "ელოდება აქტივაციას"}</td>
                   <td>{u.role === "admin" ? "ადმინი" : "კლიენტი"}</td>
                   <td>
                     {u.createdAt

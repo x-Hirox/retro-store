@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { authService } from "../services/authService";
+import { passwordError } from "../utils/validate";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,11 @@ export default function ResetPassword() {
     e.preventDefault();
     setError("");
     setMessage("");
+    const passErr = passwordError(newPassword);
+    if (passErr) {
+      setError(passErr);
+      return;
+    }
     setLoading(true);
 
     try {

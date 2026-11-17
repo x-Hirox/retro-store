@@ -4,6 +4,7 @@ import Product from "../models/Product.js";
 import User from "../models/User.js";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 import { clampText, isAdminEmail } from "../utils/security.js";
+import { normalizeGePhone } from "../utils/validate.js";
 import {
   bankConfigured,
   createBankPayment,
@@ -69,7 +70,7 @@ export const addOrderItems = async (
       address: clampText(shippingAddress?.address, 120),
       city: clampText(shippingAddress?.city, 60),
       postalCode: clampText(shippingAddress?.postalCode, 20),
-      phone: clampText(shippingAddress?.phone, 20),
+      phone: normalizeGePhone(shippingAddress?.phone) || "",
     };
     if (!address.address || !address.city || !address.phone) {
       res.status(400).json({ message: "მისამართი ან ტელეფონი არასრულია" });

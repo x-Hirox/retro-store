@@ -4,11 +4,21 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { frontendBaseUrl, trySendEmail } from "../utils/sendEmail.js";
+import {
+  frontendBaseUrl,
+  mailConfigured,
+  shopMail,
+  trySendEmail,
+} from "../utils/sendEmail.js";
 import { OAuth2Client } from "google-auth-library";
 import { getJwtSecret, isAdminEmail } from "../utils/security.js";
 import { publicUser, displayName } from "../utils/publicUser.js";
 import { clampText } from "../utils/security.js";
+import {
+  isValidEmail,
+  normalizeGePhone,
+  passwordError,
+} from "../utils/validate.js";
 
 function googleClient() {
   return new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -19,26 +29,7 @@ function resolveRole(email: string, role?: string): "admin" | "customer" {
   return "customer";
 }
 
-// 1. დამხმარე ფუნქცია ელ-ფოსტის ფორმატის შესამოწმებლად (Regex)
-const validateEmailFormat = (email: string): boolean => {
-  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return emailRegex.test(email);
-};
-
-// 2. დამხმარე ფუნქცია პაროლის შესამოწმებლად ბექენდზე
-const validatePasswordBackend = (password: string): string | null => {
-  if (password.length < 8)
-    return "პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.";
-  if (!/[A-Z]/.test(password))
-    return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ დიდ ასოს (A-Z).";
-  if (!/\d/.test(password))
-    return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს (0-9).";
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password))
-    return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ სპეციალურ სიმბოლოს.";
-  return null;
-};
-
-// 3. დამხმარე ფუნქცია JWT ტოკენის გენერაციისთვის (7 დღიანი სესია)
+// JWT ტოკენი (7 დღიანი სესია)
 const generateToken = (userId: string, role: string) => {
   return jwt.sign({ id: userId, role }, getJwtSecret(), { expiresIn: "7d" });
 };
@@ -86,23 +77,38 @@ export const registerUser = async (
   try {
     const firstName = clampText(req.body.firstName || req.body.name, 40);
     const lastName = clampText(req.body.lastName, 40);
-    const phone = clampText(req.body.phone, 20);
+    const phone = normalizeGePhone(req.body.phone);
     const email = String(req.body.email || "")
       .trim()
       .toLowerCase();
     const { password } = req.body;
     const name = displayName({ firstName, lastName }) || firstName;
 
-    if (!email || !validateEmailFormat(email)) {
-      res
-        .status(400)
-        .json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტის მისამართი!" });
+    if (!firstName) {
+      res.status(400).json({ message: "სახელი აუცილებელია" });
+      return;
+    }
+    if (!lastName) {
+      res.status(400).json({ message: "გვარი აუცილებელია" });
+      return;
+    }
+    if (!phone) {
+      res.status(400).json({
+        message:
+          "მიუთითე სწორი ქართული მობილური (მაგ: 599123456 ან +995599123456)",
+      });
+      return;
+    }
+    if (!isValidEmail(email)) {
+      res.status(400).json({
+        message: "ელ-ფოსტა უნდა შეიცავდეს @-ს და იყოს სწორი ფორმატის (მაგ: name@gmail.com)",
+      });
       return;
     }
 
-    const passwordError = validatePasswordBackend(password);
-    if (passwordError) {
-      res.status(400).json({ message: passwordError });
+    const passErr = passwordError(password);
+    if (passErr) {
+      res.status(400).json({ message: passErr });
       return;
     }
 
@@ -114,11 +120,6 @@ export const registerUser = async (
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    if (!firstName) {
-      res.status(400).json({ message: "სახელი აუცილებელია" });
-      return;
-    }
 
     const { token, code, expires } = makeActivation();
     const user = await User.create({
@@ -139,9 +140,10 @@ export const registerUser = async (
     res.status(201).json({
       mailSent,
       email: user.email,
+      mailConfigured: mailConfigured(),
       message: mailSent
-        ? "რეგისტრაცია წარმატებულია. მეილზე გამოგიგზავნეთ 6-ნიშნა აქტივაციის კოდი."
-        : "ანგარიში შეიქმნა, მაგრამ მეილი ვერ გაიგზავნა. დააჭირე „კოდის ხელახლა გაგზავნა“.",
+        ? "რეგისტრაცია წარმატებულია. მეილზე გამოგიგზავნეთ აქტივაციის ბმული და 6-ნიშნა კოდი. შეამოწმე Inbox და Spam."
+        : "ანგარიში შეიქმნა, მაგრამ მეილი ვერ გაიგზავნა. დააჭირე „კოდის ხელახლა გაგზავნა“ ან მოგვწერე retrobit.support@gmail.com",
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -223,8 +225,8 @@ export const resendVerification = async (
     const email = String(req.body.email || "")
       .trim()
       .toLowerCase();
-    if (!email || !validateEmailFormat(email)) {
-      res.status(400).json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტა." });
+    if (!isValidEmail(email)) {
+      res.status(400).json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტა (@)." });
       return;
     }
 
@@ -270,6 +272,10 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       .trim()
       .toLowerCase();
     const { password } = req.body;
+    if (!isValidEmail(email)) {
+      res.status(400).json({ message: "ელ-ფოსტა უნდა შეიცავდეს @-ს" });
+      return;
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -424,9 +430,22 @@ export const updateProfile = async (
       res.status(401).json({ message: "მომხმარებელი ვერ მოიძებნა" });
       return;
     }
-    user.firstName = clampText(req.body.firstName, 40);
-    user.lastName = clampText(req.body.lastName, 40);
-    user.phone = clampText(req.body.phone, 20);
+    const firstName = clampText(req.body.firstName, 40);
+    const lastName = clampText(req.body.lastName, 40);
+    const phone = normalizeGePhone(req.body.phone);
+    if (!firstName || !lastName) {
+      res.status(400).json({ message: "სახელი და გვარი აუცილებელია" });
+      return;
+    }
+    if (!phone) {
+      res.status(400).json({
+        message: "მიუთითე სწორი ქართული მობილური (5XX XXX XXX)",
+      });
+      return;
+    }
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.phone = phone;
     user.address = clampText(req.body.address, 120);
     user.city = clampText(req.body.city, 60);
     user.name = displayName(user);
@@ -446,8 +465,8 @@ export const forgotPassword = async (
     const email = String(req.body.email || "")
       .trim()
       .toLowerCase();
-    if (!email || !validateEmailFormat(email)) {
-      res.status(400).json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტა." });
+    if (!isValidEmail(email)) {
+      res.status(400).json({ message: "გთხოვთ მიუთითოთ სწორი ელ-ფოსტა (@)." });
       return;
     }
 
@@ -475,12 +494,17 @@ export const forgotPassword = async (
       });
       if (!mailSent) {
         console.error("Forgot-password mail was not sent for", user.email);
+        res.status(503).json({
+          message:
+            "მეილი ვერ გაიგზავნა. შეამოწმე Render-ზე EMAIL_USER / EMAIL_PASS (Gmail App Password) ან მოგვწერე retrobit.support@gmail.com",
+        });
+        return;
       }
     }
 
     res.status(200).json({
       message:
-        "თუ ეს ელ-ფოსტა რეგისტრირებულია, აღდგენის ლინკი გამოგიგზავნე. შეამოწმე Inbox და Spam. ✉️",
+        "თუ ეს ელ-ფოსტა რეგისტრირებულია, აღდგენის ლინკი გამოგიგზავნე. შეამოწმე Inbox და Spam.",
     });
   } catch (error) {
     console.error("Forgot password error:", error);
@@ -502,9 +526,9 @@ export const resetPassword = async (
       .toLowerCase();
     const { newPassword } = req.body;
 
-    const passwordError = validatePasswordBackend(newPassword);
-    if (passwordError) {
-      res.status(400).json({ message: passwordError });
+    const passErr = passwordError(newPassword);
+    if (passErr) {
+      res.status(400).json({ message: passErr });
       return;
     }
 
@@ -530,6 +554,42 @@ export const resetPassword = async (
 
     res.status(200).json({
       message: "პაროლი წარმატებით შეიცვალა! ახლა შეგიძლია შეხვიდე სისტემაში.",
+    });
+  } catch {
+    res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+};
+
+export const testMail = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const admin = await User.findById(req.user?.id).select("email firstName");
+    if (!admin?.email) {
+      res.status(401).json({ message: "ადმინი ვერ მოიძებნა" });
+      return;
+    }
+    if (!mailConfigured()) {
+      res.status(500).json({
+        message:
+          "Render-ზე აკლია EMAIL_USER ან EMAIL_PASS. Gmail-ზე ჩართე 2FA და შექმენი App Password.",
+      });
+      return;
+    }
+    const sent = await trySendEmail({
+      email: admin.email,
+      subject: "RetroBit — სატესტო მეილი",
+      message: `ეს არის სატესტო წერილი. თუ ეს მიიღე, SMTP გამართულია.\nგამგზავნი: ${shopMail()}`,
+    });
+    res.json({
+      mailConfigured: true,
+      mailSent: sent,
+      to: admin.email,
+      from: shopMail(),
+      message: sent
+        ? `სატესტო მეილი გაიგზავნა ${admin.email}-ზე. შეამოწმე Inbox/Spam.`
+        : "SMTP ვერ გაიგზავნა. Render logs-ში ნახე SMTP all attempts failed.",
     });
   } catch {
     res.status(500).json({ message: "სერვერის შეცდომა" });

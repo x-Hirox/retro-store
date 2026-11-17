@@ -29,39 +29,19 @@ export function frontendBaseUrl(origin?: string | string[]): string {
   return configured;
 }
 
-type MailPayload = {
-  from: string;
-  to: string;
-  replyTo: string;
-  subject: string;
-  text: string;
-  html: string;
-};
-
-let transporter: nodemailer.Transporter | null = null;
-let transporterPort: 465 | 587 | null = null;
+export function mailConfigured(): boolean {
+  const user = String(process.env.EMAIL_USER || "").trim();
+  const pass = String(process.env.EMAIL_PASS || "").replace(/\s/g, "");
+  return Boolean(user && pass);
+}
 
 function credentials() {
   const user = String(process.env.EMAIL_USER || "").trim();
   const pass = String(process.env.EMAIL_PASS || "").replace(/\s/g, "");
   if (!user || !pass) {
-    throw new Error("EMAIL_USER ან EMAIL_PASS აკლია");
+    throw new Error("EMAIL_USER ან EMAIL_PASS აკლია Render Environment-ში");
   }
   return { user, pass };
-}
-
-function createTransport(port: 465 | 587) {
-  const { user, pass } = credentials();
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port,
-    secure: port === 465,
-    requireTLS: port === 587,
-    auth: { user, pass },
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 10000,
-  });
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
@@ -80,12 +60,37 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
   });
 }
 
-async function sendWith(port: 465 | 587, payload: MailPayload) {
-  if (!transporter || transporterPort !== port) {
-    transporter = createTransport(port);
-    transporterPort = port;
-  }
-  await withTimeout(transporter.sendMail(payload), 11000, "SMTP timeout");
+function transports() {
+  const { user, pass } = credentials();
+  const auth = { user, pass };
+  return [
+    nodemailer.createTransport({
+      service: "gmail",
+      auth,
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 15000,
+    }),
+    nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth,
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 15000,
+    }),
+    nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth,
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 15000,
+    }),
+  ];
 }
 
 export const sendEmail = async (options: {
@@ -95,8 +100,8 @@ export const sendEmail = async (options: {
   html?: string;
   replyTo?: string;
 }) => {
-  const { user } = credentials();
-  const payload: MailPayload = {
+  const { user, pass } = credentials();
+  const payload = {
     from: `"RetroBit" <${user}>`,
     to: options.email,
     replyTo: options.replyTo || user,
@@ -109,21 +114,32 @@ export const sendEmail = async (options: {
         .replace(/</g, "&lt;")}</pre>`,
   };
 
-  try {
-    await sendWith(465, payload);
-  } catch (first) {
-    transporter = null;
-    transporterPort = null;
+  const errors: unknown[] = [];
+  for (const transporter of transports()) {
     try {
-      await sendWith(587, payload);
-    } catch (second) {
-      transporter = null;
-      transporterPort = null;
-      console.error("SMTP 465 failed:", first);
-      console.error("SMTP 587 failed:", second);
-      throw second;
+      await withTimeout(transporter.sendMail(payload), 16000, "SMTP timeout");
+      return;
+    } catch (err) {
+      errors.push(err);
+      try {
+        transporter.close();
+      } catch {
+        /* ignore */
+      }
     }
   }
+
+  console.error("SMTP all attempts failed", {
+    to: options.email,
+    hasUser: Boolean(user),
+    passLen: pass.length,
+    hint:
+      pass.length !== 16
+        ? "Gmail-ის App Password ჩვეულებრივ 16 სიმბოლოა (არა ანგარიშის პაროლი)"
+        : "შეამოწმე 2FA + App Password და რომ EMAIL_USER არის იგივე Gmail",
+    last: errors[errors.length - 1],
+  });
+  throw errors[errors.length - 1] || new Error("SMTP failed");
 };
 
 export async function trySendEmail(

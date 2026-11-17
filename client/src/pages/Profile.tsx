@@ -13,6 +13,7 @@ import {
 import { useLang } from "../i18n/LanguageContext";
 import OrderTracker from "../components/OrderTracker";
 import { canCustomerCancel, statusLabel } from "../utils/orderStatus";
+import { normalizeGePhone } from "../utils/validate";
 
 type Order = {
   _id: string;
@@ -101,11 +102,22 @@ export default function Profile() {
     e.preventDefault();
     setSaving(true);
     setMessage("");
+    const phone = normalizeGePhone(form.phone);
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setMessage("სახელი და გვარი აუცილებელია");
+      setSaving(false);
+      return;
+    }
+    if (!phone) {
+      setMessage("მიუთითე სწორი ქართული მობილური (599123456)");
+      setSaving(false);
+      return;
+    }
     try {
       const data = await authService.updateProfile({
         firstName: form.firstName,
         lastName: form.lastName,
-        phone: form.phone,
+        phone,
         address: form.address,
         city: form.city,
       });
@@ -154,6 +166,7 @@ export default function Profile() {
             <input
               value={form.lastName}
               onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+              required
             />
           </label>
           <label>
@@ -165,6 +178,8 @@ export default function Profile() {
             <input
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              placeholder="599123456"
+              required
             />
           </label>
           <label>

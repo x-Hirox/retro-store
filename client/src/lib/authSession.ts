@@ -17,5 +17,5 @@ export function saveAuthSession(data: {
 }
 
 export function afterLoginPath(role?: string): string {
-  return role === "admin" ? "/admin" : "/";
+  return role === "admin" ? "/admin" : "/profile";
 }

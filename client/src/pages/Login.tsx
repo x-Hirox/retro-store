@@ -7,6 +7,7 @@ import {
   getGoogleClientId,
   saveAuthSession,
 } from "../lib/authSession";
+import { isValidEmail } from "../utils/validate";
 
 // დეკლარაცია Google-ის გლობალური ობიექტისთვის TypeScript-ში
 declare global {
@@ -40,6 +41,10 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setNeedActivation(false);
+    if (!isValidEmail(email)) {
+      setError("ელ-ფოსტა უნდა შეიცავდეს @-ს (მაგ: name@gmail.com).");
+      return;
+    }
     setLoading(true);
 
     try {

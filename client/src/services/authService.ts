@@ -84,6 +84,16 @@ export const authService = {
     return response.data as { user: IAuthResponse["user"] };
   },
 
+  testMail: async () => {
+    const response = await API.post("/auth/test-mail", {}, { timeout: 25000 });
+    return response.data as {
+      mailSent: boolean;
+      to?: string;
+      from?: string;
+      message: string;
+    };
+  },
+
   updateProfile: async (data: {
     firstName: string;
     lastName: string;

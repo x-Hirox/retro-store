@@ -10,6 +10,7 @@ import {
   getMe,
   updateProfile,
   listUsers,
+  testMail,
 } from "../controllers/authController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { rateLimit } from "../utils/security.js";
@@ -27,5 +28,6 @@ router.post("/reset-password", authLimit, resetPassword);
 router.get("/me", protect, getMe);
 router.put("/me", protect, updateProfile);
 router.get("/users", protect, adminOnly, listUsers);
+router.post("/test-mail", protect, adminOnly, testMail);
 
 export default router;

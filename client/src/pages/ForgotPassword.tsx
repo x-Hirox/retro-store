@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../services/authService";
+import { isValidEmail } from "../utils/validate";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -10,9 +11,13 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     setMessage("");
+    if (!isValidEmail(email)) {
+      setError("ელ-ფოსტა უნდა შეიცავდეს @-ს.");
+      return;
+    }
+    setLoading(true);
 
     try {
       const response = await authService.forgotPassword({ email });

@@ -7,6 +7,11 @@ import {
   getGoogleClientId,
   saveAuthSession,
 } from "../lib/authSession";
+import {
+  isValidEmail,
+  normalizeGePhone,
+  passwordError,
+} from "../utils/validate";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -24,30 +29,31 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
 
-  const validatePassword = (pass: string) => {
-    if (pass.length < 8) return "პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან.";
-    if (!/[A-Z]/.test(pass))
-      return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ დიდ ასოს (A-Z).";
-    if (!/\d/.test(pass))
-      return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ ციფრს (0-9).";
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass))
-      return "პაროლი უნდა შეიცავდეს მინიმუმ ერთ სპეციალურ სიმბოლოს.";
-    return null;
-  };
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
 
+    if (!name.trim() || !lastName.trim()) {
+      setError("სახელი და გვარი აუცილებელია.");
+      return;
+    }
+    if (!normalizeGePhone(phone)) {
+      setError("მიუთითე სწორი ქართული მობილური: 599123456 ან +995599123456");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("ელ-ფოსტა უნდა შეიცავდეს @-ს (მაგ: name@gmail.com).");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("პაროლები არ ემთხვევა ერთმანეთს.");
       return;
     }
 
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      setError(passwordError);
+    const passErr = passwordError(password);
+    if (passErr) {
+      setError(passErr);
       return;
     }
 
@@ -57,7 +63,7 @@ export default function Register() {
       const response = await authService.register({
         firstName: name,
         lastName,
-        phone,
+        phone: normalizeGePhone(phone) || phone,
         name: `${name} ${lastName}`.trim(),
         email,
         password,
@@ -174,7 +180,8 @@ export default function Register() {
             marginBottom: "25px",
           }}
         >
-          შეიქმენი ანგარიში რეტრო კოლექციების განსათავსებლად და შესაძენად.
+          სახელი, გვარი, ტელეფონი, მეილი და პაროლი. მეილზე მოგივა აქტივაციის
+          ბმული — დააკლიკე და შედი პროფილში.
         </p>
 
         {message && (
@@ -319,13 +326,14 @@ export default function Register() {
                 fontSize: "0.9rem",
               }}
             >
-              ტელეფონი
+              ტელეფონი (სავალდებულო)
             </label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="599123456"
+              required
               style={{
                 width: "100%",
                 padding: "12px",

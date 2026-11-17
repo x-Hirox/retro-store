@@ -5,6 +5,7 @@ import API from "../services/api";
 import { authService } from "../services/authService";
 import { getSalePrice } from "../utils/pricing";
 import PaymentMarks from "../components/PaymentMarks";
+import { normalizeGePhone } from "../utils/validate";
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
@@ -58,9 +59,8 @@ export default function Checkout() {
       return;
     }
 
-    // 🟢 ტელეფონის ნომრის ვალიდაცია
-    const phoneRegex = /^\+?[0-9]{9,15}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    const phone = normalizeGePhone(formData.phone);
+    if (!phone) {
       alert(
         "გთხოვთ მიუთითოთ ტელეფონის სწორი ნომერი (მაგ: +995599123456 ან 599123456)",
       );
@@ -92,7 +92,7 @@ export default function Checkout() {
           address: formData.address,
           city: finalCity,
           postalCode: "0100",
-          phone: formData.phone,
+          phone,
         },
         paymentMethod: formData.paymentMethod,
         totalPrice: totalAmount,
