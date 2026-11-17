@@ -15,16 +15,25 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      // 🟢 ვუერთებთ რეალურ ბექენდ ენდპოინტს authService-ის მეშვეობით
       const response = await authService.forgotPassword({ email });
       setMessage(
-        response.message || "აღდგენის ინსტრუქცია გამოგზავნილია მეილზე. ✉️",
+        response.message ||
+          "თუ ეს ელ-ფოსტა რეგისტრირებულია, აღდგენის ლინკი გამოგიგზავნე. შეამოწმე Inbox და Spam.",
       );
-      setLoading(false);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "შეცდომა მოხდა მოთხოვნის გაგზავნისას.",
-      );
+    } catch (err: unknown) {
+      const axiosErr = err as {
+        code?: string;
+        response?: { data?: { message?: string } };
+      };
+      if (axiosErr.code === "ECONNABORTED") {
+        setError("სერვერი დიდხანს პასუხობს. სცადე კიდევ ერთხელ.");
+      } else {
+        setError(
+          axiosErr.response?.data?.message ||
+            "შეცდომა მოხდა მოთხოვნის გაგზავნისას.",
+        );
+      }
+    } finally {
       setLoading(false);
     }
   };

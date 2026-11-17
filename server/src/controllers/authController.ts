@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { frontendBaseUrl, sendEmail } from "../utils/sendEmail.js";
+import { frontendBaseUrl, trySendEmail } from "../utils/sendEmail.js";
 import { OAuth2Client } from "google-auth-library";
 import { getJwtSecret, isAdminEmail } from "../utils/security.js";
 import { publicUser, displayName } from "../utils/publicUser.js";
@@ -60,12 +60,11 @@ async function sendActivationEmail(
   const frontendUrl = frontendBaseUrl(req.headers.origin);
   const link = `${frontendUrl}/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(user.email)}`;
   const hello = user.firstName || user.name || "";
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: `RetroBit აქტივაციის კოდი: ${code}`,
-      message: `გამარჯობა ${hello}!\n\nშენი აქტივაციის კოდია: ${code}\nკოდი ძალაშია 24 საათი.\n\nან გახსენი ეს ბმული:\n${link}\n\nთუ ეს ანგარიში შენ არ შეგიქმნია, უგულებელყავი ეს წერილი.`,
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
+  return trySendEmail({
+    email: user.email,
+    subject: `RetroBit აქტივაციის კოდი: ${code}`,
+    message: `გამარჯობა ${hello}!\n\nშენი აქტივაციის კოდია: ${code}\nკოდი ძალაშია 24 საათი.\n\nან გახსენი ეს ბმული:\n${link}\n\nთუ ეს ანგარიში შენ არ შეგიქმნია, უგულებელყავი ეს წერილი.`,
+    html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
         <h2>RetroBit აქტივაცია</h2>
         <p>გამარჯობა ${hello}!</p>
         <p>შენი 6-ნიშნა კოდია:</p>
@@ -74,12 +73,7 @@ async function sendActivationEmail(
         <p><a href="${link}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">ანგარიშის აქტივაცია</a></p>
         <p style="font-size:12px;color:#555">თუ ღილაკი არ იხსნება:<br>${link}</p>
       </div>`,
-    });
-    return true;
-  } catch (err) {
-    console.error("Activation mail failed:", err);
-    return false;
-  }
+  });
 }
 
 // --- CONTROLLERS ---
@@ -468,12 +462,20 @@ export const forgotPassword = async (
       const frontendUrl = frontendBaseUrl(req.headers.origin);
       const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(user.email)}`;
 
-      await sendEmail({
+      const mailSent = await trySendEmail({
         email: user.email,
         subject: "პაროლის აღდგენა - RetroBit",
         message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 15 წუთი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
-        html: `<p>გამარჯობა!</p><p>მოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 15 წუთი.</p><p><a href="${resetLink}" style="display:inline-block;background:#2563eb;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">პაროლის აღდგენა</a></p><p>ან გახსენი ეს ბმული:<br>${resetLink}</p>`,
+        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
+          <h2>RetroBit — პაროლის აღდგენა</h2>
+          <p>ბმული ძალაშია 15 წუთი.</p>
+          <p><a href="${resetLink}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">პაროლის აღდგენა</a></p>
+          <p style="font-size:12px;color:#555">თუ ღილაკი არ იხსნება:<br>${resetLink}</p>
+        </div>`,
       });
+      if (!mailSent) {
+        console.error("Forgot-password mail was not sent for", user.email);
+      }
     }
 
     res.status(200).json({
@@ -481,9 +483,9 @@ export const forgotPassword = async (
         "თუ ეს ელ-ფოსტა რეგისტრირებულია, აღდგენის ლინკი გამოგიგზავნე. შეამოწმე Inbox და Spam. ✉️",
     });
   } catch (error) {
-    console.error("Email send error:", error);
+    console.error("Forgot password error:", error);
     res.status(500).json({
-      message: "სერვერის შეცდომა მეილის გაგზავნისას",
+      message: "სერვერის შეცდომა. სცადე ხელახლა.",
     });
   }
 };
