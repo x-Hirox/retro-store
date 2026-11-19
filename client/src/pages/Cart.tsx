@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { getSalePrice } from "../utils/pricing";
+import { formatGel, getSalePrice } from "../utils/pricing";
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
@@ -34,7 +34,7 @@ export default function Cart() {
               <div>
                 <h3>{item.title}</h3>
                 <p>
-                  {sale.final.toFixed(2)} ₾ × {item.quantity}
+                  {formatGel(sale.final)} × {item.quantity}
                 </p>
                 <div className="pd-stepper compact">
                   <button
@@ -52,7 +52,7 @@ export default function Cart() {
                   </button>
                 </div>
               </div>
-              <strong>{(sale.final * item.quantity).toFixed(2)} ₾</strong>
+              <strong>{formatGel(sale.final * item.quantity)}</strong>
               <button type="button" className="cart-remove" onClick={() => removeFromCart(item._id)}>
                 წაშლა
               </button>
@@ -62,7 +62,7 @@ export default function Cart() {
       </ul>
       <div className="cart-page-foot">
         <h2>
-          სულ: <span>{totalAmount.toFixed(2)} ₾</span>
+          სულ: <span>{formatGel(totalAmount)}</span>
         </h2>
         <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
         <div className="pd-cta">

@@ -11,6 +11,12 @@ export function getSalePrice(product: IProduct) {
   };
 }
 
+/** Storefront GEL: whole lari, no messy 409.18 */
+export function formatGel(n: number) {
+  const v = Math.round(Number(n) || 0);
+  return `${v} ₾`;
+}
+
 export function isBannerProduct(product: IProduct) {
   return (
     product.category === "banner-hero" ||

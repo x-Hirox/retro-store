@@ -24,14 +24,6 @@ function Bit({
   );
 }
 
-export function SantaHat() {
-  return (
-    <span className="ny-hat" aria-hidden>
-      <img src="/decor/santa-hat.svg" alt="" />
-    </span>
-  );
-}
-
 export const Tamagotchi = () => (
   <Bit src="/decor/tamagotchi.svg" title="Tamagotchi" pos="left" />
 );

@@ -4,7 +4,7 @@ import { getProductById, getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import type { IProduct } from "../types";
 import { trackRecentlyViewed } from "../utils/recentlyViewed";
-import { getSalePrice } from "../utils/pricing";
+import { formatGel, getSalePrice } from "../utils/pricing";
 import { useLang } from "../i18n/LanguageContext";
 import { suggestAddons } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
@@ -90,10 +90,10 @@ export default function ProductDetail() {
           {stock > 0 && <p className="pd-ok">შემოწმებული და მუშა</p>}
 
           <div className="pd-price">
-            <strong>{sale.final.toFixed(2)} ₾</strong>
+            <strong>{formatGel(sale.final)}</strong>
             {sale.discount > 0 && (
               <>
-                <s>{sale.original.toFixed(2)} ₾</s>
+                <s>{formatGel(sale.original)}</s>
                 <em>-{sale.discount}%</em>
               </>
             )}
@@ -174,7 +174,7 @@ export default function ProductDetail() {
                     <h3>{item.title}</h3>
                   </Link>
                   <div className="pd-addon-row">
-                    <strong>{itemSale.final.toFixed(2)} ₾</strong>
+                    <strong>{formatGel(itemSale.final)}</strong>
                     <button
                       type="button"
                       disabled={added || (item.stock ?? 0) <= 0}

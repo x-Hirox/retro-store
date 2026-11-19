@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { arcadeBeep } from "../utils/arcadeBeep";
 
+const SFX =
+  ".neon-btn, .sell-btn, .sell-brand-bar, .main-nav-bar a, .category-card, .brand-crt, .glow-cover, .arcade-tab, .lang-toggle";
+
 export default function RetroFX() {
   const { pathname } = useLocation();
   const admin = pathname.startsWith("/admin");
@@ -14,9 +17,7 @@ export default function RetroFX() {
     if (admin) return;
     const onClick = (e: Event) => {
       const t = e.target as HTMLElement | null;
-      if (t?.closest?.(".neon-btn, .sell-btn, .sell-brand-bar")) {
-        arcadeBeep();
-      }
+      if (t?.closest?.(SFX)) arcadeBeep();
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);

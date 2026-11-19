@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../i18n/LanguageContext";
+import HoloCard from "./HoloCard";
 
 export default function BrandsSection() {
   const navigate = useNavigate();
@@ -57,24 +58,12 @@ export default function BrandsSection() {
         }}
       >
         {brands.map((brand) => (
-          <div
+          <HoloCard
             key={brand.name}
+            className="brand-crt"
             onClick={() =>
               navigate(`/category/${encodeURIComponent(brand.name)}`)
             }
-            style={{
-              cursor: "pointer",
-              flexShrink: 0,
-              transition:
-                "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.transform =
-                "scale(1.15)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
-            }}
           >
             <img
               src={brand.src}
@@ -86,7 +75,7 @@ export default function BrandsSection() {
                 display: "block",
               }}
             />
-          </div>
+          </HoloCard>
         ))}
       </div>
     </div>

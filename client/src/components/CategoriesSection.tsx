@@ -4,6 +4,7 @@ import { useLang } from "../i18n/LanguageContext";
 import { getSiteSettings } from "../services/contentService";
 import type { MessageKey } from "../i18n/messages";
 import type { ISiteSettings } from "../types";
+import HoloCard from "./HoloCard";
 
 const DEFAULTS = {
   catImageHome: "/images/console-home.png",
@@ -88,10 +89,9 @@ export default function CategoriesSection() {
       <h2 className="section-title cats-title ny-title">{t("shopByCategory")}</h2>
       <div className="category-mosaic">
         {categories.map((cat) => (
-          <button
+          <HoloCard
             key={cat.title}
-            type="button"
-            className={`category-card ${cat.wide ? "is-wide" : ""}`}
+            className={`category-card crt-frame ${cat.wide ? "is-wide" : ""}`}
             onClick={() => navigate(cat.path)}
             style={{ background: cat.background, gridColumn: cat.gridSpan }}
           >
@@ -100,7 +100,7 @@ export default function CategoriesSection() {
               <p>{t(cat.desc)}</p>
             </div>
             <img className="cat-art" src={img(cat.imageKey)} alt="" />
-          </button>
+          </HoloCard>
         ))}
       </div>
     </div>

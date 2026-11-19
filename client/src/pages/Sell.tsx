@@ -5,6 +5,7 @@ import ReviewsSection from "../components/ReviewsSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Boombox } from "../components/NostalgiaBits";
+import SellEstimator from "../components/SellEstimator";
 
 type QuoteItem = {
   id: string;
@@ -110,6 +111,16 @@ export default function Sell() {
         </div>
         <img className="sell-chest neon-lift" src="/images/sell-chest.jpg" alt="" />
       </section>
+
+      <ol className="sell-progress" aria-label="ნაბიჯები">
+        <li className={step === "list" ? "is-on" : "is-done"}>1. სია</li>
+        <li className={step === "list" ? "" : step === "form" ? "is-on" : "is-done"}>
+          2. კონტაქტი
+        </li>
+        <li className={step === "done" ? "is-on" : ""}>3. შეთავაზება</li>
+      </ol>
+
+      <SellEstimator />
 
       <section className="sell-section">
         <h2>როგორ მუშაობს</h2>

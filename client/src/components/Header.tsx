@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import SoundToggle from "./SoundToggle";
-import { HolidayLights, SantaHat } from "./NostalgiaBits";
+import { HolidayLights } from "./NostalgiaBits";
 import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
 
@@ -69,7 +69,6 @@ export default function Header({
 
       <div className="nav-container">
         <Link to="/" className="site-logo" aria-label="RetroBit">
-          <SantaHat />
           <img src="/retrobit.png" alt="RetroBit" />
         </Link>
 

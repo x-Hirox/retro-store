@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
-import { getSalePrice } from "../utils/pricing";
+import { formatGel, getSalePrice } from "../utils/pricing";
 import { suggestAddons } from "../utils/shopAddons";
 
 export default function CartDrawer() {
@@ -63,7 +63,7 @@ export default function CartDrawer() {
                   <div>
                     <strong>{item.title}</strong>
                     <span>
-                      {sale.final.toFixed(2)} ₾ × {item.quantity}
+                      {formatGel(sale.final)} × {item.quantity}
                     </span>
                     <div className="pd-stepper compact">
                       <button
@@ -109,7 +109,7 @@ export default function CartDrawer() {
                   <article key={item._id} className="cart-upsell-card">
                     <img src={item.imageUrl || ""} alt={item.title} />
                     <p>{item.title}</p>
-                    <strong>{sale.final.toFixed(2)} ₾</strong>
+                    <strong>{formatGel(sale.final)}</strong>
                     <button
                       type="button"
                       disabled={inCart}
@@ -127,7 +127,7 @@ export default function CartDrawer() {
         <footer className="cart-drawer-foot">
           <div className="cart-drawer-total">
             <span>ჯამი</span>
-            <strong>{total.toFixed(2)} ₾</strong>
+            <strong>{formatGel(total)}</strong>
           </div>
           <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
           <button

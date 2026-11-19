@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ARCADE_GAMES, type ArcadeGame, type ArcadeSystem } from "../data/arcadeGames";
 import { useLang } from "../i18n/LanguageContext";
+import HoloCard from "./HoloCard";
+import SoundToggle from "./SoundToggle";
 
 const SYSTEM_LABEL: Record<ArcadeSystem, string> = {
   nes: "NES",
@@ -53,13 +55,11 @@ export default function GameCovers({ mode = "play" }: Props) {
       </div>
       <div className="home-games-grid">
         {ARCADE_GAMES.map((game) => (
-          <button
+          <HoloCard
             key={game.id}
-            type="button"
             className="glow-cover"
             style={{ background: game.poster }}
             onClick={() => onCover(game)}
-            title={`${game.title} — ${game.author}`}
           >
             <span className="glow-cover-art">
               {game.coverUrl ? (
@@ -70,11 +70,12 @@ export default function GameCovers({ mode = "play" }: Props) {
             </span>
             <span className="glow-cover-meta">
               <em>{SYSTEM_LABEL[game.system]}</em>
+              <span className="arcade-badge mini">FREE PLAY</span>
               <strong>{game.title}</strong>
               <span className="glow-cover-credits">{game.author}</span>
               <span className="glow-cover-blurb">{game.desc[lang]}</span>
             </span>
-          </button>
+          </HoloCard>
         ))}
       </div>
 
@@ -100,16 +101,31 @@ export default function GameCovers({ mode = "play" }: Props) {
               <span className="arcade-player-desc">{playing.desc[lang]}</span>
             </div>
             <span className="arcade-hint">{playing.hint || t("arcadeHint")}</span>
+            <SoundToggle />
+            <button
+              type="button"
+              className="arcade-fs"
+              onClick={() => {
+                const box = document.querySelector(".arcade-player");
+                if (!box) return;
+                if (document.fullscreenElement) void document.exitFullscreen();
+                else void (box as HTMLElement).requestFullscreen?.();
+              }}
+            >
+              FULL
+            </button>
             <button type="button" onClick={() => setPlaying(null)}>
               {t("close")}
             </button>
           </div>
-          <iframe
-            title={playing.title}
-            src={src}
-            allow="autoplay; fullscreen; gamepad; gyroscope; accelerometer"
-            allowFullScreen
-          />
+          <div className="arcade-crt-glass">
+            <iframe
+              title={playing.title}
+              src={src}
+              allow="autoplay; fullscreen; gamepad; gyroscope; accelerometer"
+              allowFullScreen
+            />
+          </div>
         </div>
       )}
     </section>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import {
   getCollectionPage,
@@ -133,7 +133,6 @@ function matchesSub(
 
 export default function CategoryView() {
   const { platform, sub } = useParams<{ platform: string; sub?: string }>();
-  const navigate = useNavigate();
   const brand = brandKey(platform);
 
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -207,7 +206,7 @@ export default function CategoryView() {
 
   const visible = filteredProducts.slice(0, visibleCount);
   const bannerColor =
-    collection?.bannerColor || bannerColors[brand] || "#7c3aed";
+    bannerColors[brand] || collection?.bannerColor || "#7c3aed";
 
   const toggleValue = (
     list: string[],
@@ -222,33 +221,32 @@ export default function CategoryView() {
 
   return (
     <div
+      className="shop-page"
       style={{
         minHeight: "100vh",
-        backgroundColor: "var(--bg)",
         color: "var(--text)",
         paddingBottom: "40px",
+        ["--banner" as string]: bannerColor,
       }}
     >
-      <div className="collection-banner" style={{ background: bannerColor }}>
+      <div
+        className="collection-banner"
+        style={{ ["--banner" as string]: bannerColor }}
+      >
         <div className="collection-consoles">
           {currentCards.map((item) => {
             const active =
               normalize(sub) === normalize(item.slug) ||
               normalize(sub) === normalize(item.name);
             return (
-              <button
+              <Link
                 key={item._id || item.slug}
-                type="button"
+                to={`/category/${encodeURIComponent(platform || "")}/${encodeURIComponent(item.slug)}`}
                 className={`collection-console arcade-tab ${active ? "is-active" : ""}`}
-                onClick={() =>
-                  navigate(
-                    `/category/${encodeURIComponent(platform || "")}/${encodeURIComponent(item.slug)}`,
-                  )
-                }
               >
-                <img src={item.imageUrl} alt={item.name} />
+                <img src={item.imageUrl} alt="" />
                 <span>{item.name}</span>
-              </button>
+              </Link>
             );
           })}
         </div>

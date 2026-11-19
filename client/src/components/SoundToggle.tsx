@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import { playArcadeTune } from "../utils/arcadeBeep";
-import { isMuted, toggleMuted } from "../utils/soundMute";
+import { isMuted, subscribeMute, toggleMuted } from "../utils/soundMute";
 
 export default function SoundToggle() {
-  const [muted, setMutedState] = useState(false);
+  const [muted, setMutedState] = useState(true);
 
   useEffect(() => {
     setMutedState(isMuted());
+    return subscribeMute(setMutedState);
   }, []);
 
   return (
     <button
       type="button"
       className={`walkman-btn${muted ? " is-muted" : ""}`}
-      title={muted ? "Walkman ჩართე" : "Walkman გამორთე"}
+      title={muted ? "Sound Off — ჩართე არკადული ხმა" : "Sound On — გამორთე ხმა"}
       aria-pressed={!muted}
+      aria-label={muted ? "Sound Off" : "Sound On"}
       onClick={() => {
         const next = toggleMuted();
         setMutedState(next);
@@ -28,7 +30,7 @@ export default function SoundToggle() {
           <i />
         </span>
       </span>
-      <span className="walkman-label">{muted ? "MUTE" : "PLAY"}</span>
+      <span className="walkman-label">{muted ? "SOUND OFF" : "SOUND ON"}</span>
     </button>
   );
 }

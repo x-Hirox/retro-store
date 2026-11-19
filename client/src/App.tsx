@@ -19,6 +19,7 @@ import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import CartDrawer from "./components/CartDrawer";
 import RetroFX from "./components/RetroFX";
+import RetroAnimeBackdrop from "./components/RetroAnimeBackdrop";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
@@ -97,9 +98,9 @@ export default function App() {
   return (
     <Router>
       <div
+        className="site-shell"
         style={{
           minHeight: "100vh",
-          backgroundColor: "var(--bg)",
           color: "var(--text)",
           width: "100%",
           margin: 0,
@@ -109,6 +110,7 @@ export default function App() {
           transition: "background-color 0.2s ease, color 0.2s ease",
         }}
       >
+        <RetroAnimeBackdrop />
         <style>
           {`
             .dropdown-parent:hover .dropdown-content {
@@ -168,8 +170,7 @@ export default function App() {
               }
             />
 
-            <Route path="/category/:platform" element={<CategoryView />} />
-            <Route path="/category/:platform/:sub" element={<CategoryView />} />
+            <Route path="/category/:platform/:sub?" element={<CategoryView />} />
             <Route path="/order-success/:id" element={<OrderSuccess />} />
           </Routes>
         </div>

@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
-import { getSalePrice, isBannerProduct } from "../utils/pricing";
+import { formatGel, getSalePrice, isBannerProduct } from "../utils/pricing";
+import HoloCard from "./HoloCard";
 import { useLang } from "../i18n/LanguageContext";
 
 interface Props {
@@ -123,35 +124,10 @@ export default function BestSellersSlider({
             ).map((product) => {
               const sale = getSalePrice(product);
               return (
-              <div
+              <HoloCard
                 key={product._id}
-                style={{
-                  minWidth: "250px",
-                  maxWidth: "250px",
-                  backgroundColor: "var(--code-bg)",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "all 0.3s ease",
-                  cursor: "pointer",
-                  border: "1px solid var(--border)",
-                  padding: "16px",
-                  position: "relative",
-                  flexShrink: 0,
-                }}
+                className="product-card glass-card slider-card"
                 onClick={() => navigate(`/product/${product._id}`)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-6px)";
-                  e.currentTarget.style.borderColor = "var(--neon-pink)";
-                  e.currentTarget.style.boxShadow =
-                    "-3px 3px 0px var(--neon-pink), 3px -3px 0px var(--neon-cyan)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor = "var(--border)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
               >
                 {(product.stock ?? 0) <= 0 && (
                   <span className="sold-badge">SOLD</span>
@@ -178,26 +154,13 @@ export default function BestSellersSlider({
                 </span>
                 )}
 
-                <div
-                  style={{
-                    height: "180px",
-                    backgroundColor: "var(--bg)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "hidden",
-                    borderRadius: "10px",
-                  }}
-                >
+                <div className="card-photo">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
                       alt={product.title}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
+                      loading="lazy"
+                      decoding="async"
                     />
                   ) : (
                     <span style={{ fontSize: "3rem" }}>🕹️</span>
@@ -257,7 +220,7 @@ export default function BestSellersSlider({
                         color: "var(--text-h)",
                       }}
                     >
-                      {sale.final} ₾
+                      {formatGel(sale.final)}
                     </span>
                     {sale.discount > 0 && (
                     <span
@@ -267,12 +230,12 @@ export default function BestSellersSlider({
                         textDecoration: "line-through",
                       }}
                     >
-                      {sale.original} ₾
+                      {formatGel(sale.original)}
                     </span>
                     )}
                   </div>
                 </div>
-              </div>
+              </HoloCard>
             );
             })}
           </div>

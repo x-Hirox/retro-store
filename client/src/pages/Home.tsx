@@ -52,7 +52,7 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "var(--bg)",
+        backgroundColor: "transparent",
         color: "var(--text)",
         paddingBottom: "60px",
         overflowX: "hidden",
