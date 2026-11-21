@@ -44,32 +44,20 @@ function credentials() {
   return { user, pass };
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string) {
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(label)), ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (err) => {
-        clearTimeout(timer);
-        reject(err);
-      },
-    );
-  });
-}
-
 function transports() {
   const { user, pass } = credentials();
   const auth = { user, pass };
+  const timeouts = {
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 25000,
+    family: 4 as const,
+  };
   return [
     nodemailer.createTransport({
       service: "gmail",
       auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
+      ...timeouts,
     }),
     nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -77,18 +65,7 @@ function transports() {
       secure: false,
       requireTLS: true,
       auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
-    }),
-    nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
+      ...timeouts,
     }),
   ];
 }
@@ -117,10 +94,11 @@ export const sendEmail = async (options: {
   const errors: unknown[] = [];
   for (const transporter of transports()) {
     try {
-      await withTimeout(transporter.sendMail(payload), 16000, "SMTP timeout");
+      await transporter.sendMail(payload);
       console.log("SMTP sent", { to: options.email, from: user });
       return;
     } catch (err) {
+      console.error("SMTP attempt failed", err);
       errors.push(err);
       try {
         transporter.close();

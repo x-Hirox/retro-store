@@ -502,7 +502,7 @@ export const forgotPassword = async (
         console.error("Forgot-password mail was not sent for", user.email);
         res.status(503).json({
           message:
-            "მეილი ვერ გაიგზავნა. შეამოწმე Render-ზე EMAIL_USER / EMAIL_PASS (Gmail App Password) ან მოგვწერე retrobit.support@gmail.com",
+            "წერილი ვერ გაიგზავნა. სცადე ხელახლა ან მოგვწერე retrobit.support@gmail.com",
         });
         return;
       }

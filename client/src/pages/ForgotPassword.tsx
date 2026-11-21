@@ -126,7 +126,7 @@ export default function ForgotPassword() {
           </div>
 
           <button type="submit" disabled={loading} className="auth-button">
-            {loading ? "იგზავნება... (სერვერი შეიძლება იღვიძებდეს)" : "აღდგენის მოთხოვნა"}
+            {loading ? "იგზავნება..." : "აღდგენის მოთხოვნა"}
           </button>
         </form>
 
