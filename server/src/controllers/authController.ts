@@ -479,10 +479,29 @@ export const forgotPassword = async (
     const user = await User.findOne({ email });
 
     if (user) {
-      const resetToken = crypto.randomBytes(32).toString("hex");
-      user.resetPasswordToken = resetToken;
-      user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000);
-      await user.save();
+      const now = Date.now();
+      const previousToken = user.resetPasswordToken || null;
+      const previousExp = user.resetPasswordExpires || null;
+      const canReuse =
+        Boolean(previousToken) &&
+        previousExp instanceof Date &&
+        previousExp.getTime() > now;
+
+      const resetToken = canReuse
+        ? String(previousToken)
+        : crypto.randomBytes(32).toString("hex");
+
+      if (!canReuse) {
+        await User.updateOne(
+          { _id: user._id },
+          {
+            $set: {
+              resetPasswordToken: resetToken,
+              resetPasswordExpires: new Date(now + 24 * 60 * 60 * 1000),
+            },
+          },
+        );
+      }
 
       const frontendUrl = frontendBaseUrl(req.headers.origin);
       const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(user.email)}`;
@@ -490,15 +509,26 @@ export const forgotPassword = async (
       const mailSent = await trySendEmail({
         email: user.email,
         subject: "პაროლის აღდგენა - RetroBit",
-        message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 15 წუთი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
+        message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 24 საათი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
         html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
           <h2>RetroBit — პაროლის აღდგენა</h2>
-          <p>ბმული ძალაშია 15 წუთი.</p>
+          <p>ბმული ძალაშია 24 საათი.</p>
           <p><a href="${resetLink}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">პაროლის აღდგენა</a></p>
           <p style="font-size:12px;color:#555">თუ ღილაკი არ იხსნება:<br>${resetLink}</p>
         </div>`,
       });
       if (!mailSent) {
+        if (!canReuse) {
+          await User.updateOne(
+            { _id: user._id },
+            {
+              $set: {
+                resetPasswordToken: previousToken,
+                resetPasswordExpires: previousExp,
+              },
+            },
+          );
+        }
         console.error("Forgot-password mail was not sent for", user.email);
         res.status(503).json({
           message:
@@ -527,10 +557,21 @@ export const resetPassword = async (
 ): Promise<void> => {
   try {
     const token = String(req.body.token || "").trim();
-    const email = decodeURIComponent(String(req.body.email || ""))
-      .trim()
-      .toLowerCase();
+    let email = String(req.body.email || "").trim();
+    try {
+      email = decodeURIComponent(email);
+    } catch {
+      /* keep raw */
+    }
+    email = email.trim().toLowerCase();
     const { newPassword } = req.body;
+
+    if (!token || !email) {
+      res.status(400).json({
+        message: "აღდგენის ბმული არასწორია. მოითხოვე ახალი ლინკი.",
+      });
+      return;
+    }
 
     const passErr = passwordError(newPassword);
     if (passErr) {
@@ -538,16 +579,15 @@ export const resetPassword = async (
       return;
     }
 
-    const user = await User.findOne({
-      email,
-      resetPasswordToken: token,
-      resetPasswordExpires: { $gt: new Date() },
-    });
+    const user =
+      (await User.findOne({ email, resetPasswordToken: token })) ||
+      (await User.findOne({ resetPasswordToken: token }));
 
     if (!user) {
-      res
-        .status(400)
-        .json({ message: "აღდგენის ბმული არასწორია ან ვადა გასულია. მოითხოვე ახალი ლინკი." });
+      res.status(400).json({
+        message:
+          "ეს ბმული აღარ მუშაობს. ახალი წერილი ჯერ უნდა მივიდეს Inbox-ში.",
+      });
       return;
     }
 
@@ -555,8 +595,11 @@ export const resetPassword = async (
     await User.updateOne(
       { _id: user._id },
       {
-        $set: { password: hashed },
-        $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 },
+        $set: {
+          password: hashed,
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        },
       },
     );
 

@@ -29,15 +29,21 @@ export function frontendBaseUrl(origin?: string | string[]): string {
   return configured;
 }
 
+function envPass() {
+  return String(process.env.EMAIL_PASS || "")
+    .replace(/\s/g, "")
+    .replace(/^["']+|["']+$/g, "");
+}
+
 export function mailConfigured(): boolean {
   const user = String(process.env.EMAIL_USER || "").trim();
-  const pass = String(process.env.EMAIL_PASS || "").replace(/\s/g, "");
+  const pass = envPass();
   return Boolean(user && pass);
 }
 
 function credentials() {
   const user = String(process.env.EMAIL_USER || "").trim();
-  const pass = String(process.env.EMAIL_PASS || "").replace(/\s/g, "");
+  const pass = envPass();
   if (!user || !pass) {
     throw new Error("EMAIL_USER ან EMAIL_PASS აკლია Render Environment-ში");
   }
@@ -64,6 +70,13 @@ function transports() {
       port: 587,
       secure: false,
       requireTLS: true,
+      auth,
+      ...timeouts,
+    }),
+    nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth,
       ...timeouts,
     }),
