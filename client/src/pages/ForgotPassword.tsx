@@ -31,7 +31,7 @@ export default function ForgotPassword() {
         response?: { data?: { message?: string } };
       };
       if (axiosErr.code === "ECONNABORTED") {
-        setError("სერვერი დიდხანს პასუხობს. სცადე კიდევ ერთხელ.");
+        setError("წერილი ვერ გაიგზავნა. სცადე კიდევ ერთხელ.");
       } else {
         setError(
           axiosErr.response?.data?.message ||

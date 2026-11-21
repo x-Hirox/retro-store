@@ -53,32 +53,13 @@ function credentials() {
 function transports() {
   const { user, pass } = credentials();
   const auth = { user, pass };
-  const timeouts = {
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 25000,
-    family: 4 as const,
-  };
   return [
     nodemailer.createTransport({
       service: "gmail",
       auth,
-      ...timeouts,
-    }),
-    nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      auth,
-      ...timeouts,
-    }),
-    nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth,
-      ...timeouts,
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 15000,
     }),
   ];
 }
@@ -125,10 +106,7 @@ export const sendEmail = async (options: {
     to: options.email,
     hasUser: Boolean(user),
     passLen: pass.length,
-    hint:
-      pass.length !== 16
-        ? "Gmail-ის App Password ჩვეულებრივ 16 სიმბოლოა (არა ანგარიშის პაროლი)"
-        : "შეამოწმე 2FA + App Password და რომ EMAIL_USER არის იგივე Gmail",
+    hint: "SMTP one attempt failed",
     last: errors[errors.length - 1],
   });
   throw errors[errors.length - 1] || new Error("SMTP failed");
