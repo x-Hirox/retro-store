@@ -77,7 +77,7 @@ async function sendViaResend(options: {
 }) {
   const key = resendKey();
   const from =
-    process.env.RESEND_FROM?.trim() || "RetroBit <onboarding@resend.dev>";
+    process.env.RESEND_FROM?.trim() || "RetroBit <noreply@retrobit.ge>";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -99,6 +99,11 @@ async function sendViaResend(options: {
   });
   const body = await res.text();
   if (!res.ok) {
+    if (res.status === 403 && /verify a domain/i.test(body)) {
+      throw new Error(
+        "Resend-ზე დაადასტურე დომენი retrobit.ge, რომ მომხმარებლებსაც მივიდეთ წერილი.",
+      );
+    }
     throw new Error(`Resend ${res.status} ${body.slice(0, 160)}`);
   }
   console.log("Resend sent", { to: options.email, from });
