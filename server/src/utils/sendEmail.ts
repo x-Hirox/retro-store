@@ -1,4 +1,17 @@
+import { lookup as dnsLookup } from "node:dns";
 import nodemailer from "nodemailer";
+
+function ipv4Lookup(
+  hostname: string,
+  _options: unknown,
+  callback: (
+    err: NodeJS.ErrnoException | null,
+    address: string,
+    family: number,
+  ) => void,
+) {
+  dnsLookup(hostname, { family: 4 }, callback);
+}
 
 export function shopMail(): string {
   return (
@@ -65,17 +78,29 @@ export function mailErrorText(err: unknown): string {
 function transports() {
   const { user, pass } = credentials();
   const auth = { user, pass };
+  const base = {
+    auth,
+    lookup: ipv4Lookup,
+    family: 4 as const,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 18000,
+  };
   return [
     nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
       secure: false,
       requireTLS: true,
-      family: 4,
-      auth,
-      connectionTimeout: 18000,
-      greetingTimeout: 18000,
-      socketTimeout: 20000,
+      tls: { servername: "smtp.gmail.com" },
+      ...base,
+    }),
+    nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      tls: { servername: "smtp.gmail.com" },
+      ...base,
     }),
   ];
 }
