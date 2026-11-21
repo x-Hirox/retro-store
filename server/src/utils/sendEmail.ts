@@ -114,12 +114,15 @@ async function sendViaResend(options: {
 }) {
   const customFrom = process.env.RESEND_FROM?.trim();
   const onboarding = "RetroBit <onboarding@resend.dev>";
-  const domainFrom = customFrom || "RetroBit <noreply@retrobit.ge>";
+  const domainFrom =
+    customFrom && !/onboarding@resend\.dev/i.test(customFrom)
+      ? customFrom
+      : "RetroBit <noreply@retrobit.ge>";
   const toOwner =
     options.email.trim().toLowerCase() === shopMail().trim().toLowerCase();
 
   try {
-    await postResend(toOwner ? onboarding : domainFrom, options);
+    await postResend(domainFrom, options);
   } catch (err) {
     const body = String((err as { body?: string }).body || err);
     const domainBlocked = /verify a domain|only send testing emails/i.test(
