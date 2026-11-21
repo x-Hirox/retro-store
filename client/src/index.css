@@ -70,13 +70,19 @@ body.dark #social .button-icon {
 /* ==========================================
    ✨ გლობალური სტილები და ტოპოგრაფია
    ========================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
   background-color: var(--bg);
   color: var(--text);
@@ -85,10 +91,17 @@ body {
     color 0.25s ease;
 }
 
+img,
+video,
+iframe,
+canvas {
+  max-width: 100%;
+}
+
 #root {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
   margin: 0;
   min-height: 100svh;
   display: flex;
@@ -337,7 +350,7 @@ body.dark div[style*="background-color: var(--code-bg)"]:hover {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
   gap: 24px;
   width: 100%;
 }
@@ -1538,7 +1551,7 @@ body:not(.dark) .site-header {
   flex-direction: column;
   padding: 0;
   height: 100dvh;
-  width: 100vw;
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -1867,16 +1880,23 @@ body:not(.dark) .site-header {
   font-weight: 800;
 }
 
+.profile-hero-copy {
+  min-width: 0;
+  flex: 1;
+}
+
 .profile-hero-copy h1 {
   margin: 0;
-  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-size: clamp(1.35rem, 3vw, 2rem);
   color: var(--text-h);
+  overflow-wrap: anywhere;
 }
 
 .profile-hero-mail {
   margin: 4px 0 10px;
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
 .profile-chips {
@@ -1921,7 +1941,7 @@ body.dark .profile-chip.is-ok {
 
 .profile-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 380px) 1fr;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -1936,6 +1956,8 @@ body.dark .profile-chip.is-ok {
   gap: 14px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
+  min-width: 0;
+  isolation: isolate;
 }
 
 .profile-card h2 {
@@ -1946,8 +1968,9 @@ body.dark .profile-chip.is-ok {
 
 .profile-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
+  min-width: 0;
 }
 
 .profile-span {
@@ -1964,6 +1987,8 @@ body.dark .profile-chip.is-ok {
 }
 
 .profile-card input {
+  width: 100%;
+  min-width: 0;
   padding: 11px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -2201,7 +2226,7 @@ body.dark .profile-chip.is-ok {
   object-fit: cover;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 960px) {
   .profile-grid {
     grid-template-columns: 1fr;
   }
@@ -3829,6 +3854,35 @@ html.fx-cursor select {
   color: #f87171;
   font-weight: 800;
   padding: 8px 0;
+}
+
+.order-tracker li span {
+  text-align: center;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+@media (max-width: 700px) {
+  .order-tracker {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  .order-tracker li {
+    flex: 1 1 30%;
+    font-size: 0.64rem;
+  }
+  .nbit,
+  .ny-gift-stack {
+    display: none;
+  }
+  .main-nav-bar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 16px;
+    padding: 0 12px;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @media (max-width: 900px) {

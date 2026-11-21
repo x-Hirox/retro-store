@@ -150,11 +150,22 @@ export default function Profile() {
     }
   };
 
+  const cleanName = (value: string) => {
+    const text = value.trim();
+    if (!text || text.includes("@") || /gmail|google/i.test(text)) return "";
+    return text;
+  };
   const displayName =
-    [form.firstName, form.lastName].filter(Boolean).join(" ") || t("profile");
-  const initials = (
-    (form.firstName?.[0] || "") + (form.lastName?.[0] || form.email?.[0] || "R")
-  ).toUpperCase();
+    [cleanName(form.firstName), cleanName(form.lastName)]
+      .filter(Boolean)
+      .join(" ") || t("profile");
+  const initialSource = displayName === t("profile") ? "R" : displayName;
+  const initials = initialSource
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
   const savedOk = message === "პროფილი შენახულია";
 
   if (loading) {
@@ -183,7 +194,7 @@ export default function Profile() {
               <span className="profile-chip">მეილი დასადასტურებელია</span>
             )}
             <span className="profile-chip">
-              {orders.length} {t("myOrders")}
+              {orders.length} შეკვეთა
             </span>
           </div>
         </div>
@@ -201,7 +212,7 @@ export default function Profile() {
       )}
 
       <div className="profile-grid">
-        <form className="profile-card" onSubmit={save}>
+        <form className="profile-card" onSubmit={save} autoComplete="off">
           <h2>პირადი მონაცემები</h2>
           {message && (
             <p className={savedOk ? "profile-msg" : "profile-msg is-err"}>
