@@ -9,6 +9,7 @@ export default function ResetPassword() {
   const email = searchParams.get("email");
 
   const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,7 +65,7 @@ export default function ResetPassword() {
             marginBottom: "25px",
           }}
         >
-          შეიყვანე ახალი, ძლიერი პაროლი შენი ანგარიშისთვის.
+            მინიმუმ 8 სიმბოლო: ლათინური დიდი ასო (A–Z), ციფრი და სიმბოლო (მაგ. !).
         </p>
 
         {message && (
@@ -114,14 +115,41 @@ export default function ResetPassword() {
             >
               ახალი პაროლი
             </label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              placeholder="********"
-              className="auth-input"
-            />
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <input
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+                placeholder="********"
+                className="auth-input"
+                style={{ paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                title={showPassword ? "დამალვა" : "ჩვენება"}
+                aria-label={showPassword ? "პაროლის დამალვა" : "პაროლის ჩვენება"}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "1.1rem",
+                }}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
 
           <button type="submit" disabled={loading} className="auth-button">

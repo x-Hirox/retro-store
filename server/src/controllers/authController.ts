@@ -522,8 +522,8 @@ export const resetPassword = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const token = String(req.body.token || "");
-    const email = String(req.body.email || "")
+    const token = String(req.body.token || "").trim();
+    const email = decodeURIComponent(String(req.body.email || ""))
       .trim()
       .toLowerCase();
     const { newPassword } = req.body;
@@ -543,22 +543,25 @@ export const resetPassword = async (
     if (!user) {
       res
         .status(400)
-        .json({ message: "აღდგენის ბმული არასწორია ან ვადა გასულია." });
+        .json({ message: "აღდგენის ბმული არასწორია ან ვადა გასულია. მოითხოვე ახალი ლინკი." });
       return;
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-
-    user.resetPasswordToken = null as any;
-    user.resetPasswordExpires = null as any;
-    await user.save();
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { password: hashed },
+        $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 },
+      },
+    );
 
     res.status(200).json({
       message: "პაროლი წარმატებით შეიცვალა! ახლა შეგიძლია შეხვიდე სისტემაში.",
     });
-  } catch {
-    res.status(500).json({ message: "სერვერის შეცდომა" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "სერვერის შეცდომა. სცადე ახალი აღდგენის ლინკი." });
   }
 };
 
