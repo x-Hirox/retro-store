@@ -75,7 +75,10 @@ export default function Header({
         <div className="search-box-wrapper">
           <form onSubmit={handleSearchSubmit} className="search-form">
             <input
-              type="text"
+              id="site-search"
+              name="q"
+              type="search"
+              autoComplete="off"
               placeholder={t("search")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

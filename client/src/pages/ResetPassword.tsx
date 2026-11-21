@@ -106,6 +106,7 @@ export default function ResetPassword() {
         >
           <div>
             <label
+              htmlFor="reset-password"
               style={{
                 display: "block",
                 color: "var(--text)",
@@ -123,6 +124,8 @@ export default function ResetPassword() {
               }}
             >
               <input
+                id="reset-password"
+                name="new-password"
                 type={showPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}

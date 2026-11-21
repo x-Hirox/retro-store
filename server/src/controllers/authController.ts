@@ -7,6 +7,8 @@ import crypto from "crypto";
 import {
   frontendBaseUrl,
   mailConfigured,
+  mailErrorText,
+  sendEmail,
   shopMail,
   trySendEmail,
 } from "../utils/sendEmail.js";
@@ -506,21 +508,25 @@ export const forgotPassword = async (
       const frontendUrl = frontendBaseUrl(req.headers.origin);
       const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(user.email)}`;
 
-      void trySendEmail({
-        email: user.email,
-        subject: "პაროლის აღდგენა - RetroBit",
-        message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 24 საათი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
-        html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
+      try {
+        await sendEmail({
+          email: user.email,
+          subject: "პაროლის აღდგენა - RetroBit",
+          message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 24 საათი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
+          html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#111">
           <h2>RetroBit — პაროლის აღდგენა</h2>
           <p>ბმული ძალაშია 24 საათი.</p>
           <p><a href="${resetLink}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">პაროლის აღდგენა</a></p>
           <p style="font-size:12px;color:#555">თუ ღილაკი არ იხსნება:<br>${resetLink}</p>
         </div>`,
-      }).then((sent) => {
-        if (!sent) {
-          console.error("Forgot-password mail was not sent for", user.email);
-        }
-      });
+        });
+      } catch (err) {
+        console.error("Forgot-password mail was not sent for", user.email, err);
+        res.status(503).json({
+          message: `წერილი ვერ გაიგზავნა. ${mailErrorText(err)}`,
+        });
+        return;
+      }
     }
 
     res.status(200).json({

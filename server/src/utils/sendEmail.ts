@@ -50,25 +50,32 @@ function credentials() {
   return { user, pass };
 }
 
+export function mailErrorText(err: unknown): string {
+  const e = err as {
+    code?: string;
+    command?: string;
+    response?: string;
+    message?: string;
+  };
+  const bits = [e.code, e.command, e.response || e.message].filter(Boolean);
+  const text = bits.join(" ").replace(/\s+/g, " ").trim();
+  return text.slice(0, 180) || "SMTP failed";
+}
+
 function transports() {
   const { user, pass } = credentials();
   const auth = { user, pass };
   return [
     nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      family: 4,
       auth,
-      connectionTimeout: 25000,
-      greetingTimeout: 25000,
-      socketTimeout: 30000,
-    }),
-    nodemailer.createTransport({
-      service: "gmail",
-      auth,
-      connectionTimeout: 25000,
-      greetingTimeout: 25000,
-      socketTimeout: 30000,
+      connectionTimeout: 18000,
+      greetingTimeout: 18000,
+      socketTimeout: 20000,
     }),
   ];
 }
