@@ -1,11 +1,6 @@
 import { promises as dnsPromises } from "node:dns";
 import nodemailer from "nodemailer";
 
-async function gmailIPv4(): Promise<string> {
-  const { address } = await dnsPromises.lookup("smtp.gmail.com", { family: 4 });
-  return address;
-}
-
 export function shopMail(): string {
   return (
     process.env.EMAIL_USER ||
@@ -41,7 +36,12 @@ function envPass() {
     .replace(/^["']+|["']+$/g, "");
 }
 
+function resendKey() {
+  return String(process.env.RESEND_API_KEY || "").trim();
+}
+
 export function mailConfigured(): boolean {
+  if (resendKey()) return true;
   const user = String(process.env.EMAIL_USER || "").trim();
   const pass = envPass();
   return Boolean(user && pass);
@@ -51,7 +51,7 @@ function credentials() {
   const user = String(process.env.EMAIL_USER || "").trim();
   const pass = envPass();
   if (!user || !pass) {
-    throw new Error("EMAIL_USER ან EMAIL_PASS აკლია Render Environment-ში");
+    throw new Error("EMAIL_USER ან EMAIL_PASS აკლია");
   }
   return { user, pass };
 }
@@ -65,44 +65,56 @@ export function mailErrorText(err: unknown): string {
   };
   const bits = [e.code, e.command, e.response || e.message].filter(Boolean);
   const text = bits.join(" ").replace(/\s+/g, " ").trim();
-  return text.slice(0, 180) || "SMTP failed";
+  return text.slice(0, 180) || "Mail failed";
 }
 
-function transports(ipv4: string) {
-  const { user, pass } = credentials();
-  const auth = { user, pass };
-  const base = {
-    host: ipv4,
-    auth,
-    connectionTimeout: 12000,
-    greetingTimeout: 12000,
-    socketTimeout: 15000,
-    tls: { servername: "smtp.gmail.com" },
-  };
-  return [
-    nodemailer.createTransport({
-      ...base,
-      port: 587,
-      secure: false,
-      requireTLS: true,
-    }),
-    nodemailer.createTransport({
-      ...base,
-      port: 465,
-      secure: true,
-    }),
-  ];
-}
-
-export const sendEmail = async (options: {
+async function sendViaResend(options: {
   email: string;
   subject: string;
   message: string;
   html?: string;
   replyTo?: string;
-}) => {
+}) {
+  const key = resendKey();
+  const from =
+    process.env.RESEND_FROM?.trim() || "RetroBit <onboarding@resend.dev>";
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [options.email],
+      reply_to: options.replyTo || shopMail(),
+      subject: options.subject,
+      text: options.message,
+      html:
+        options.html ||
+        `<pre style="font-family:sans-serif;white-space:pre-wrap">${options.message
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")}</pre>`,
+    }),
+  });
+  const body = await res.text();
+  if (!res.ok) {
+    throw new Error(`Resend ${res.status} ${body.slice(0, 160)}`);
+  }
+  console.log("Resend sent", { to: options.email, from });
+}
+
+async function sendViaSmtp(options: {
+  email: string;
+  subject: string;
+  message: string;
+  html?: string;
+  replyTo?: string;
+}) {
   const { user, pass } = credentials();
-  const ipv4 = await gmailIPv4();
+  const { address: ipv4 } = await dnsPromises.lookup("smtp.gmail.com", {
+    family: 4,
+  });
   const payload = {
     from: `"RetroBit" <${user}>`,
     to: options.email,
@@ -115,32 +127,48 @@ export const sendEmail = async (options: {
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")}</pre>`,
   };
-
-  const errors: unknown[] = [];
-  for (const transporter of transports(ipv4)) {
+  const transporter = nodemailer.createTransport({
+    host: ipv4,
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: { user, pass },
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
+    tls: { servername: "smtp.gmail.com" },
+  });
+  try {
+    await transporter.sendMail(payload);
+    console.log("SMTP sent", { to: options.email, from: user, ipv4 });
+  } finally {
     try {
-      await transporter.sendMail(payload);
-      console.log("SMTP sent", { to: options.email, from: user, ipv4 });
-      return;
-    } catch (err) {
-      console.error("SMTP attempt failed", { ipv4, err });
-      errors.push(err);
-      try {
-        transporter.close();
-      } catch {
-        /* ignore */
-      }
+      transporter.close();
+    } catch {
+      /* ignore */
     }
   }
+}
 
-  console.error("SMTP all attempts failed", {
-    to: options.email,
-    hasUser: Boolean(user),
-    passLen: pass.length,
-    hint: "SMTP one attempt failed",
-    last: errors[errors.length - 1],
-  });
-  throw errors[errors.length - 1] || new Error("SMTP failed");
+export const sendEmail = async (options: {
+  email: string;
+  subject: string;
+  message: string;
+  html?: string;
+  replyTo?: string;
+}) => {
+  if (resendKey()) {
+    await sendViaResend(options);
+    return;
+  }
+
+  if (process.env.RENDER) {
+    throw new Error(
+      "Render-ზე Gmail SMTP დახურულია (პორტი 587/465). დაამატე RESEND_API_KEY",
+    );
+  }
+
+  await sendViaSmtp(options);
 };
 
 export async function trySendEmail(
