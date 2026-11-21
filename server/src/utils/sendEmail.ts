@@ -1,16 +1,9 @@
-import { lookup as dnsLookup } from "node:dns";
+import { promises as dnsPromises } from "node:dns";
 import nodemailer from "nodemailer";
 
-function ipv4Lookup(
-  hostname: string,
-  _options: unknown,
-  callback: (
-    err: NodeJS.ErrnoException | null,
-    address: string,
-    family: number,
-  ) => void,
-) {
-  dnsLookup(hostname, { family: 4 }, callback);
+async function gmailIPv4(): Promise<string> {
+  const { address } = await dnsPromises.lookup("smtp.gmail.com", { family: 4 });
+  return address;
 }
 
 export function shopMail(): string {
@@ -75,32 +68,28 @@ export function mailErrorText(err: unknown): string {
   return text.slice(0, 180) || "SMTP failed";
 }
 
-function transports() {
+function transports(ipv4: string) {
   const { user, pass } = credentials();
   const auth = { user, pass };
   const base = {
+    host: ipv4,
     auth,
-    lookup: ipv4Lookup,
-    family: 4 as const,
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 18000,
+    connectionTimeout: 12000,
+    greetingTimeout: 12000,
+    socketTimeout: 15000,
+    tls: { servername: "smtp.gmail.com" },
   };
   return [
     nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      ...base,
       port: 587,
       secure: false,
       requireTLS: true,
-      tls: { servername: "smtp.gmail.com" },
-      ...base,
     }),
     nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      ...base,
       port: 465,
       secure: true,
-      tls: { servername: "smtp.gmail.com" },
-      ...base,
     }),
   ];
 }
@@ -113,6 +102,7 @@ export const sendEmail = async (options: {
   replyTo?: string;
 }) => {
   const { user, pass } = credentials();
+  const ipv4 = await gmailIPv4();
   const payload = {
     from: `"RetroBit" <${user}>`,
     to: options.email,
@@ -127,13 +117,13 @@ export const sendEmail = async (options: {
   };
 
   const errors: unknown[] = [];
-  for (const transporter of transports()) {
+  for (const transporter of transports(ipv4)) {
     try {
       await transporter.sendMail(payload);
-      console.log("SMTP sent", { to: options.email, from: user });
+      console.log("SMTP sent", { to: options.email, from: user, ipv4 });
       return;
     } catch (err) {
-      console.error("SMTP attempt failed", err);
+      console.error("SMTP attempt failed", { ipv4, err });
       errors.push(err);
       try {
         transporter.close();
