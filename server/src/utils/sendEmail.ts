@@ -67,9 +67,9 @@ function transports() {
     nodemailer.createTransport({
       service: "gmail",
       auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
     }),
     nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -77,18 +77,9 @@ function transports() {
       secure: false,
       requireTLS: true,
       auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
-    }),
-    nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
     }),
   ];
 }
@@ -117,7 +108,7 @@ export const sendEmail = async (options: {
   const errors: unknown[] = [];
   for (const transporter of transports()) {
     try {
-      await withTimeout(transporter.sendMail(payload), 16000, "SMTP timeout");
+      await withTimeout(transporter.sendMail(payload), 9000, "SMTP timeout");
       return;
     } catch (err) {
       errors.push(err);

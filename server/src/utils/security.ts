@@ -37,8 +37,10 @@ const hits = new Map<string, number[]>();
 
 export function rateLimit(windowMs: number, max: number) {
   return (req: Request, res: Response, next: NextFunction): void => {
+    const forwarded = req.headers["x-forwarded-for"];
+    const forwardedIp = Array.isArray(forwarded) ? forwarded[0] : forwarded;
     const ip = String(
-      req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "",
+      req.ip || forwardedIp || req.socket?.remoteAddress || "",
     )
       .split(",")[0]
       .trim();
