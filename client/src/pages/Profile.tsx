@@ -150,21 +150,51 @@ export default function Profile() {
     }
   };
 
+  const displayName =
+    [form.firstName, form.lastName].filter(Boolean).join(" ") || t("profile");
+  const initials = (
+    (form.firstName?.[0] || "") + (form.lastName?.[0] || form.email?.[0] || "R")
+  ).toUpperCase();
+  const savedOk = message === "პროფილი შენახულია";
+
   if (loading) {
-    return <div className="profile-page">{t("loading")}</div>;
+    return (
+      <div className="profile-page">
+        <div className="profile-loading">{t("loading")}</div>
+      </div>
+    );
   }
 
   return (
     <div className="profile-page nbit-slot">
       <GiftStack />
-      <h1 className="ny-title">{t("profile")}</h1>
+      <header className="profile-hero">
+        <div className="profile-avatar" aria-hidden>
+          {initials}
+        </div>
+        <div className="profile-hero-copy">
+          <p className="profile-kicker">RetroBit ID</p>
+          <h1>{displayName}</h1>
+          <p className="profile-hero-mail">{form.email}</p>
+          <div className="profile-chips">
+            {verified ? (
+              <span className="profile-chip is-ok">დადასტურებული</span>
+            ) : (
+              <span className="profile-chip">მეილი დასადასტურებელია</span>
+            )}
+            <span className="profile-chip">
+              {orders.length} {t("myOrders")}
+            </span>
+          </div>
+        </div>
+      </header>
       <p className="profile-lead">
         {setup
           ? "დაასრულე პროფილი (გვარი და ტელეფონი) — შემდეგ გადახვალ მთავარ გვერდზე."
           : "შენი მონაცემები და შეკვეთების ისტორია."}
       </p>
       {!verified && (
-        <p className="profile-lead">
+        <p className="profile-banner">
           დასტურის ბმული გამოგიგზავნეთ მეილზე. ყიდვა შეგიძლია ახლავე — დააკლიკე
           ბმულს როცა მოგივა.
         </p>
@@ -173,51 +203,80 @@ export default function Profile() {
       <div className="profile-grid">
         <form className="profile-card" onSubmit={save}>
           <h2>პირადი მონაცემები</h2>
-          {message && <p className="profile-msg">{message}</p>}
-          <label>
-            სახელი
-            <input
-              value={form.firstName}
-              onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-              required
-            />
-          </label>
-          <label>
-            გვარი
-            <input
-              value={form.lastName}
-              onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-              required
-            />
-          </label>
-          <label>
-            ელ-ფოსტა
-            <input value={form.email} disabled />
-          </label>
-          <label>
-            ტელეფონი
-            <input
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="599123456"
-              required
-            />
-          </label>
-          <label>
-            ქალაქი
-            <input
-              value={form.city}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
-            />
-          </label>
-          <label>
-            მისამართი
-            <input
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-            />
-          </label>
-          <button type="submit" disabled={saving}>
+          {message && (
+            <p className={savedOk ? "profile-msg" : "profile-msg is-err"}>
+              {message}
+            </p>
+          )}
+          <div className="profile-fields">
+            <label htmlFor="profile-first">
+              სახელი
+              <input
+                id="profile-first"
+                name="given-name"
+                autoComplete="given-name"
+                value={form.firstName}
+                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                required
+              />
+            </label>
+            <label htmlFor="profile-last">
+              გვარი
+              <input
+                id="profile-last"
+                name="family-name"
+                autoComplete="family-name"
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                required
+              />
+            </label>
+            <label htmlFor="profile-email" className="profile-span">
+              ელ-ფოსტა
+              <input
+                id="profile-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={form.email}
+                disabled
+              />
+            </label>
+            <label htmlFor="profile-phone">
+              ტელეფონი
+              <input
+                id="profile-phone"
+                name="tel"
+                type="tel"
+                autoComplete="tel"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                placeholder="599123456"
+                required
+              />
+            </label>
+            <label htmlFor="profile-city">
+              ქალაქი
+              <input
+                id="profile-city"
+                name="address-level2"
+                autoComplete="address-level2"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </label>
+            <label htmlFor="profile-address" className="profile-span">
+              მისამართი
+              <input
+                id="profile-address"
+                name="street-address"
+                autoComplete="street-address"
+                value={form.address}
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
+              />
+            </label>
+          </div>
+          <button type="submit" className="profile-save" disabled={saving}>
             {saving ? "ინახება..." : t("saveProfile")}
           </button>
           <Link to="/" className="profile-home-link">
@@ -225,9 +284,17 @@ export default function Profile() {
           </Link>
         </form>
 
-        <section className="profile-card">
+        <section className="profile-card profile-orders">
           <h2>{t("myOrders")}</h2>
-          {orders.length === 0 && <p>შეკვეთები ჯერ არ გაქვს.</p>}
+          {orders.length === 0 && (
+            <div className="profile-empty">
+              <span aria-hidden>🎮</span>
+              <p>შეკვეთები ჯერ არ გაქვს.</p>
+              <Link to="/" className="profile-empty-link">
+                კოლექციაში გადასვლა
+              </Link>
+            </div>
+          )}
           <div className="order-list">
             {orders.map((order) => (
               <article key={order._id} className="order-card">
@@ -262,11 +329,14 @@ export default function Profile() {
                   {payStatusLabel(order.paymentStatus)}
                 </p>
                 <div className="order-actions">
-                  <Link to={`/order-success/${order._id}`}>{t("invoice")}</Link>
+                  <Link className="order-btn" to={`/order-success/${order._id}`}>
+                    {t("invoice")}
+                  </Link>
                   {order.paymentMethod !== "cash" &&
                     order.paymentStatus !== "paid" && (
                       <button
                         type="button"
+                        className="order-btn"
                         onClick={async () => {
                           try {
                             const { data } = await API.post(
@@ -289,14 +359,26 @@ export default function Profile() {
                         ბანკით გადახდა
                       </button>
                     )}
-                  <button type="button" onClick={() => printInvoice(order)}>
+                  <button
+                    type="button"
+                    className="order-btn is-ghost"
+                    onClick={() => printInvoice(order)}
+                  >
                     ამობეჭდვა
                   </button>
-                  <button type="button" onClick={() => downloadInvoice(order)}>
+                  <button
+                    type="button"
+                    className="order-btn is-ghost"
+                    onClick={() => downloadInvoice(order)}
+                  >
                     {t("downloadInvoice")}
                   </button>
                   {canCustomerCancel(order.status) && (
-                    <button type="button" onClick={() => cancelOrder(order._id)}>
+                    <button
+                      type="button"
+                      className="order-btn is-danger"
+                      onClick={() => cancelOrder(order._id)}
+                    >
                       {t("cancelOrder")}
                     </button>
                   )}
