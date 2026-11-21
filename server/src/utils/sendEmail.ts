@@ -55,11 +55,20 @@ function transports() {
   const auth = { user, pass };
   return [
     nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth,
+      connectionTimeout: 25000,
+      greetingTimeout: 25000,
+      socketTimeout: 30000,
+    }),
+    nodemailer.createTransport({
       service: "gmail",
       auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
+      connectionTimeout: 25000,
+      greetingTimeout: 25000,
+      socketTimeout: 30000,
     }),
   ];
 }

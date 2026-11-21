@@ -506,7 +506,7 @@ export const forgotPassword = async (
       const frontendUrl = frontendBaseUrl(req.headers.origin);
       const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(user.email)}`;
 
-      const mailSent = await trySendEmail({
+      void trySendEmail({
         email: user.email,
         subject: "პაროლის აღდგენა - RetroBit",
         message: `გამარჯობა!\n\nმოთხოვნილია პაროლის აღდგენა RetroBit-ზე. ბმული ძალაშია 24 საათი:\n\n${resetLink}\n\nთუ ეს მოთხოვნა შენ არ გეკუთვნის, უგულებელყავი ეს წერილი.`,
@@ -516,26 +516,11 @@ export const forgotPassword = async (
           <p><a href="${resetLink}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">პაროლის აღდგენა</a></p>
           <p style="font-size:12px;color:#555">თუ ღილაკი არ იხსნება:<br>${resetLink}</p>
         </div>`,
-      });
-      if (!mailSent) {
-        if (!canReuse) {
-          await User.updateOne(
-            { _id: user._id },
-            {
-              $set: {
-                resetPasswordToken: previousToken,
-                resetPasswordExpires: previousExp,
-              },
-            },
-          );
+      }).then((sent) => {
+        if (!sent) {
+          console.error("Forgot-password mail was not sent for", user.email);
         }
-        console.error("Forgot-password mail was not sent for", user.email);
-        res.status(503).json({
-          message:
-            "წერილი ვერ გაიგზავნა. სცადე ხელახლა ან მოგვწერე retrobit.support@gmail.com",
-        });
-        return;
-      }
+      });
     }
 
     res.status(200).json({

@@ -106,6 +106,7 @@ export default function ForgotPassword() {
         >
           <div>
             <label
+              htmlFor="forgot-email"
               style={{
                 display: "block",
                 color: "var(--text)",
@@ -116,6 +117,8 @@ export default function ForgotPassword() {
               ელ-ფოსტა
             </label>
             <input
+              id="forgot-email"
+              name="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

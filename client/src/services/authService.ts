@@ -59,7 +59,7 @@ export const authService = {
   // 4. პაროლის აღდგენის მოთხოვნა (Forgot Password)
   forgotPassword: async (data: { email: string }) => {
     const response = await API.post("/auth/forgot-password", data, {
-      timeout: 25000,
+      timeout: 20000,
     });
     return response.data;
   },
