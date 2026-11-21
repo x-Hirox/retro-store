@@ -127,23 +127,29 @@ export default function Header({
               <button
                 type="button"
                 onClick={onLogout}
-                className="neon-btn icon-btn"
+                className="neon-btn icon-btn auth-logout"
                 title={t("logout")}
               >
                 🚪
+                <span className="btn-label">{t("logout")}</span>
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="neon-btn icon-btn" title={t("login")}>
+              <Link
+                to="/login"
+                className="neon-btn icon-btn auth-login"
+                title={t("login")}
+              >
                 🔑
+                <span className="btn-label">{t("login")}</span>
               </Link>
               <Link
                 to="/register"
-                className="neon-btn icon-btn play-link"
+                className="neon-btn icon-btn auth-register"
                 title={t("register")}
               >
-                ⚡
+                <span className="btn-label">{t("register")}</span>
               </Link>
             </>
           )}

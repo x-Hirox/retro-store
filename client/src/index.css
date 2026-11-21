@@ -710,6 +710,22 @@ body:not(.dark) .site-header {
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  white-space: nowrap;
+}
+.auth-login {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #60a5fa;
+}
+.auth-register {
+  background: transparent;
+  color: var(--text-h);
+  border: 1px solid var(--border);
+}
+.auth-logout {
+  background: #7c2d12;
+  color: #ffedd5;
+  border: 1px solid #ea580c;
 }
 
 .cart-count {
@@ -1739,6 +1755,10 @@ body:not(.dark) .site-header {
 @media (max-width: 899px) {
   .btn-label {
     display: none;
+  }
+  .auth-logout .btn-label,
+  .auth-login .btn-label {
+    display: inline;
   }
   .nav-container {
     grid-template-columns: auto 1fr;
@@ -2830,9 +2850,10 @@ html.fx-cursor select {
   top: -10px;
   width: 5px;
   height: 5px;
-  background: #fff;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
   border-radius: 50%;
-  opacity: 0.7;
+  opacity: 0.85;
   animation: snow-fall 12s linear infinite;
 }
 .flake.n0 { left: 6%; animation-duration: 11s; }
