@@ -65,15 +65,6 @@ function transports() {
   const auth = { user, pass };
   return [
     nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth,
-      connectionTimeout: 12000,
-      greetingTimeout: 12000,
-      socketTimeout: 15000,
-    }),
-    nodemailer.createTransport({
       service: "gmail",
       auth,
       connectionTimeout: 12000,
@@ -85,6 +76,15 @@ function transports() {
       port: 587,
       secure: false,
       requireTLS: true,
+      auth,
+      connectionTimeout: 12000,
+      greetingTimeout: 12000,
+      socketTimeout: 15000,
+    }),
+    nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth,
       connectionTimeout: 12000,
       greetingTimeout: 12000,
