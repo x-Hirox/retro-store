@@ -68,7 +68,7 @@ export function mailErrorText(err: unknown): string {
   return text.slice(0, 180) || "Mail failed";
 }
 
-async function sendViaResend(options: {
+async function postResend(from: string, options: {
   email: string;
   subject: string;
   message: string;
@@ -76,8 +76,6 @@ async function sendViaResend(options: {
   replyTo?: string;
 }) {
   const key = resendKey();
-  const from =
-    process.env.RESEND_FROM?.trim() || "RetroBit <noreply@retrobit.ge>";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -99,14 +97,47 @@ async function sendViaResend(options: {
   });
   const body = await res.text();
   if (!res.ok) {
-    if (res.status === 403 && /verify a domain/i.test(body)) {
-      throw new Error(
-        "Resend-ზე დაადასტურე დომენი retrobit.ge, რომ მომხმარებლებსაც მივიდეთ წერილი.",
-      );
-    }
-    throw new Error(`Resend ${res.status} ${body.slice(0, 160)}`);
+    const err = new Error(`Resend ${res.status} ${body.slice(0, 200)}`);
+    (err as Error & { status?: number; body?: string }).status = res.status;
+    (err as Error & { status?: number; body?: string }).body = body;
+    throw err;
   }
   console.log("Resend sent", { to: options.email, from });
+}
+
+async function sendViaResend(options: {
+  email: string;
+  subject: string;
+  message: string;
+  html?: string;
+  replyTo?: string;
+}) {
+  const customFrom = process.env.RESEND_FROM?.trim();
+  const onboarding = "RetroBit <onboarding@resend.dev>";
+  const domainFrom = customFrom || "RetroBit <noreply@retrobit.ge>";
+  const toOwner =
+    options.email.trim().toLowerCase() === shopMail().trim().toLowerCase();
+
+  try {
+    await postResend(toOwner ? onboarding : domainFrom, options);
+  } catch (err) {
+    const body = String((err as { body?: string }).body || err);
+    const domainBlocked = /verify a domain|only send testing emails/i.test(
+      body,
+    );
+    if (domainBlocked && toOwner && domainFrom !== onboarding) {
+      await postResend(onboarding, options);
+      return;
+    }
+    if (domainBlocked) {
+      throw new Error(
+        toOwner
+          ? "Resend-ის ტესტი მხოლოდ retrobit.support@gmail.com-ზე მიდის. შეამოწმე Inbox/Spam."
+          : "Resend-ზე დაადასტურე დომენი retrobit.ge, რომ სხვა მეილებზეც გაიგზავნოს.",
+      );
+    }
+    throw err;
+  }
 }
 
 async function sendViaSmtp(options: {
