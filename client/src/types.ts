@@ -1,3 +1,9 @@
+export interface IProductColor {
+  name: string;
+  hex: string;
+  imageUrl?: string;
+}
+
 export interface IProduct {
   _id: string;
   title: string;
@@ -6,6 +12,7 @@ export interface IProduct {
   discount?: number; // 🟢 ფასდაკლების პროცენტი
   imageUrl?: string;
   images?: string[];
+  colors?: IProductColor[];
   category: string;
   stock: number;
   isHeroBanner?: boolean; // 🟢 მთავარი ბანერი

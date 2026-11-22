@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import { formatGel, getSalePrice } from "../utils/pricing";
 import SeoHead from "../components/SeoHead";
 import { productImageAlt } from "../utils/imageAlt";
+import { cartLineKey } from "../utils/productColors";
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
@@ -43,31 +44,42 @@ export default function Cart() {
         {cart.map((item) => {
           const sale = getSalePrice(item);
           return (
-            <li key={item._id} className="cart-page-item">
+            <li key={cartLineKey(item)} className="cart-page-item">
               <img src={item.imageUrl || ""} alt={productImageAlt(item)} />
               <div>
                 <h3>{item.title}</h3>
+                {item.selectedColor && (
+                  <p className="cart-color">{item.selectedColor}</p>
+                )}
                 <p>
                   {formatGel(sale.final)} × {item.quantity}
                 </p>
                 <div className="pd-stepper compact">
                   <button
                     type="button"
-                    onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                    onClick={() =>
+                      updateQuantity(cartLineKey(item), item.quantity - 1)
+                    }
                   >
                     −
                   </button>
                   <span>{item.quantity}</span>
                   <button
                     type="button"
-                    onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                    onClick={() =>
+                      updateQuantity(cartLineKey(item), item.quantity + 1)
+                    }
                   >
                     +
                   </button>
                 </div>
               </div>
               <strong>{formatGel(sale.final * item.quantity)}</strong>
-              <button type="button" className="cart-remove" onClick={() => removeFromCart(item._id)}>
+              <button
+                type="button"
+                className="cart-remove"
+                onClick={() => removeFromCart(cartLineKey(item))}
+              >
                 წაშლა
               </button>
             </li>

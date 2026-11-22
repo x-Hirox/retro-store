@@ -37,6 +37,7 @@ type Order = {
     quantity?: number;
     price?: number;
     imageUrl?: string;
+    color?: string;
     product?: { title?: string; price?: number; imageUrl?: string };
   }>;
 };

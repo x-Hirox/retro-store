@@ -6,9 +6,12 @@ import {
   deleteProduct,
   updateProduct,
 } from "../services/productService";
-import type { IProduct } from "../types";
+import type { IProduct, IProductColor } from "../types";
 import AdminContent from "./AdminContent";
-import ImageUrlField, { GalleryImagesField } from "../components/ImageUrlField";
+import ImageUrlField, {
+  GalleryImagesField,
+  ProductColorsField,
+} from "../components/ImageUrlField";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
@@ -82,6 +85,7 @@ export default function Admin() {
   const [genre, setGenre] = useState("");
   const [tags, setTags] = useState("");
   const [isBestSeller, setIsBestSeller] = useState(false);
+  const [colors, setColors] = useState<IProductColor[]>([]);
 
   const fetchProducts = async () => {
     try {
@@ -100,6 +104,10 @@ export default function Admin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!imageUrl.trim()) {
+      alert("ატვირთე პროდუქტის ფოტო");
+      return;
+    }
     try {
       const productData = {
         title,
@@ -109,6 +117,9 @@ export default function Admin() {
         stock: isHeroBanner ? 1 : Number(stock),
         imageUrl,
         images: isHeroBanner ? [] : images,
+        colors: isHeroBanner
+          ? []
+          : colors.filter((item) => item.name.trim()),
         category: isHeroBanner ? "banner-hero" : category,
         isHeroBanner,
         platform: isHeroBanner ? "" : platform,
@@ -148,6 +159,7 @@ export default function Admin() {
     setGenre(p.genre || "");
     setTags((p.tags || []).join(", "));
     setIsBestSeller(!!p.isBestSeller);
+    setColors(p.colors || []);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -166,6 +178,7 @@ export default function Admin() {
     setGenre("");
     setTags("");
     setIsBestSeller(false);
+    setColors([]);
   };
 
   const handleDelete = async (id: string) => {
@@ -318,17 +331,19 @@ export default function Admin() {
 
               <p className="admin-muted" style={{ margin: 0 }}>
                 {isHeroBanner
-                  ? "ბანერის სურათი Cloudinary-ზე ადის ამ ფორმიდან."
-                  : "გასაყიდი პროდუქტის ფოტოები Cloudinary-ზეა. აქვე აირჩიე ფაილი კომპიუტერიდან (მთავარი + კიდევ რამდენიმე). კონსოლის ბარათები (DS Lite, DSi) ლოკალური SVG-ებია — პროდუქტს ისინი არ ებმის."}
+                  ? "ბანერის სურათი Cloudinary-ზე ადის ამ ფორმიდან — აირჩიე ფაილი."
+                  : "მთავარი ფოტო და კიდევ რამდენიმე სურათი. ფაილი ადის Cloudinary-ზე, ლინკის ჩასმა აღარ გჭირდება."}
               </p>
               <ImageUrlField
                 value={imageUrl}
                 onChange={setImageUrl}
-                placeholder="მთავარი ფოტო — აირჩიე ფაილი ან ჩასვი Cloudinary ლინკი"
-                hint="ფაილის არჩევა ადის Cloudinary-ზე. ეს არის პროდუქტის ფოტო, არა კონსოლის SVG."
+                hint="ეს არის პროდუქტის მთავარი ფოტო. ფაილი ადის Cloudinary-ზე."
               />
               {!isHeroBanner && (
-                <GalleryImagesField images={images} onChange={setImages} />
+                <>
+                  <GalleryImagesField images={images} onChange={setImages} />
+                  <ProductColorsField colors={colors} onChange={setColors} />
+                </>
               )}
 
               {!isHeroBanner && (
@@ -444,7 +459,11 @@ export default function Admin() {
                               (p.stock ?? 0) <= 0
                                 ? "SOLD"
                                 : `მარაგი ${p.stock}`
-                            }${p.platform ? ` · ${p.platform}` : ""}`}
+                            }${p.platform ? ` · ${p.platform}` : ""}${
+                              p.colors?.length
+                                ? ` · ${p.colors.map((c) => c.name).join(", ")}`
+                                : ""
+                            }`}
                       </p>
                     </div>
                   </div>

@@ -5,6 +5,7 @@ import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
 import { formatGel, getSalePrice } from "../utils/pricing";
 import { suggestAddons } from "../utils/shopAddons";
+import { cartLineKey } from "../utils/productColors";
 
 export default function CartDrawer() {
   const {
@@ -58,10 +59,13 @@ export default function CartDrawer() {
             {cart.map((item) => {
               const sale = getSalePrice(item);
               return (
-                <li key={item._id} className="cart-drawer-item">
+                <li key={cartLineKey(item)} className="cart-drawer-item">
                   <img src={item.imageUrl || ""} alt={item.title || "RetroBit"} />
                   <div>
                     <strong>{item.title}</strong>
+                    {item.selectedColor && (
+                      <span className="cart-color">{item.selectedColor}</span>
+                    )}
                     <span>
                       {formatGel(sale.final)} × {item.quantity}
                     </span>
@@ -69,7 +73,7 @@ export default function CartDrawer() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item._id, item.quantity - 1)
+                          updateQuantity(cartLineKey(item), item.quantity - 1)
                         }
                       >
                         −
@@ -78,7 +82,7 @@ export default function CartDrawer() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item._id, item.quantity + 1)
+                          updateQuantity(cartLineKey(item), item.quantity + 1)
                         }
                       >
                         +
@@ -88,7 +92,7 @@ export default function CartDrawer() {
                   <button
                     type="button"
                     className="cart-remove"
-                    onClick={() => removeFromCart(item._id)}
+                    onClick={() => removeFromCart(cartLineKey(item))}
                   >
                     წაშლა
                   </button>

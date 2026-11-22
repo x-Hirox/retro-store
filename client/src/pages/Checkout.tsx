@@ -87,6 +87,7 @@ export default function Checkout() {
         orderItems: cart.map((item) => ({
           product: item._id,
           quantity: item.quantity,
+          color: item.selectedColor || "",
         })),
         shippingAddress: {
           fullName: formData.fullName,
@@ -438,7 +439,7 @@ export default function Checkout() {
             >
               {cart.map((item) => (
                 <div
-                  key={item._id}
+                  key={`${item._id}-${item.selectedColor || ""}`}
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -447,7 +448,9 @@ export default function Checkout() {
                   }}
                 >
                   <span>
-                    {item.title} (x{item.quantity})
+                    {item.title}
+                    {item.selectedColor ? ` — ${item.selectedColor}` : ""}{" "}
+                    (x{item.quantity})
                   </span>
                   <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
                     {(getSalePrice(item).final * item.quantity).toFixed(2)} ₾

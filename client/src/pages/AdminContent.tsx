@@ -124,7 +124,12 @@ function ReviewsAdmin() {
       <textarea style={inputStyle} placeholder="ტექსტი" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required />
       <input style={inputStyle} placeholder="ვარსკვლავები 1-5" value={form.stars} onChange={(e) => setForm({ ...form, stars: e.target.value })} />
       <input style={inputStyle} placeholder="ავატარის URL (Cloudinary ან სხვა)" value={form.avatarUrl} onChange={(e) => setForm({ ...form, avatarUrl: e.target.value })} />
-      <ImageUrlField value={form.productImageUrl} onChange={(imageUrl) => setForm({ ...form, productImageUrl: imageUrl })} placeholder="პროდუქტის სურათის Cloudinary ლინკი" />
+      <ImageUrlField
+        required={false}
+        value={form.productImageUrl}
+        onChange={(imageUrl) => setForm({ ...form, productImageUrl: imageUrl })}
+        hint="რევიუს პროდუქტის ფოტო — ატვირთე ფაილი."
+      />
       <List
         items={items.map((item) => ({
           id: item._id,
@@ -264,6 +269,7 @@ function PlatformsAdmin() {
       <ImageUrlField
         value={form.imageUrl}
         onChange={(imageUrl) => setForm({ ...form, imageUrl })}
+        allowUrl
         placeholder="მაგ: /images/platforms/dsl.png ან Cloudinary ლინკი"
         hint="ან ჩააგდე client/public/images/platforms/dsl.png — ან ატვირთე აქ Cloudinary-ზე."
       />

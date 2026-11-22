@@ -38,6 +38,17 @@ export default function ProductCard({ product }: { product: IProduct }) {
       </div>
 
       <h3>{product.title}</h3>
+      {!!product.colors?.length && (
+        <div className="card-colors" aria-label="ფერები">
+          {product.colors.slice(0, 5).map((item) => (
+            <i
+              key={item.name}
+              style={{ background: item.hex }}
+              title={item.name}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="card-price">
         <span className="card-price-now">{formatGel(final)}</span>

@@ -10,6 +10,7 @@ interface IOrderItem {
   title?: string;
   price?: number;
   imageUrl?: string;
+  color?: string;
 }
 
 export interface IStatusEvent {
@@ -68,6 +69,7 @@ const orderSchema = new Schema<IOrder>(
         title: { type: String, default: "" },
         price: { type: Number, default: 0 },
         imageUrl: { type: String, default: "" },
+        color: { type: String, default: "" },
       },
     ],
     shippingAddress: {

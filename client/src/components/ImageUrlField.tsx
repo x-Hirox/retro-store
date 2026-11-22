@@ -1,18 +1,21 @@
 import { useState } from "react";
 import API from "../services/api";
+import type { IProductColor } from "../types";
 
 export default function ImageUrlField({
   value,
   onChange,
-  placeholder = "სურათის Cloudinary ლინკი ან /images/platforms/dsl.png",
   required = true,
   hint: fallbackHint,
+  placeholder,
+  allowUrl = false,
 }: {
   value: string;
   onChange: (url: string) => void;
   placeholder?: string;
   required?: boolean;
   hint?: string;
+  allowUrl?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   const [hint, setHint] = useState("");
@@ -28,10 +31,7 @@ export default function ImageUrlField({
       onChange(data.url);
       setHint("სურათი Cloudinary-ზე აიტვირთა");
     } catch (err: any) {
-      setHint(
-        err.response?.data?.message ||
-          "ატვირთვა ვერ მოხდა — ჩასვი Cloudinary-ის ლინკი.",
-      );
+      setHint(err.response?.data?.message || "ატვირთვა ვერ მოხდა. სცადე თავიდან.");
     } finally {
       setBusy(false);
     }
@@ -39,30 +39,45 @@ export default function ImageUrlField({
 
   return (
     <div className="image-url-field">
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-      />
+      {allowUrl && (
+        <input
+          type="text"
+          placeholder={placeholder || "სურათის ლინკი ან /images/platforms/dsl.png"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required={required && !value}
+        />
+      )}
       <label className="image-file-btn">
-        {busy ? "იტვირთება..." : "ფოტოს ატვირთვა კომპიუტერიდან"}
+        {busy
+          ? "იტვირთება..."
+          : value
+            ? "სურათის შეცვლა"
+            : "ფოტოს ატვირთვა კომპიუტერიდან"}
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg"
           hidden
           disabled={busy}
-          onChange={(e) => onFile(e.target.files?.[0])}
+          required={required && !value && !allowUrl}
+          onChange={(e) => {
+            onFile(e.target.files?.[0]);
+            e.currentTarget.value = "";
+          }}
         />
       </label>
       {value && (
-        <img src={value} alt="" className="image-url-preview" />
+        <div className="image-url-preview-wrap">
+          <img src={value} alt="" className="image-url-preview" />
+          <button type="button" className="image-url-clear" onClick={() => onChange("")}>
+            წაშლა
+          </button>
+        </div>
       )}
       <p className="image-url-hint">
         {hint ||
           fallbackHint ||
-          "ლაივ საიტისთვის სურათი Cloudinary-ზე უნდა იყოს, არა შენს კომპიუტერში. SVG-ც შეგიძლია ატვირთო ან /nds.svg ჩაწერო."}
+          "ფაილი ადის Cloudinary-ზე. ლინკის ჩასმა აღარ გჭირდება."}
       </p>
     </div>
   );
@@ -91,12 +106,9 @@ export function GalleryImagesField({
       body.append("image", file);
       const { data } = await API.post("/uploads", body);
       onChange([...images, data.url]);
-      setHint("სურათი Cloudinary-ზე აიტვირთა და ბაზაში ლინკად შეინახება");
+      setHint("სურათი Cloudinary-ზე აიტვირთა");
     } catch (err: any) {
-      setHint(
-        err.response?.data?.message ||
-          "ატვირთვა ვერ მოხდა — ჩასვი Cloudinary-ის ლინკი.",
-      );
+      setHint(err.response?.data?.message || "ატვირთვა ვერ მოხდა. სცადე თავიდან.");
     } finally {
       setBusy(false);
     }
@@ -105,8 +117,8 @@ export function GalleryImagesField({
   return (
     <div className="image-url-field">
       <p className="image-url-hint">
-        დამატებითი სურათები. ფაილი ადის Cloudinary-ზე, საიტი ინახავს მხოლოდ
-        ლინკს — კომპიუტერი რომ გაფუჭდეს, სურათები საიტზე რჩება.
+        დამატებითი სურათები (გვერდი, უკანა მხარე, კომპლექტი). ფაილი ადის
+        Cloudinary-ზე — პროდუქტის გვერდზე ქვემოთ thumbs-ად გამოჩნდება.
       </p>
       {images.length > 0 && (
         <div className="gallery-admin">
@@ -139,6 +151,92 @@ export function GalleryImagesField({
         />
       </label>
       {hint && <p className="image-url-hint">{hint}</p>}
+    </div>
+  );
+}
+
+const COLOR_PRESETS: IProductColor[] = [
+  { name: "შავი", hex: "#111111" },
+  { name: "იასამნისფერი", hex: "#7c3aed" },
+  { name: "თეთრი", hex: "#f4f4f5" },
+  { name: "ლურჯი", hex: "#2563eb" },
+  { name: "წითელი", hex: "#dc2626" },
+];
+
+export function ProductColorsField({
+  colors,
+  onChange,
+}: {
+  colors: IProductColor[];
+  onChange: (colors: IProductColor[]) => void;
+}) {
+  const add = (preset?: IProductColor) => {
+    if (colors.length >= 8) return;
+    const name = preset?.name || "";
+    if (name && colors.some((item) => item.name === name)) return;
+    onChange([
+      ...colors,
+      { name, hex: preset?.hex || "#111111", imageUrl: "" },
+    ]);
+  };
+
+  const patch = (index: number, next: Partial<IProductColor>) => {
+    onChange(
+      colors.map((item, i) => (i === index ? { ...item, ...next } : item)),
+    );
+  };
+
+  return (
+    <div className="color-admin">
+      <p className="image-url-hint">
+        ერთი მოდელი, სხვადასხვა ფერი — ცალკე პროდუქტი არ დადო. მყიდველი გვერდზე
+        აირჩევს შავს ან იასამნისფერს.
+      </p>
+      <div className="color-admin-presets">
+        {COLOR_PRESETS.map((preset) => (
+          <button
+            key={preset.name}
+            type="button"
+            className="color-admin-preset"
+            onClick={() => add(preset)}
+          >
+            <i style={{ background: preset.hex }} />
+            {preset.name}
+          </button>
+        ))}
+        <button type="button" className="color-admin-preset" onClick={() => add()}>
+          + სხვა ფერი
+        </button>
+      </div>
+      {colors.map((item, index) => (
+        <div key={`${item.name}-${index}`} className="color-admin-row">
+          <input
+            type="color"
+            value={/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(item.hex) ? item.hex : "#111111"}
+            onChange={(e) => patch(index, { hex: e.target.value })}
+            aria-label="ფერი"
+          />
+          <input
+            type="text"
+            placeholder="ფერის სახელი (შავი)"
+            value={item.name}
+            onChange={(e) => patch(index, { name: e.target.value })}
+          />
+          <ImageUrlField
+            value={item.imageUrl || ""}
+            onChange={(url) => patch(index, { imageUrl: url })}
+            required={false}
+            hint="ამ ფერის მთავარი ფოტო. თუ ცარიელია, საიტი მთავარ სურათს გამოიყენებს."
+          />
+          <button
+            type="button"
+            className="image-url-clear"
+            onClick={() => onChange(colors.filter((_, i) => i !== index))}
+          >
+            ფერის წაშლა
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

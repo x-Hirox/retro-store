@@ -1,20 +1,23 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { IProduct } from "../types";
+import { cartLineKey } from "../utils/productColors";
 
 export interface CartItem extends IProduct {
   quantity: number;
+  selectedColor?: string;
+  selectedColorHex?: string;
 }
 
 interface CartContextType {
   cart: CartItem[];
   addToCart: (
-    product: IProduct,
+    product: IProduct & { selectedColor?: string; selectedColorHex?: string },
     qty?: number,
     opts?: { drawer?: boolean },
   ) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  removeFromCart: (id: string) => void;
+  updateQuantity: (lineKey: string, quantity: number) => void;
+  removeFromCart: (lineKey: string) => void;
   clearCart: () => void;
   drawerOpen: boolean;
   openCartDrawer: () => void;
@@ -22,6 +25,15 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+function lineCap(cart: CartItem[], product: IProduct, lineKey: string) {
+  const others = cart
+    .filter(
+      (item) => item._id === product._id && cartLineKey(item) !== lineKey,
+    )
+    .reduce((sum, item) => sum + item.quantity, 0);
+  return Math.max(0, (product.stock ?? 0) - others);
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -35,19 +47,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart]);
 
   const addToCart = (
-    product: IProduct,
+    product: IProduct & { selectedColor?: string; selectedColorHex?: string },
     qty = 1,
     opts?: { drawer?: boolean },
   ) => {
     if ((product.stock ?? 0) <= 0) return;
     const addBy = Math.max(1, Math.floor(qty));
+    const key = cartLineKey(product);
     setCart((prevCart) => {
+      const cap = lineCap(prevCart, product, key);
+      if (cap < 1) return prevCart;
       const existingIndex = prevCart.findIndex(
-        (item) => item._id === product._id,
+        (item) => cartLineKey(item) === key,
       );
       if (existingIndex > -1) {
         const current = prevCart[existingIndex];
-        const nextQty = Math.min(product.stock, current.quantity + addBy);
+        const nextQty = Math.min(cap, current.quantity + addBy);
         if (nextQty === current.quantity) return prevCart;
         return prevCart.map((item, index) =>
           index === existingIndex ? { ...item, quantity: nextQty } : item,
@@ -55,28 +70,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [
         ...prevCart,
-        { ...product, quantity: Math.min(product.stock, addBy) },
+        {
+          ...product,
+          quantity: Math.min(cap, addBy),
+        },
       ];
     });
     if (opts?.drawer !== false) setDrawerOpen(true);
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = (lineKey: string, quantity: number) => {
     setCart((prevCart) => {
-      const current = prevCart.find((item) => item._id === id);
+      const current = prevCart.find((item) => cartLineKey(item) === lineKey);
       if (!current) return prevCart;
-      if (quantity <= 0) return prevCart.filter((item) => item._id !== id);
-      const max = current.stock ?? quantity;
-      const nextQty = Math.min(quantity, max);
+      if (quantity <= 0) {
+        return prevCart.filter((item) => cartLineKey(item) !== lineKey);
+      }
+      const cap = lineCap(prevCart, current, lineKey);
+      const nextQty = Math.min(quantity, cap);
       if (nextQty === current.quantity) return prevCart;
       return prevCart.map((item) =>
-        item._id === id ? { ...item, quantity: nextQty } : item,
+        cartLineKey(item) === lineKey ? { ...item, quantity: nextQty } : item,
       );
     });
   };
 
-  const removeFromCart = (id: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item._id !== id));
+  const removeFromCart = (lineKey: string) => {
+    setCart((prevCart) =>
+      prevCart.filter((item) => cartLineKey(item) !== lineKey),
+    );
   };
 
   const clearCart = () => {

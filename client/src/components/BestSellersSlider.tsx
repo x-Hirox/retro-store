@@ -229,6 +229,17 @@ export default function BestSellersSlider({
                   >
                     {product.title}
                   </h3>
+                  {!!product.colors?.length && (
+                    <div className="card-colors" aria-label="ფერები">
+                      {product.colors.slice(0, 5).map((item) => (
+                        <i
+                          key={item.name}
+                          style={{ background: item.hex }}
+                          title={item.name}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                   <div
                     style={{

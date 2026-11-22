@@ -19,6 +19,32 @@ function cleanImages(value: unknown): string[] {
   return out;
 }
 
+function cleanHex(value: unknown): string {
+  const hex = String(value || "").trim();
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return hex;
+  return "#111111";
+}
+
+function cleanColors(value: unknown): { name: string; hex: string; imageUrl: string }[] {
+  if (!Array.isArray(value)) return [];
+  const out: { name: string; hex: string; imageUrl: string }[] = [];
+  const seen = new Set<string>();
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const row = item as { name?: unknown; hex?: unknown; imageUrl?: unknown };
+    const name = String(row.name || "").trim().slice(0, 40);
+    if (!name || seen.has(name.toLowerCase())) continue;
+    const imageUrl = String(row.imageUrl || "").trim();
+    if (imageUrl && (!/^https?:\/\//i.test(imageUrl) || imageUrl.length > 500)) {
+      continue;
+    }
+    seen.add(name.toLowerCase());
+    out.push({ name, hex: cleanHex(row.hex), imageUrl });
+    if (out.length >= 8) break;
+  }
+  return out;
+}
+
 // ყველა პროდუქტის წამოღება (GET) - ღიაა ყველასთვის
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -90,6 +116,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       genre,
       tags,
       isBestSeller,
+      colors,
     } = req.body;
 
     const newProduct = new Product({
@@ -99,6 +126,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       category,
       imageUrl,
       images: cleanImages(images),
+      colors: cleanColors(colors),
       stock,
       discount: discount || 0,
       isHeroBanner: !!isHeroBanner,
@@ -134,6 +162,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
       genre,
       tags,
       isBestSeller,
+      colors,
     } = req.body;
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -144,6 +173,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
         category,
         imageUrl,
         images: cleanImages(images),
+        colors: cleanColors(colors),
         stock,
         discount: discount || 0,
         isHeroBanner: !!isHeroBanner,

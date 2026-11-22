@@ -51,7 +51,7 @@ export default function Header({
   return (
     <header className="site-header">
       <div className="top-banner">
-        <span className="top-banner-text arcade-flicker">{t("topBanner")}</span>
+        <span className="top-banner-text">{t("topBanner")}</span>
         <button
           type="button"
           className="lang-toggle"

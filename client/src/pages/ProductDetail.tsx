@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getProductById, getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
@@ -17,6 +17,13 @@ import {
   jsonLdGraph,
 } from "../seo/site";
 import { productKeywords } from "../utils/tags";
+import {
+  cartLineKey,
+  pickColor,
+  productColors,
+  productPhotos,
+  withSelectedColor,
+} from "../utils/productColors";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -29,14 +36,20 @@ export default function ProductDetail() {
   const [error, setError] = useState<string | null>(null);
   const [photo, setPhoto] = useState(0);
   const [qty, setQty] = useState(1);
+  const [colorName, setColorName] = useState("");
+  const [sticky, setSticky] = useState(false);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
     setPhoto(0);
     setQty(1);
+    setColorName("");
+    setSticky(false);
     getProductById(id)
       .then((data) => {
         setProduct(data);
+        setColorName(productColors(data)[0]?.name || "");
         trackRecentlyViewed(data);
         setLoading(false);
         getProducts()
@@ -48,6 +61,17 @@ export default function ProductDetail() {
         setLoading(false);
       });
   }, [id]);
+
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setSticky(!entry.isIntersecting),
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [product?._id, product?.stock]);
 
   if (loading) {
     return <div className="pd-status">{t("loading")}</div>;
@@ -72,11 +96,16 @@ export default function ProductDetail() {
 
   const sale = getSalePrice(product);
   const stock = product.stock ?? 0;
-  const inCart = cart.find((item) => item._id === product._id)?.quantity ?? 0;
+  const colors = productColors(product);
+  const selected = pickColor(product, colorName);
+  const line = withSelectedColor(product, colorName);
+  const inCart =
+    cart.find((item) => cartLineKey(item) === cartLineKey(line))?.quantity ?? 0;
   const maxQty = Math.max(1, stock);
+  const photos = productPhotos(product, colorName);
 
   const add = (goCheckout: boolean) => {
-    addToCart(product, qty, { drawer: !goCheckout });
+    addToCart(line, qty, { drawer: !goCheckout });
     if (goCheckout) {
       closeCartDrawer();
       navigate("/checkout");
@@ -99,10 +128,7 @@ export default function ProductDetail() {
       "@type": "Product",
       name: product.title,
       description,
-      image: [
-        absUrl(product.imageUrl),
-        ...(product.images || []).map((url) => absUrl(url)),
-      ],
+      image: photos.map((url) => absUrl(url)),
       brand: {
         "@type": "Brand",
         name: product.platform || product.category || "RetroBit",
@@ -125,12 +151,12 @@ export default function ProductDetail() {
   ]);
 
   return (
-    <div className="pd-page nbit-slot">
+    <div className={`pd-page nbit-slot${sticky && stock > 0 ? " has-sticky" : ""}`}>
       <SeoHead
         title={product.title}
         description={description}
         path={path}
-        image={product.imageUrl}
+        image={photos[0] || product.imageUrl}
         type="product"
         jsonLd={jsonLd}
         keywords={keywords}
@@ -142,9 +168,14 @@ export default function ProductDetail() {
       <div className="pd-layout">
         <ProductPhotos
           title={product.title}
-          photos={productPhotos(product)}
+          photos={photos}
           active={photo}
-          onSelect={setPhoto}
+          onSelect={(index) => {
+            setPhoto(index);
+            const url = photos[index];
+            const match = colors.find((item) => item.imageUrl === url);
+            if (match) setColorName(match.name);
+          }}
         />
 
         <div className="pd-buy">
@@ -161,6 +192,30 @@ export default function ProductDetail() {
               </>
             )}
           </div>
+
+          {colors.length > 0 && (
+            <div className="pd-colors">
+              <p>
+                ფერი: <strong>{selected?.name}</strong>
+              </p>
+              <div className="pd-swatches">
+                {colors.map((item) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    className={item.name === selected?.name ? "is-on" : ""}
+                    style={{ background: item.hex }}
+                    aria-label={item.name}
+                    title={item.name}
+                    onClick={() => {
+                      setColorName(item.name);
+                      setPhoto(0);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           <p className="pd-desc">{product.description}</p>
           {!!product.tags?.length && (
@@ -199,7 +254,7 @@ export default function ProductDetail() {
                 </button>
               </div>
 
-              <div className="pd-cta">
+              <div className="pd-cta" ref={ctaRef}>
                 <button
                   type="button"
                   className="pd-buy-now"
@@ -218,6 +273,7 @@ export default function ProductDetail() {
               {inCart > 0 && (
                 <p className="pd-incart">
                   {t("inCart")}: {inCart} {t("pieces")}
+                  {selected ? ` · ${selected.name}` : ""}
                 </p>
               )}
               {stock <= 3 && (
@@ -268,18 +324,28 @@ export default function ProductDetail() {
           </div>
         </section>
       )}
+
+      {stock > 0 && (
+        <div className={`pd-sticky${sticky ? " is-on" : ""}`} aria-hidden={!sticky}>
+          <div className="pd-sticky-info">
+            <strong>{product.title}</strong>
+            <span>
+              {formatGel(sale.final)}
+              {selected ? ` · ${selected.name}` : ""}
+            </span>
+          </div>
+          <div className="pd-sticky-cta">
+            <button type="button" className="pd-buy-now" onClick={() => add(true)}>
+              ახლავე ყიდვა
+            </button>
+            <button type="button" className="pd-add-cart" onClick={() => add(false)}>
+              {t("addToCart")} +
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function productPhotos(product: IProduct): string[] {
-  const urls = [product.imageUrl, ...(product.images || [])];
-  const unique: string[] = [];
-  for (const url of urls) {
-    const clean = String(url || "").trim();
-    if (clean && !unique.includes(clean)) unique.push(clean);
-  }
-  return unique;
 }
 
 function ProductPhotos({
@@ -293,31 +359,79 @@ function ProductPhotos({
   active: number;
   onSelect: (index: number) => void;
 }) {
+  const scroller = useRef<HTMLDivElement>(null);
   const index = photos.length === 0 ? 0 : Math.min(active, photos.length - 1);
   const current = photos[index];
+
+  const go = (dir: number) => {
+    if (photos.length < 2) return;
+    onSelect((index + dir + photos.length) % photos.length);
+  };
+
+  const slideThumbs = (dir: number) => {
+    scroller.current?.scrollBy({ left: dir * 168, behavior: "smooth" });
+  };
 
   return (
     <div className="pd-gallery">
       <div className="pd-photo">
+        {photos.length > 1 && (
+          <button
+            type="button"
+            className="pd-photo-nav prev"
+            onClick={() => go(-1)}
+            aria-label="წინა სურათი"
+          >
+            ‹
+          </button>
+        )}
         {current ? (
           <img src={current} alt={productImageAlt({ title })} />
         ) : (
           <span style={{ fontSize: "3rem" }}>🕹️</span>
         )}
+        {photos.length > 1 && (
+          <button
+            type="button"
+            className="pd-photo-nav next"
+            onClick={() => go(1)}
+            aria-label="შემდეგი სურათი"
+          >
+            ›
+          </button>
+        )}
       </div>
       {photos.length > 1 && (
-        <div className="pd-thumbs">
-          {photos.map((url, item) => (
-            <button
-              key={url}
-              type="button"
-              className={item === index ? "is-on" : ""}
-              onClick={() => onSelect(item)}
-              aria-label={`${title} — ფოტო ${item + 1}`}
-            >
-              <img src={url} alt={`${title} — ფოტო ${item + 1} | RetroBit`} />
-            </button>
-          ))}
+        <div className="pd-thumbs-row">
+          <button
+            type="button"
+            className="pd-thumbs-nav"
+            onClick={() => slideThumbs(-1)}
+            aria-label="სურათები მარცხნივ"
+          >
+            ‹
+          </button>
+          <div className="pd-thumbs" ref={scroller}>
+            {photos.map((url, item) => (
+              <button
+                key={url}
+                type="button"
+                className={item === index ? "is-on" : ""}
+                onClick={() => onSelect(item)}
+                aria-label={`${title} — ფოტო ${item + 1}`}
+              >
+                <img src={url} alt={`${title} — ფოტო ${item + 1} | RetroBit`} />
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="pd-thumbs-nav"
+            onClick={() => slideThumbs(1)}
+            aria-label="სურათები მარჯვნივ"
+          >
+            ›
+          </button>
         </div>
       )}
     </div>

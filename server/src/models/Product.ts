@@ -1,5 +1,11 @@
 import { Schema, model, Document } from "mongoose";
 
+export interface IProductColor {
+  name: string;
+  hex: string;
+  imageUrl?: string;
+}
+
 export interface IProduct extends Document {
   title: string;
   description: string;
@@ -8,6 +14,7 @@ export interface IProduct extends Document {
   category: string;
   imageUrl: string;
   images?: string[];
+  colors?: IProductColor[];
   stock: number;
   isHeroBanner?: boolean; // 🟢 მთავარი ბანერი
   platform?: string;
@@ -25,6 +32,19 @@ const ProductSchema = new Schema<IProduct>({
   category: { type: String, required: true },
   imageUrl: { type: String, required: true },
   images: { type: [String], default: [] },
+  colors: {
+    type: [
+      new Schema(
+        {
+          name: { type: String, required: true },
+          hex: { type: String, default: "#111111" },
+          imageUrl: { type: String, default: "" },
+        },
+        { _id: false },
+      ),
+    ],
+    default: [],
+  },
   stock: { type: Number, required: true, default: 1 },
   isHeroBanner: { type: Boolean, default: false },
   platform: { type: String, default: "" },

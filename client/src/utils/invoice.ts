@@ -16,6 +16,7 @@ export type InvoiceOrder = {
     title?: string;
     quantity?: number;
     price?: number;
+    color?: string;
     product?: { title?: string; price?: number };
   }>;
 };
@@ -39,7 +40,8 @@ export function payStatusLabel(status?: string) {
 }
 
 export function itemTitle(item: NonNullable<InvoiceOrder["orderItems"]>[number]) {
-  return item.title || item.product?.title || "პროდუქტი";
+  const title = item.title || item.product?.title || "პროდუქტი";
+  return item.color ? `${title} — ${item.color}` : title;
 }
 
 export function itemPrice(item: NonNullable<InvoiceOrder["orderItems"]>[number]) {

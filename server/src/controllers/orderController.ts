@@ -84,6 +84,7 @@ export const addOrderItems = async (
       title: string;
       price: number;
       imageUrl: string;
+      color: string;
     }[] = [];
     let totalPrice = 0;
 
@@ -106,13 +107,16 @@ export const addOrderItems = async (
           throw new Error("stock");
         }
         const price = unitPrice(product);
+        const color = clampText(item.color, 40);
+        const colorMatch = product.colors?.find((row) => row.name === color);
         decremented.push({ id: String(product._id), qty });
         pricedItems.push({
           product: String(product._id),
           quantity: qty,
           title: product.title,
           price,
-          imageUrl: product.imageUrl,
+          imageUrl: colorMatch?.imageUrl || product.imageUrl,
+          color,
         });
         totalPrice += price * qty;
       }
@@ -178,7 +182,7 @@ export const addOrderItems = async (
         origin: req.headers.origin || undefined,
         items: pricedItems.map((item) => ({
           id: item.product,
-          title: item.title,
+          title: item.color ? `${item.title} — ${item.color}` : item.title,
           quantity: item.quantity,
           price: item.price,
         })),
@@ -285,7 +289,9 @@ export const retryOrderPayment = async (
       origin: req.headers.origin || undefined,
       items: order.orderItems.map((item) => ({
         id: String(item.product),
-        title: item.title || "item",
+        title: item.color
+          ? `${item.title || "item"} — ${item.color}`
+          : item.title || "item",
         quantity: item.quantity,
         price: item.price || 0,
       })),
