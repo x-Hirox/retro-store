@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import type { IProduct } from "../types";
 import { formatGel, getSalePrice, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
@@ -6,7 +6,6 @@ import { productImageAlt } from "../utils/imageAlt";
 import { colorStock, totalStock } from "../utils/productColors";
 
 export default function ProductCard({ product }: { product: IProduct }) {
-  const navigate = useNavigate();
   const { original, final, discount } = getSalePrice(product);
   const range = saleRange(product);
   const left = totalStock(product);
@@ -14,13 +13,10 @@ export default function ProductCard({ product }: { product: IProduct }) {
   const low = !sold && left <= 3;
   const fromPrice = range.min !== range.max;
 
-  return (
+  const card = (
     <HoloCard
       className={`product-card glass-card${sold ? " is-sold" : ""}`}
       disabled={sold}
-      onClick={() => {
-        if (!sold) navigate(`/product/${product._id}`);
-      }}
     >
       {sold && <span className="sold-badge">SOLD</span>}
       {low && <span className="left-badge">დარჩა {left}</span>}
@@ -35,6 +31,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
             alt={productImageAlt(product)}
             loading="lazy"
             decoding="async"
+            draggable={false}
           />
         ) : (
           <span style={{ fontSize: "3rem" }}>🕹️</span>
@@ -63,5 +60,13 @@ export default function ProductCard({ product }: { product: IProduct }) {
         )}
       </div>
     </HoloCard>
+  );
+
+  if (sold) return card;
+
+  return (
+    <Link to={`/product/${product._id}`} className="product-card-link" draggable={false}>
+      {card}
+    </Link>
   );
 }

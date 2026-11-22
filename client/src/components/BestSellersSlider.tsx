@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
 import { formatGel, getSalePrice, isBannerProduct, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { useLang } from "../i18n/LanguageContext";
 import { colorStock, totalStock } from "../utils/productColors";
+
+const DRAG_THRESHOLD = 8;
 
 interface Props {
   products: IProduct[];
@@ -22,7 +24,27 @@ export default function BestSellersSlider({
   const navigate = useNavigate();
   const sliderRef = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
+  const drag = useRef({
+    pointerId: -1,
+    startX: 0,
+    startScroll: 0,
+    moved: false,
+  });
   const { t } = useLang();
+
+  const endDrag = (pointerId: number) => {
+    const node = sliderRef.current;
+    if (drag.current.pointerId !== pointerId) return;
+    if (node) {
+      if (node.hasPointerCapture(pointerId)) {
+        node.releasePointerCapture(pointerId);
+      }
+      node.style.cursor = "grab";
+      node.style.scrollBehavior = "smooth";
+    }
+    drag.current.pointerId = -1;
+    paused.current = false;
+  };
 
   useEffect(() => {
     const el = sliderRef.current;
@@ -125,28 +147,39 @@ export default function BestSellersSlider({
               paused.current = true;
             }}
             onMouseLeave={() => {
-              paused.current = false;
+              if (drag.current.pointerId === -1) paused.current = false;
             }}
             onPointerDown={(event) => {
               const node = sliderRef.current;
-              if (!node) return;
+              if (!node || event.pointerType === "touch") return;
               paused.current = true;
-              node.dataset.drag = "1";
-              node.dataset.startX = String(event.clientX);
-              node.dataset.startScroll = String(node.scrollLeft);
-              node.setPointerCapture(event.pointerId);
+              drag.current = {
+                pointerId: event.pointerId,
+                startX: event.clientX,
+                startScroll: node.scrollLeft,
+                moved: false,
+              };
             }}
             onPointerMove={(event) => {
               const node = sliderRef.current;
-              if (!node || node.dataset.drag !== "1") return;
-              const startX = Number(node.dataset.startX || 0);
-              const startScroll = Number(node.dataset.startScroll || 0);
-              node.scrollLeft = startScroll - (event.clientX - startX);
+              if (!node || drag.current.pointerId !== event.pointerId) return;
+              const dx = event.clientX - drag.current.startX;
+              if (!drag.current.moved) {
+                if (Math.abs(dx) < DRAG_THRESHOLD) return;
+                drag.current.moved = true;
+                node.setPointerCapture(event.pointerId);
+                node.style.cursor = "grabbing";
+                node.style.scrollBehavior = "auto";
+              }
+              node.scrollLeft = drag.current.startScroll - dx;
             }}
-            onPointerUp={() => {
-              const node = sliderRef.current;
-              if (node) node.dataset.drag = "";
-              paused.current = false;
+            onPointerUp={(event) => endDrag(event.pointerId)}
+            onPointerCancel={(event) => endDrag(event.pointerId)}
+            onClickCapture={(event) => {
+              if (!drag.current.moved) return;
+              event.preventDefault();
+              event.stopPropagation();
+              drag.current.moved = false;
             }}
             style={{
               display: "flex",
@@ -158,6 +191,8 @@ export default function BestSellersSlider({
               paddingBottom: "15px",
               scrollbarWidth: "none",
               cursor: "grab",
+              userSelect: "none",
+              touchAction: "pan-x",
             }}
           >
             {(regularProducts.some((p) => p.isBestSeller)
@@ -167,11 +202,13 @@ export default function BestSellersSlider({
               const sale = getSalePrice(product);
               const range = saleRange(product);
               return (
-              <HoloCard
+              <Link
                 key={product._id}
-                className="product-card glass-card slider-card"
-                onClick={() => navigate(`/product/${product._id}`)}
+                to={`/product/${product._id}`}
+                className="product-card-link slider-card"
+                draggable={false}
               >
+              <HoloCard className="product-card glass-card">
                 {totalStock(product) <= 0 && (
                   <span className="sold-badge">SOLD</span>
                 )}
@@ -204,6 +241,7 @@ export default function BestSellersSlider({
                       alt={`${product.title}${product.platform ? ` — ${product.platform}` : ""} | RetroBit`}
                       loading="lazy"
                       decoding="async"
+                      draggable={false}
                     />
                   ) : (
                     <span style={{ fontSize: "3rem" }}>🕹️</span>
@@ -292,6 +330,7 @@ export default function BestSellersSlider({
                   </div>
                 </div>
               </HoloCard>
+              </Link>
             );
             })}
           </div>

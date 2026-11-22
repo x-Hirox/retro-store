@@ -2294,8 +2294,10 @@ body.dark .profile-chip.is-ok {
 .pd-photo {
   position: relative;
   width: 100%;
-  min-height: 420px;
-  height: min(56vw, 520px);
+  max-width: 560px;
+  aspect-ratio: 1;
+  height: auto;
+  min-height: 0;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -3902,7 +3904,7 @@ html.fx-cursor select {
   .pd-layout, .pd-cta { grid-template-columns: 1fr; }
   .cart-page-item { grid-template-columns: 64px 1fr; }
   .pd-gallery { position: static; }
-  .pd-photo { min-height: 280px; height: 320px; }
+  .pd-photo { min-height: 0; height: auto; max-width: none; }
   .pd-page.has-sticky { padding-bottom: 148px; }
   .pd-sticky {
     flex-wrap: wrap;
@@ -4346,8 +4348,17 @@ html.fx-cursor select {
   position: relative;
   z-index: 4;
 }
+.product-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.product-card-link .holo-card {
+  height: 100%;
+}
 .card-photo {
-  height: 180px;
+  aspect-ratio: 1;
+  height: auto;
   background: transparent;
   display: flex;
   align-items: center;
@@ -4361,6 +4372,8 @@ html.fx-cursor select {
   object-fit: contain;
   opacity: 1;
   filter: none;
+  pointer-events: none;
+  user-select: none;
 }
 .card-price {
   display: flex;

@@ -382,12 +382,12 @@ export default function Admin() {
               <p className="admin-muted" style={{ margin: 0 }}>
                 {isHeroBanner
                   ? "ბანერის სურათი Cloudinary-ზე ადის ამ ფორმიდან — აირჩიე ფაილი."
-                  : "მთავარი ფოტო და კიდევ რამდენიმე სურათი. ფაილი ადის Cloudinary-ზე, ლინკის ჩასმა აღარ გჭირდება."}
+                  : "მთავარი ფოტო კვადრატული უნდა იყოს (1:1, მაგ. 1200×1200 JPG/WebP). ფართო ბანერი ბარათზე და გვერდზე ცარიელ ადგილს ტოვებს."}
               </p>
               <ImageUrlField
                 value={imageUrl}
                 onChange={setImageUrl}
-                hint="ეს არის პროდუქტის მთავარი ფოტო. ფაილი ადის Cloudinary-ზე."
+                hint="მთავარი ფოტო — კვადრატი 1:1 (1200×1200). ფაილი ადის Cloudinary-ზე."
               />
               {!isHeroBanner && (
                 <>
