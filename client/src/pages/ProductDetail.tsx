@@ -8,7 +8,6 @@ import { formatGel, getSalePrice } from "../utils/pricing";
 import { useLang } from "../i18n/LanguageContext";
 import { suggestAddons } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
-import { Polaroid } from "../components/NostalgiaBits";
 import SeoHead from "../components/SeoHead";
 import { productImageAlt } from "../utils/imageAlt";
 import {
@@ -17,6 +16,7 @@ import {
   breadcrumbGraph,
   jsonLdGraph,
 } from "../seo/site";
+import { productKeywords } from "../utils/tags";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -85,6 +85,7 @@ export default function ProductDetail() {
 
   const path = `/product/${product._id}`;
   const description = String(product.description || product.title).slice(0, 300);
+  const keywords = productKeywords(product);
   const jsonLd = jsonLdGraph([
     breadcrumbGraph([
       { name: "მთავარი", path: "/" },
@@ -107,6 +108,7 @@ export default function ProductDetail() {
         name: product.platform || product.category || "RetroBit",
       },
       category: product.category,
+      keywords,
       offers: {
         "@type": "Offer",
         url: `${SITE_URL}${path}`,
@@ -131,8 +133,8 @@ export default function ProductDetail() {
         image={product.imageUrl}
         type="product"
         jsonLd={jsonLd}
+        keywords={keywords}
       />
-      <Polaroid />
       <button type="button" className="pd-ghost" onClick={() => navigate(-1)}>
         ← უკან
       </button>
@@ -161,6 +163,19 @@ export default function ProductDetail() {
           </div>
 
           <p className="pd-desc">{product.description}</p>
+          {!!product.tags?.length && (
+            <div className="pd-tags">
+              {product.tags.map((tag) => (
+                <Link
+                  key={tag}
+                  to={`/?search=${encodeURIComponent(tag)}`}
+                  className="pd-tag"
+                >
+                  #{tag}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {stock <= 0 ? (
             <button type="button" className="pd-sold" disabled>

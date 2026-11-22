@@ -11,6 +11,7 @@ export interface IProduct {
   isHeroBanner?: boolean; // 🟢 მთავარი ბანერი
   platform?: string;
   genre?: string;
+  tags?: string[];
   isBestSeller?: boolean;
 }
 
@@ -72,6 +73,11 @@ export interface ISiteSettings {
   footerEmail: string;
   footerHours: string;
   footerAddress: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialYoutube?: string;
+  socialX?: string;
   catImageHome?: string;
   catImageHand?: string;
   catImageGames?: string;

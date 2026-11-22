@@ -1,4 +1,5 @@
 import {
+  CONTACT,
   DEFAULT_OG_IMAGE,
   SITE_URL,
   absUrl,
@@ -15,6 +16,7 @@ export function crawlerDocument({
   h1,
   bodyHtml,
   noindex,
+  keywords,
   type = "website",
 }: {
   title: string;
@@ -25,6 +27,7 @@ export function crawlerDocument({
   h1: string;
   bodyHtml: string;
   noindex?: boolean;
+  keywords?: string;
   type?: string;
 }) {
   const url = sitePath(path);
@@ -40,6 +43,7 @@ export function crawlerDocument({
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${escapeHtml(fullTitle)}</title>
 <meta name="description" content="${escapeHtml(description)}" />
+${keywords ? `<meta name="keywords" content="${escapeHtml(keywords)}" />` : ""}
 <meta name="robots" content="${robots}" />
 <meta name="geo.region" content="GE" />
 <meta name="geo.placename" content="Tbilisi" />
@@ -70,22 +74,50 @@ ${bodyHtml}
 </html>`;
 }
 
-export function organizationGraph() {
+export function organizationGraph(sameAs: string[] = []) {
   return {
-    "@type": "Organization",
+    "@type": ["Store", "Organization"],
     "@id": `${SITE_URL}/#organization`,
     name: "RetroBit",
-    alternateName: "RetroStore",
+    alternateName: ["RetroBit Georgia", "retrobit.ge"],
+    legalName: "RetroBit",
     url: SITE_URL,
-    email: "retrobit.support@gmail.com",
-    logo: absUrl("/retrobit.png"),
+    telephone: CONTACT.phoneE164,
+    email: CONTACT.email,
     image: DEFAULT_OG_IMAGE,
+    logo: absUrl("/retrobit.png"),
+    priceRange: "GEL",
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Tbilisi",
-      addressCountry: "GE",
+      addressLocality: CONTACT.city,
+      addressCountry: CONTACT.country,
     },
     areaServed: { "@type": "Country", name: "Georgia" },
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: CONTACT.phoneE164,
+      email: CONTACT.email,
+      contactType: "customer support",
+      areaServed: "GE",
+      availableLanguage: ["ka", "en"],
+    },
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: CONTACT.opens,
+      closes: CONTACT.closes,
+    },
+    disambiguatingDescription:
+      "Tbilisi retro video game store. Not affiliated with Retro-Bit (retro-bit.com).",
+    ...(sameAs.length ? { sameAs } : {}),
   };
 }
 
@@ -119,9 +151,9 @@ export function breadcrumbGraph(
   };
 }
 
-export function jsonLdGraph(nodes: unknown[]) {
+export function jsonLdGraph(nodes: unknown[] = [], sameAs: string[] = []) {
   return {
     "@context": "https://schema.org",
-    "@graph": [organizationGraph(), websiteGraph(), ...nodes],
+    "@graph": [organizationGraph(sameAs), websiteGraph(), ...nodes],
   };
 }

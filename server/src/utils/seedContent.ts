@@ -9,6 +9,21 @@ export async function seedContentIfEmpty() {
   if ((await SiteSettings.countDocuments()) === 0) {
     await SiteSettings.create({});
   }
+  const settings = await SiteSettings.findOne();
+  if (settings) {
+    const phone = String(settings.footerPhone || "").replace(/\s|-/g, "");
+    const email = String(settings.footerEmail || "");
+    const $set: Record<string, string> = {};
+    if (!phone || /555000000/.test(phone) || phone === "+995555000000") {
+      $set.footerPhone = "+995 595 95 00 39";
+    }
+    if (!email || /help@retrobit\.ge/i.test(email)) {
+      $set.footerEmail = "retrobit.support@gmail.com";
+    }
+    if (Object.keys($set).length) {
+      await SiteSettings.updateOne({ _id: settings._id }, { $set });
+    }
+  }
 
   const geoReviews = [
     {
@@ -361,7 +376,17 @@ export async function seedContentIfEmpty() {
       order: 3,
     },
   ];
-  for (const card of nintendoHandhelds) {
+  const chineseHandhelds = [
+    {
+      brand: "chinese consoles",
+      name: "R36S",
+      slug: "r36s",
+      year: "2023",
+      imageUrl: "/images/platforms/r36s.png",
+      order: 0,
+    },
+  ];
+  for (const card of [...nintendoHandhelds, ...chineseHandhelds]) {
     const existing = await PlatformCard.findOne({
       brand: card.brand,
       slug: card.slug,

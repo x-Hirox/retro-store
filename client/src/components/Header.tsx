@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import SoundToggle from "./SoundToggle";
-import { HolidayLights } from "./NostalgiaBits";
 import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
 
@@ -65,7 +63,6 @@ export default function Header({
           <span className={lang === "en" ? "on" : ""}>🇬🇧 Eng</span>
         </button>
       </div>
-      <HolidayLights />
 
       <div className="nav-container">
         <Link to="/" className="site-logo" aria-label="RetroBit">
@@ -90,8 +87,6 @@ export default function Header({
         </div>
 
         <div className="nav-links-wrapper">
-          <SoundToggle />
-
           <Link to="/play" className="neon-btn play-link">
             <span aria-hidden>🎮</span>
             <span className="btn-label">{t("games")}</span>
@@ -188,7 +183,9 @@ export default function Header({
             )}
           </div>
         ))}
-        <Link to="/gifts">{t("gifts")}</Link>
+        <Link to="/gifts" className="gifts-nav-link">
+          GIFTS
+        </Link>
         <Link to="/sell" className="sell-nav-link">
           {t("sellNav")}
         </Link>

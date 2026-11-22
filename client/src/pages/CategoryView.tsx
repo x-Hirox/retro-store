@@ -99,6 +99,7 @@ const fallbackCards: Record<
   ],
   sega: [{ name: "Sega Genesis", slug: "sega-genesis", image: "/sega.svg" }],
   "chinese consoles": [
+    { name: "R36S", slug: "r36s", image: platformArtUrl("r36s"), year: "2023" },
     { name: "Anbernic", slug: "anbernic", image: "/anbernic.svg" },
     { name: "Miyoo Mini", slug: "miyoo-mini", image: "/miyoo.svg" },
     { name: "Powkiddy", slug: "powkiddy", image: "/powkiddy.svg" },

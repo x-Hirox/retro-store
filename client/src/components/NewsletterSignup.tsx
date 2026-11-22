@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSiteSettings, subscribeNewsletter } from "../services/contentService";
 import type { ISiteSettings } from "../types";
-import { Discman } from "./NostalgiaBits";
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
@@ -35,7 +34,6 @@ export default function NewsletterSignup() {
         color: "#fff",
       }}
     >
-      <Discman />
       <h2
         style={{
           color: "#fff",

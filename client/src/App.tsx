@@ -18,8 +18,6 @@ import OrderSuccess from "./pages/OrderSuccess";
 import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import CartDrawer from "./components/CartDrawer";
-import RetroFX from "./components/RetroFX";
-import RetroAnimeBackdrop from "./components/RetroAnimeBackdrop";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
@@ -60,7 +58,7 @@ const categoriesData = [
   },
   {
     name: "Chinese Consoles",
-    sub: ["Anbernic", "Miyoo Mini", "PowKiddy", "Retroid Pocket"],
+    sub: ["R36S", "Anbernic", "Miyoo Mini", "PowKiddy", "Retroid Pocket"],
   },
   {
     name: "Bundles",
@@ -116,14 +114,13 @@ export default function App() {
           transition: "background-color 0.2s ease, color 0.2s ease",
         }}
       >
-        <RetroAnimeBackdrop />
         <style>
           {`
             .dropdown-parent:hover .dropdown-content {
               display: block !important;
             }
             .neon-btn {
-              transition: all 0.3s ease;
+              transition: transform 0.28s ease, box-shadow 0.28s ease;
             }
             .neon-btn:hover {
               box-shadow: 0 0 12px #00f3ff88;
@@ -183,7 +180,6 @@ export default function App() {
         </div>
         <SiteFooter />
         <CartDrawer />
-        <RetroFX />
       </div>
     </Router>
   );

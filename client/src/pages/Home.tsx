@@ -14,7 +14,6 @@ import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
-import { Tamagotchi, FloppyDisk, Rubik } from "../components/NostalgiaBits";
 import SeoHead from "../components/SeoHead";
 import {
   DEFAULT_DESCRIPTION,
@@ -31,12 +30,6 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const link = document.createElement("link");
-    link.href =
-      "https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@700;900&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-
     getProducts()
       .then((data) => {
         setProducts(data || []);
@@ -87,8 +80,7 @@ export default function Home() {
       <h1 className="home-seo-h1">{DEFAULT_TITLE}</h1>
 
       {/* 2. ბესტსელერები */}
-      <div className="nbit-slot" style={{ paddingTop: "25px", overflow: "visible" }}>
-        <Tamagotchi />
+      <div style={{ paddingTop: "25px", overflow: "visible" }}>
         <BestSellersSlider
           products={products}
           loading={loading}
@@ -99,18 +91,12 @@ export default function Home() {
 
       {/* 3. პოპულარული ბრენდები */}
       {!searchQuery && (
-        <div className="nbit-slot">
-          <FloppyDisk />
-          <BrandsSection />
-        </div>
+        <BrandsSection />
       )}
 
       {/* 4. კატეგორიები */}
       {!searchQuery && (
-        <div className="nbit-slot">
-          <Rubik />
-          <CategoriesSection />
-        </div>
+        <CategoriesSection />
       )}
 
       {/* 6. SHOP BY POPULAR BUNDLES */}

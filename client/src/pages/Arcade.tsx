@@ -1,6 +1,4 @@
 import GameCovers from "../components/GameCovers";
-import { InsertCoin } from "../components/NostalgiaBits";
-import SoundToggle from "../components/SoundToggle";
 import SeoHead from "../components/SeoHead";
 import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 
@@ -26,15 +24,13 @@ export default function Arcade() {
           <span>1P START</span>
         </div>
         <div className="arcade-bezel">
-          <div className="arcade-wrap nbit-slot">
-            <InsertCoin />
+          <div className="arcade-wrap">
             <GameCovers mode="play" />
           </div>
         </div>
         <div className="arcade-controls-hint">
           <span className="arcade-badge">LEGAL HOMEBREW</span>
           <span className="arcade-badge">CRT FOCUS</span>
-          <SoundToggle />
           <p>
             <b>←↑↓→ / WASD</b> მოძრაობა · <b>Z / X / Space</b> მოქმედება ·{" "}
             <b>Enter</b> start · მობილურზე — თაჩი

@@ -2,18 +2,22 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import PlatformCard from "../models/PlatformCard.js";
+import SiteSettings from "../models/SiteSettings.js";
 import {
   CATEGORY_BRANDS,
+  CONTACT,
   DEFAULT_DESCRIPTION,
   DEFAULT_OG_IMAGE,
   DEFAULT_TITLE,
   SITE_URL,
   STATIC_PAGES,
   absUrl,
+  collectSameAs,
   escapeHtml,
   escapeXml,
   sitePath,
 } from "../seo/config.js";
+import { productKeywords } from "../utils/tags.js";
 import {
   breadcrumbGraph,
   crawlerDocument,
@@ -37,6 +41,19 @@ function salePrice(product: { price?: number; discount?: number }) {
   const discount = Number(product.discount) || 0;
   const final = discount > 0 ? original * (1 - discount / 100) : original;
   return Number(final.toFixed(2));
+}
+
+async function loadSameAs() {
+  try {
+    const settings = await SiteSettings.findOne()
+      .select(
+        "socialInstagram socialFacebook socialTiktok socialYoutube socialX",
+      )
+      .lean();
+    return collectSameAs(settings);
+  } catch {
+    return [];
+  }
 }
 
 function isoDay(date?: Date | string) {
@@ -184,31 +201,36 @@ export async function productCrawlerHtml(id: string, res: Response) {
     },
     { name: product.title, path },
   ];
-  const jsonLd = jsonLdGraph([
-    breadcrumbGraph(crumbs),
-    {
-      "@type": "Product",
-      name: product.title,
-      description,
-      image: [absUrl(product.imageUrl), ...(product.images || []).map(absUrl)],
-      brand: {
-        "@type": "Brand",
-        name: product.platform || product.category || "RetroBit",
+  const keywords = productKeywords(product);
+  const jsonLd = jsonLdGraph(
+    [
+      breadcrumbGraph(crumbs),
+      {
+        "@type": "Product",
+        name: product.title,
+        description,
+        image: [absUrl(product.imageUrl), ...(product.images || []).map(absUrl)],
+        brand: {
+          "@type": "Brand",
+          name: product.platform || product.category || "RetroBit",
+        },
+        category: product.category,
+        keywords,
+        offers: {
+          "@type": "Offer",
+          url: sitePath(path),
+          priceCurrency: "GEL",
+          price: price.toFixed(2),
+          availability: inStock
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+          itemCondition: "https://schema.org/UsedCondition",
+          seller: { "@id": `${SITE_URL}/#organization` },
+        },
       },
-      category: product.category,
-      offers: {
-        "@type": "Offer",
-        url: sitePath(path),
-        priceCurrency: "GEL",
-        price: price.toFixed(2),
-        availability: inStock
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-        itemCondition: "https://schema.org/UsedCondition",
-        seller: { "@id": `${SITE_URL}/#organization` },
-      },
-    },
-  ]);
+    ],
+    await loadSameAs(),
+  );
   res.type("html").send(
     crawlerDocument({
       title: product.title,
@@ -218,6 +240,7 @@ export async function productCrawlerHtml(id: string, res: Response) {
       jsonLd,
       h1: product.title,
       type: "product",
+      keywords,
       bodyHtml: `<p>${escapeHtml(description)}</p><p>ფასი: ${price} GEL. ${inStock ? "მარაგშია" : "ამოიწურა"}.</p><p><img src="${escapeHtml(absUrl(product.imageUrl))}" alt="${escapeHtml(product.title)}" /></p>`,
     }),
   );
@@ -245,14 +268,14 @@ export async function categoryCrawlerHtml(
       title: h1,
       description,
       path,
-      jsonLd: jsonLdGraph([breadcrumbGraph(crumbs)]),
+      jsonLd: jsonLdGraph([breadcrumbGraph(crumbs)], await loadSameAs()),
       h1,
       bodyHtml: `<p>${escapeHtml(description)}</p>`,
     }),
   );
 }
 
-export function giftsCrawlerHtml(res: Response) {
+export async function giftsCrawlerHtml(res: Response) {
   const path = "/gifts";
   const h1 = "საჩუქრები";
   const description =
@@ -262,28 +285,36 @@ export function giftsCrawlerHtml(res: Response) {
       title: h1,
       description,
       path,
-      jsonLd: jsonLdGraph([
-        breadcrumbGraph([
-          { name: "მთავარი", path: "/" },
-          { name: h1, path },
-        ]),
-      ]),
+      jsonLd: jsonLdGraph(
+        [
+          breadcrumbGraph([
+            { name: "მთავარი", path: "/" },
+            { name: h1, path },
+          ]),
+        ],
+        await loadSameAs(),
+      ),
       h1,
       bodyHtml: `<p>${escapeHtml(description)}</p>`,
     }),
   );
 }
 
-export function homeCrawlerHtml(res: Response) {
+export async function homeCrawlerHtml(res: Response) {
   res.type("html").send(
     crawlerDocument({
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
       path: "/",
       image: DEFAULT_OG_IMAGE,
-      jsonLd: jsonLdGraph([]),
+      jsonLd: jsonLdGraph([], await loadSameAs()),
       h1: DEFAULT_TITLE,
-      bodyHtml: `<p>${escapeHtml(DEFAULT_DESCRIPTION)}</p><p><a href="${SITE_URL}/gifts">საჩუქრები</a> · <a href="${SITE_URL}/category/Nintendo">Nintendo</a> · <a href="${SITE_URL}/category/PlayStation">PlayStation</a></p>`,
+      bodyHtml: `<p>${escapeHtml(DEFAULT_DESCRIPTION)}</p>
+<p>ტელეფონი: <a href="tel:${CONTACT.phoneE164}">${escapeHtml(CONTACT.phoneDisplay)}</a></p>
+<p>ელფოსტა: <a href="mailto:${CONTACT.email}">${escapeHtml(CONTACT.email)}</a></p>
+<p>${escapeHtml(CONTACT.cityKa)} · ${escapeHtml(CONTACT.hoursKa)}</p>
+<p>RetroBit არის თბილისის რეტრო მაღაზია და არ არის დაკავშირებული Retro-Bit (retro-bit.com) ბრენდთან.</p>
+<p><a href="${SITE_URL}/gifts">საჩუქრები</a> · <a href="${SITE_URL}/category/Nintendo">Nintendo</a> · <a href="${SITE_URL}/category/PlayStation">PlayStation</a></p>`,
     }),
   );
 }

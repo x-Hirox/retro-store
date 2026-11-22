@@ -7,7 +7,7 @@
     <title>RetroBit — რეტრო კონსოლები და თამაშები საქართველოში</title>
     <meta
       name="description"
-      content="მეორადი რეტრო კონსოლები და თამაშები თბილისში: Nintendo DS Lite, DSi, 3DS, PlayStation, Sega, Xbox. შემოწმებული ტექნიკა, მიწოდება საქართველოში — retrobit.ge"
+      content="მეორადი რეტრო კონსოლები და თამაშები თბილისში: Nintendo, PlayStation, Sega, Xbox და R36S. კონტაქტი: +995 595 95 00 39, retrobit.support@gmail.com. მიწოდება საქართველოში — retrobit.ge"
     />
     <link rel="canonical" href="https://retrobit.ge/" />
     <meta property="og:site_name" content="RetroBit" />
@@ -19,25 +19,66 @@
     />
     <meta
       property="og:description"
-      content="მეორადი რეტრო კონსოლები და თამაშები თბილისში. მიწოდება საქართველოში."
+      content="მეორადი რეტრო კონსოლები და თამაშები თბილისში. კონტაქტი: +995 595 95 00 39. მიწოდება საქართველოში."
     />
     <meta property="og:url" content="https://retrobit.ge/" />
     <meta property="og:image" content="https://retrobit.ge/retrobit.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="geo.region" content="GE" />
     <meta name="geo.placename" content="Tbilisi" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": ["Store", "Organization"],
+        "@id": "https://retrobit.ge/#organization",
+        "name": "RetroBit",
+        "alternateName": ["RetroBit Georgia", "retrobit.ge"],
+        "url": "https://retrobit.ge",
+        "telephone": "+995595950039",
+        "email": "retrobit.support@gmail.com",
+        "image": "https://retrobit.ge/retrobit.png",
+        "logo": "https://retrobit.ge/retrobit.png",
+        "priceRange": "GEL",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Tbilisi",
+          "addressCountry": "GE"
+        },
+        "areaServed": { "@type": "Country", "name": "Georgia" },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+995595950039",
+          "email": "retrobit.support@gmail.com",
+          "contactType": "customer support",
+          "areaServed": "GE",
+          "availableLanguage": ["ka", "en"]
+        },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "10:00",
+          "closes": "22:00"
+        },
+        "disambiguatingDescription": "Tbilisi retro video game store. Not affiliated with Retro-Bit (retro-bit.com)."
+      }
+    </script>
 
-    <!-- 🟢 Google Fonts: 80s/90s Retro Anime & Arcade Typography -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Permanent+Marker&family=Press+Start+2P&family=VT323&family=Noto+Sans+Georgia:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body>
-    <!-- CRT TV Overlay Layer (Scanlines & Screen Glow Effect) -->
-    <div class="crt-overlay" aria-hidden="true"></div>
-
+    <noscript>
+      RetroBit — თბილისის რეტრო მაღაზია.
+      ტელეფონი: +995 595 95 00 39 ·
+      ელფოსტა: retrobit.support@gmail.com
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

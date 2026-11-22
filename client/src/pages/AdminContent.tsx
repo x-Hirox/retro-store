@@ -379,6 +379,11 @@ function SettingsAdmin() {
     footerEmail: "",
     footerHours: "",
     footerAddress: "",
+    socialInstagram: "",
+    socialFacebook: "",
+    socialTiktok: "",
+    socialYoutube: "",
+    socialX: "",
   });
 
   useEffect(() => {
@@ -405,6 +410,27 @@ function SettingsAdmin() {
           ["footerEmail", "ელფოსტა"],
           ["footerHours", "სამუშაო საათები"],
           ["footerAddress", "მისამართი"],
+        ] as [keyof ISiteSettings, string][]
+      ).map(([key, label]) => (
+        <input
+          key={key}
+          style={inputStyle}
+          placeholder={label}
+          value={String(form[key] || "")}
+          onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+        />
+      ))}
+      <h3>სოციალური ქსელები (სრული URL)</h3>
+      <p style={{ margin: 0, fontSize: 13, color: "#94a3b8" }}>
+        როცა გვერდს გააკეთებ, ჩასვი ლინკი. ცარიელი რომ დატოვო, ფუტერში არ გამოჩნდება.
+      </p>
+      {(
+        [
+          ["socialInstagram", "Instagram — https://instagram.com/..."],
+          ["socialFacebook", "Facebook — https://facebook.com/..."],
+          ["socialTiktok", "TikTok — https://tiktok.com/@..."],
+          ["socialYoutube", "YouTube — https://youtube.com/@..."],
+          ["socialX", "X / Twitter — https://x.com/..."],
         ] as [keyof ISiteSettings, string][]
       ).map(([key, label]) => (
         <input

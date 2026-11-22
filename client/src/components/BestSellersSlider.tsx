@@ -41,10 +41,8 @@ export default function BestSellersSlider({
     if (isBannerProduct(p)) return false;
 
     if (searchQuery) {
-      const matchesTitle = p.title?.toLowerCase().includes(searchQuery);
-      const matchesDesc = p.description?.toLowerCase().includes(searchQuery);
-      const matchesCat = p.category?.toLowerCase().includes(searchQuery);
-      return matchesTitle || matchesDesc || matchesCat;
+      const hay = `${p.title || ""} ${p.description || ""} ${p.category || ""} ${p.platform || ""} ${p.genre || ""} ${(p.tags || []).join(" ")}`.toLowerCase();
+      return hay.includes(searchQuery);
     }
 
     if (selectedCategory && selectedCategory !== "All") {

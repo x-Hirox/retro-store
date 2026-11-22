@@ -25,10 +25,5 @@ export default function RetroFX() {
 
   if (admin) return null;
 
-  return (
-    <>
-      <div className="fx-glow" aria-hidden />
-      <div className="fx-scan" aria-hidden />
-    </>
-  );
+  return <div className="fx-glow" aria-hidden />;
 }

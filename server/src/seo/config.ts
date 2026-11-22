@@ -10,8 +10,39 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/retrobit.png`;
 export const DEFAULT_TITLE =
   "RetroBit — რეტრო კონსოლები და თამაშები საქართველოში";
 
+export const CONTACT = {
+  name: "RetroBit",
+  phoneDisplay: "+995 595 95 00 39",
+  phoneE164: "+995595950039",
+  email: "retrobit.support@gmail.com",
+  hoursKa: "ორშ–კვი 10:00–22:00",
+  opens: "10:00",
+  closes: "22:00",
+  city: "Tbilisi",
+  cityKa: "თბილისი, საქართველო",
+  country: "GE",
+};
+
 export const DEFAULT_DESCRIPTION =
-  "მეორადი რეტრო კონსოლები და თამაშები თბილისში: Nintendo DS Lite, DSi, 3DS, PlayStation, Sega, Xbox. შემოწმებული ტექნიკა, მიწოდება საქართველოში — retrobit.ge";
+  "მეორადი რეტრო კონსოლები და თამაშები თბილისში: Nintendo, PlayStation, Sega, Xbox და R36S. კონტაქტი: +995 595 95 00 39, retrobit.support@gmail.com. მიწოდება საქართველოში — retrobit.ge";
+
+export function collectSameAs(settings?: {
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialYoutube?: string;
+  socialX?: string;
+} | null) {
+  return [
+    settings?.socialInstagram,
+    settings?.socialFacebook,
+    settings?.socialTiktok,
+    settings?.socialYoutube,
+    settings?.socialX,
+  ]
+    .map((url) => String(url || "").trim())
+    .filter((url) => /^https?:\/\//i.test(url));
+}
 
 const CRAWLER_UA =
   /googlebot|google-inspectiontool|bingbot|bingpreview|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|pinterest|discordbot|applebot|semrushbot|ahrefsbot|dotbot|embedly|quora|outbrain|vkshare/i;

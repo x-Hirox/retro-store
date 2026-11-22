@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ARCADE_GAMES, type ArcadeGame, type ArcadeSystem } from "../data/arcadeGames";
 import { useLang } from "../i18n/LanguageContext";
 import HoloCard from "./HoloCard";
-import SoundToggle from "./SoundToggle";
 
 const SYSTEM_LABEL: Record<ArcadeSystem, string> = {
   nes: "NES",
@@ -101,7 +100,6 @@ export default function GameCovers({ mode = "play" }: Props) {
               <span className="arcade-player-desc">{playing.desc[lang]}</span>
             </div>
             <span className="arcade-hint">{playing.hint || t("arcadeHint")}</span>
-            <SoundToggle />
             <button
               type="button"
               className="arcade-fs"

@@ -38,7 +38,14 @@ const ALIASES: Record<string, string[]> = {
   sega: ["sega", "genesis", "mega drive", "dreamcast", "saturn", "master system"],
   bundles: ["bundle", "ბუნდლ", "კომპლექტ"],
   accessories: ["accessor", "აქსესუარ", "controller", "ჯოისტიკ", "charger"],
-  "chinese consoles": ["anbernic", "miyoo", "powkiddy", "retroid", "chinese"],
+  "chinese consoles": [
+    "anbernic",
+    "miyoo",
+    "powkiddy",
+    "retroid",
+    "r36s",
+    "chinese",
+  ],
   "atari & more": ["atari", "coleco", "turbografx", "turbo grafx"],
   atari: ["atari", "coleco", "turbografx"],
 };

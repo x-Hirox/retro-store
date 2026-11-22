@@ -11,7 +11,7 @@ export default function HomeExtraSections() {
 
   const faqData = [
     {
-      q: "რატომ უნდა შევიძინო RetroStore-ში?",
+      q: "რატომ უნდა შევიძინო RetroBit-ში?",
       a: "ჩვენ გთავაზობთ 100%-ით ორიგინალ, შემოწმებულ და გარანტირებულ რეტრო კონსოლებსა და თამაშებს.",
     },
     {

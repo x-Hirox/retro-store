@@ -4,7 +4,6 @@ import { SELL_BRANDS, SELL_FAQS } from "../data/sellCatalog";
 import ReviewsSection from "../components/ReviewsSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
-import { Boombox } from "../components/NostalgiaBits";
 import SellEstimator from "../components/SellEstimator";
 import SeoHead from "../components/SeoHead";
 import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
@@ -96,8 +95,7 @@ export default function Sell() {
           ]),
         ])}
       />
-      <section className="sell-hero nbit-slot">
-        <Boombox />
+      <section className="sell-hero">
         <div className="sell-hero-copy">
           <h1>
             გაყიდე კონსოლი

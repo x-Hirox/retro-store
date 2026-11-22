@@ -12,6 +12,7 @@ export interface IProduct extends Document {
   isHeroBanner?: boolean; // 🟢 მთავარი ბანერი
   platform?: string;
   genre?: string;
+  tags?: string[];
   isBestSeller?: boolean;
   createdAt: Date;
 }
@@ -28,6 +29,7 @@ const ProductSchema = new Schema<IProduct>({
   isHeroBanner: { type: Boolean, default: false },
   platform: { type: String, default: "" },
   genre: { type: String, default: "" },
+  tags: { type: [String], default: [] },
   isBestSeller: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });

@@ -13,6 +13,7 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
 import SeoHead from "../components/SeoHead";
+import { parseTags, productSearchText } from "../utils/tags";
 
 type Tab = "overview" | "orders" | "products" | "customers" | "content";
 
@@ -52,6 +53,11 @@ const PLATFORM_OPTIONS = [
   "Sega Genesis",
   "Sega Saturn",
   "Sega Dreamcast",
+  "R36S",
+  "Anbernic",
+  "Miyoo Mini",
+  "PowKiddy",
+  "Retroid Pocket",
 ];
 
 export default function Admin() {
@@ -74,6 +80,7 @@ export default function Admin() {
   const [isHeroBanner, setIsHeroBanner] = useState(false);
   const [platform, setPlatform] = useState("");
   const [genre, setGenre] = useState("");
+  const [tags, setTags] = useState("");
   const [isBestSeller, setIsBestSeller] = useState(false);
 
   const fetchProducts = async () => {
@@ -106,6 +113,7 @@ export default function Admin() {
         isHeroBanner,
         platform: isHeroBanner ? "" : platform,
         genre: isHeroBanner ? "" : genre,
+        tags: isHeroBanner ? [] : parseTags(tags),
         isBestSeller: isHeroBanner ? false : isBestSeller,
       };
 
@@ -138,6 +146,7 @@ export default function Admin() {
     setIsHeroBanner(!!p.isHeroBanner);
     setPlatform(p.platform || "");
     setGenre(p.genre || "");
+    setTags((p.tags || []).join(", "));
     setIsBestSeller(!!p.isBestSeller);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -155,6 +164,7 @@ export default function Admin() {
     setIsHeroBanner(false);
     setPlatform("");
     setGenre("");
+    setTags("");
     setIsBestSeller(false);
   };
 
@@ -170,7 +180,7 @@ export default function Admin() {
 
   const visibleProducts = useMemo(() => {
     return products.filter((p) => {
-      const hay = `${p.title} ${p.category} ${p.platform} ${p.genre}`.toLowerCase();
+      const hay = productSearchText(p);
       if (productQ && !hay.includes(productQ.toLowerCase())) return false;
       if (stockFilter === "sold" && (p.isHeroBanner || (p.stock ?? 0) > 0)) return false;
       if (stockFilter === "low" && (p.isHeroBanner || (p.stock ?? 0) > 3 || (p.stock ?? 0) <= 0))
@@ -361,6 +371,13 @@ export default function Admin() {
                     placeholder="ჟანრი (მაგ: ექშენი, რბოლა, RPG)"
                     value={genre}
                     onChange={(e) => setGenre(e.target.value)}
+                    style={inputStyle}
+                  />
+                  <input
+                    type="text"
+                    placeholder="თეგები: R36S, handheld, საჩუქარი"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
                     style={inputStyle}
                   />
                   <label className="admin-check">

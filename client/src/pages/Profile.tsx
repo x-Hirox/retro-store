@@ -14,7 +14,6 @@ import { useLang } from "../i18n/LanguageContext";
 import OrderTracker from "../components/OrderTracker";
 import { canCustomerCancel, statusLabel } from "../utils/orderStatus";
 import { isValidPersonName, normalizeGePhone } from "../utils/validate";
-import { GiftStack } from "../components/NostalgiaBits";
 import SeoHead from "../components/SeoHead";
 
 type Order = {
@@ -185,7 +184,6 @@ export default function Profile() {
         path="/profile"
         noindex
       />
-      <GiftStack />
       <header className="profile-hero">
         <div className="profile-avatar" aria-hidden>
           {initials}

@@ -11,6 +11,17 @@
       "destination": "https://retro-store.onrender.com/sitemap.xml"
     },
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|google-inspectiontool|bingbot|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|pinterest|discordbot|applebot).*"
+        }
+      ],
+      "destination": "https://retro-store.onrender.com/"
+    },
+    {
       "source": "/product/:id",
       "has": [
         {

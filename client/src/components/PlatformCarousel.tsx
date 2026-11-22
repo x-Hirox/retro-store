@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import type { IPlatformCard } from "../types";
 import { nextPlatformArtUrl, platformArtUrl } from "../utils/platformArt";
 
-const VISIBLE = 3;
 const AUTO_MS = 4500;
+const CARD_W = 164;
+const CARD_GAP = 16;
 
 function normalize(value?: string) {
   return decodeURIComponent(value || "")
@@ -12,10 +13,11 @@ function normalize(value?: string) {
     .trim();
 }
 
-function pagesOf(cards: IPlatformCard[]) {
+function pagesOf(cards: IPlatformCard[], visible: number) {
+  const size = Math.max(1, visible);
   const pages: IPlatformCard[][] = [];
-  for (let i = 0; i < cards.length; i += VISIBLE) {
-    pages.push(cards.slice(i, i + VISIBLE));
+  for (let i = 0; i < cards.length; i += size) {
+    pages.push(cards.slice(i, i + size));
   }
   return pages.length ? pages : [[]];
 }
@@ -29,14 +31,31 @@ export default function PlatformCarousel({
   brandPath: string;
   activeSub?: string;
 }) {
-  const pages = pagesOf(cards);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(cards.length || 1);
   const [page, setPage] = useState(0);
   const [paused, setPaused] = useState(false);
   const drag = useRef({ x: 0, moved: false, down: false });
 
   useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const measure = () => {
+      const width = el.clientWidth;
+      const count = Math.max(2, Math.floor((width + CARD_GAP) / (CARD_W + CARD_GAP)));
+      setVisible(Math.min(cards.length || 1, count));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [cards.length]);
+
+  const pages = pagesOf(cards, visible);
+
+  useEffect(() => {
     setPage(0);
-  }, [brandPath, cards.length]);
+  }, [brandPath, cards.length, visible]);
 
   useEffect(() => {
     if (paused || pages.length <= 1) return;
@@ -48,6 +67,7 @@ export default function PlatformCarousel({
 
   const go = (next: number) => {
     const count = pages.length;
+    if (count <= 1) return;
     setPage(((next % count) + count) % count);
   };
 
@@ -58,6 +78,7 @@ export default function PlatformCarousel({
       onMouseLeave={() => setPaused(false)}
     >
       <div
+        ref={viewportRef}
         className="collection-strip-viewport"
         onPointerDown={(event) => {
           drag.current = { x: event.clientX, moved: false, down: true };
@@ -92,7 +113,7 @@ export default function PlatformCarousel({
                   <Link
                     key={item._id || item.slug}
                     to={`/category/${encodeURIComponent(brandPath)}/${encodeURIComponent(item.slug)}`}
-                    className={`collection-console arcade-tab ${active ? "is-active" : ""}`}
+                    className={`collection-console ${active ? "is-active" : ""}`}
                     draggable={false}
                     onClick={(event) => {
                       if (drag.current.moved) {

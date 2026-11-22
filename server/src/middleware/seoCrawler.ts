@@ -46,11 +46,16 @@ export async function seoCrawlerMiddleware(
       return;
     }
     if (path === "/gifts" || path === "/seo/gifts") {
-      giftsCrawlerHtml(res);
+      await giftsCrawlerHtml(res);
       return;
     }
-    if (forceSeo && (path === "/seo" || path === "/seo/")) {
-      homeCrawlerHtml(res);
+    if (
+      path === "/" ||
+      path === "/index.html" ||
+      path === "/seo" ||
+      path === "/seo/"
+    ) {
+      await homeCrawlerHtml(res);
       return;
     }
   } catch (err) {

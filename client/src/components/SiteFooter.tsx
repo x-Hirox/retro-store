@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { getSiteSettings } from "../services/contentService";
 import type { ISiteSettings } from "../types";
 import { useLang } from "../i18n/LanguageContext";
-import { GiftStack } from "./NostalgiaBits";
 
 export default function SiteFooter() {
   const location = useLocation();
@@ -20,12 +19,6 @@ export default function SiteFooter() {
 
   return (
     <footer className="site-footer">
-      <div className="ny-header-lights footer-lights" aria-hidden>
-        {Array.from({ length: 18 }, (_, i) => (
-          <i key={i} className={`ny-bulb c${i % 4}`} />
-        ))}
-      </div>
-      <GiftStack />
       <div className="footer-grid">
         <div>
           <h4>{t("collections")}</h4>
@@ -70,23 +63,30 @@ export default function SiteFooter() {
           </p>
           <p>{settings?.footerHours || "ორშ–კვი 10:00–22:00"}</p>
           <p>{settings?.footerAddress || "თბილისი, საქართველო"}</p>
-          <div className="footer-socials" aria-label="სოციალური ქსელები">
-            <a href="https://facebook.com" target="_blank" rel="noreferrer">
-              f
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer">
-              ig
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noreferrer">
-              yt
-            </a>
-            <a href="https://tiktok.com" target="_blank" rel="noreferrer">
-              tt
-            </a>
-            <a href="https://x.com" target="_blank" rel="noreferrer">
-              x
-            </a>
-          </div>
+          {(() => {
+            const socials = [
+              ["ig", settings?.socialInstagram],
+              ["f", settings?.socialFacebook],
+              ["tt", settings?.socialTiktok],
+              ["yt", settings?.socialYoutube],
+              ["x", settings?.socialX],
+            ].filter(([, url]) => /^https?:\/\//i.test(String(url || "")));
+            if (!socials.length) return null;
+            return (
+              <div className="footer-socials" aria-label="სოციალური ქსელები">
+                {socials.map(([label, url]) => (
+                  <a
+                    key={label}
+                    href={String(url)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </div>
 

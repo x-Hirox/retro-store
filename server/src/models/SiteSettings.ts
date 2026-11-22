@@ -9,6 +9,11 @@ export interface ISiteSettings extends Document {
   footerEmail: string;
   footerHours: string;
   footerAddress: string;
+  socialInstagram?: string;
+  socialFacebook?: string;
+  socialTiktok?: string;
+  socialYoutube?: string;
+  socialX?: string;
   catImageHome?: string;
   catImageHand?: string;
   catImageGames?: string;
@@ -31,6 +36,11 @@ const SiteSettingsSchema = new Schema<ISiteSettings>({
   footerEmail: { type: String, default: "retrobit.support@gmail.com" },
   footerHours: { type: String, default: "ორშ–კვი 10:00–22:00" },
   footerAddress: { type: String, default: "თბილისი, საქართველო" },
+  socialInstagram: { type: String, default: "" },
+  socialFacebook: { type: String, default: "" },
+  socialTiktok: { type: String, default: "" },
+  socialYoutube: { type: String, default: "" },
+  socialX: { type: String, default: "" },
   catImageHome: { type: String, default: "" },
   catImageHand: { type: String, default: "" },
   catImageGames: { type: String, default: "" },

@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_DESCRIPTION,
   DEFAULT_OG_IMAGE,
   DEFAULT_TITLE,
   absUrl,
   canonicalUrl,
+  collectSameAs,
 } from "../seo/site";
+import { getSiteSettings } from "../services/contentService";
 
 type SeoHeadProps = {
   title?: string;
@@ -14,8 +16,26 @@ type SeoHeadProps = {
   image?: string;
   type?: "website" | "product";
   jsonLd?: unknown;
+  keywords?: string;
   noindex?: boolean;
 };
+
+function withSameAs(jsonLd: unknown, sameAs: string[]) {
+  if (!jsonLd || typeof jsonLd !== "object" || !sameAs.length) return jsonLd;
+  const clone = JSON.parse(JSON.stringify(jsonLd)) as {
+    "@graph"?: Array<Record<string, unknown>>;
+  };
+  const graph = clone["@graph"];
+  if (!Array.isArray(graph)) return jsonLd;
+  for (const node of graph) {
+    const type = node?.["@type"];
+    const types = Array.isArray(type) ? type : [type];
+    if (types.includes("Organization") || types.includes("Store")) {
+      node.sameAs = sameAs;
+    }
+  }
+  return clone;
+}
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
   const selector = `meta[${attr}="${key}"][data-seo="1"]`;
@@ -56,9 +76,19 @@ export default function SeoHead({
   image,
   type = "website",
   jsonLd,
+  keywords,
   noindex,
 }: SeoHeadProps) {
-  const encodedJson = jsonLd ? JSON.stringify(jsonLd) : "";
+  const [sameAs, setSameAs] = useState<string[]>([]);
+  useEffect(() => {
+    getSiteSettings()
+      .then((settings) => setSameAs(collectSameAs(settings)))
+      .catch(() => setSameAs([]));
+  }, []);
+  const encodedJson = useMemo(
+    () => (jsonLd ? JSON.stringify(withSameAs(jsonLd, sameAs)) : ""),
+    [jsonLd, sameAs],
+  );
   useEffect(() => {
     const fullTitle = title.includes("RetroBit") ? title : `${title} | RetroBit`;
     const url = canonicalUrl(path);
@@ -67,6 +97,7 @@ export default function SeoHead({
     document.documentElement.lang = "ka";
 
     upsertMeta("name", "description", description);
+    if (keywords) upsertMeta("name", "keywords", keywords);
     upsertMeta(
       "name",
       "robots",
@@ -100,7 +131,7 @@ export default function SeoHead({
       document.head.appendChild(script);
     }
     script.textContent = encodedJson;
-  }, [title, description, path, image, type, encodedJson, noindex]);
+  }, [title, description, path, image, type, encodedJson, noindex, keywords]);
 
   return null;
 }

@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import Product from "../models/Product.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { escapeRegex } from "../utils/security.js";
+import { parseTags } from "../utils/tags.js";
 
 const router = Router();
 
@@ -41,6 +42,10 @@ router.get("/search", async (req: Request, res: Response) => {
       $or: [
         { title: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { platform: { $regex: query, $options: "i" } },
+        { genre: { $regex: query, $options: "i" } },
+        { tags: { $regex: query, $options: "i" } },
       ],
     }).limit(40);
     res.json(products);
@@ -83,6 +88,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       isHeroBanner,
       platform,
       genre,
+      tags,
       isBestSeller,
     } = req.body;
 
@@ -98,6 +104,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       isHeroBanner: !!isHeroBanner,
       platform: platform || "",
       genre: genre || "",
+      tags: parseTags(tags),
       isBestSeller: !!isBestSeller,
     });
 
@@ -125,6 +132,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
       isHeroBanner,
       platform,
       genre,
+      tags,
       isBestSeller,
     } = req.body;
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -141,6 +149,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
         isHeroBanner: !!isHeroBanner,
         platform: platform || "",
         genre: genre || "",
+        tags: parseTags(tags),
         isBestSeller: !!isBestSeller,
       },
       { new: true, runValidators: true },
