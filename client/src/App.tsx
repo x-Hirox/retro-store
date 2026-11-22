@@ -23,20 +23,22 @@ import RetroAnimeBackdrop from "./components/RetroAnimeBackdrop";
 import SiteFooter from "./components/SiteFooter";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
+import Gifts from "./pages/Gifts";
 
 const categoriesData = [
   { name: "All", sub: [] },
   {
     name: "Nintendo",
     sub: [
+      "Nintendo DS Lite",
+      "Nintendo DSi",
+      "Nintendo 3DS",
+      "Nintendo DS",
+      "Game Boy Advance",
+      "Nintendo Switch",
       "Nintendo NES - 1985",
       "Super Nintendo - 1991",
       "Nintendo 64 - 1996",
-      "Nintendo Switch",
-      "Game Boy Advance",
-      "Nintendo DS",
-      "Nintendo DSi",
-      "Nintendo 3DS",
     ],
   },
   {
@@ -148,6 +150,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/play" element={<Arcade />} />
             <Route path="/sell" element={<Sell />} />
+            <Route path="/gifts" element={<Gifts />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route

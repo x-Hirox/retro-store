@@ -15,6 +15,8 @@ import {
 } from "./controllers/paymentController.js";
 import { seedContentIfEmpty } from "./utils/seedContent.js";
 import { securityHeaders } from "./utils/security.js";
+import { seoCrawlerMiddleware } from "./middleware/seoCrawler.js";
+import { robotsTxt, sitemapXml } from "./controllers/seoController.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -49,6 +51,11 @@ app.use(
   }),
 );
 app.use(securityHeaders);
+app.get("/sitemap.xml", (req, res, next) => {
+  sitemapXml(req, res).catch(next);
+});
+app.get("/robots.txt", robotsTxt);
+app.use(seoCrawlerMiddleware);
 app.post(
   "/api/payments/bog/callback",
   express.raw({ type: "*/*", limit: "200kb" }),

@@ -12,6 +12,7 @@ import {
   normalizeGePhone,
   passwordError,
 } from "../utils/validate";
+import SeoHead from "../components/SeoHead";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -162,7 +163,13 @@ export default function Register() {
           boxShadow: "var(--shadow)",
         }}
       >
-        <h2
+        <SeoHead
+          title="რეგისტრაცია"
+          description="შექმენი RetroBit ანგარიში."
+          path="/register"
+          noindex
+        />
+        <h1
           style={{
             color: "var(--text-h)",
             marginBottom: "10px",
@@ -170,7 +177,7 @@ export default function Register() {
           }}
         >
           რეგისტრაცია 📝
-        </h2>
+        </h1>
         <p
           style={{
             color: "var(--text)",

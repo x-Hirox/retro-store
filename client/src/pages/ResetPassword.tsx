@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { authService } from "../services/authService";
 import { passwordError } from "../utils/validate";
+import SeoHead from "../components/SeoHead";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -48,7 +49,13 @@ export default function ResetPassword() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2
+        <SeoHead
+          title="ახალი პაროლი"
+          description="დააყენე ახალი RetroBit პაროლი."
+          path="/reset-password"
+          noindex
+        />
+        <h1
           style={{
             color: "var(--text-h)",
             marginBottom: "10px",
@@ -56,7 +63,7 @@ export default function ResetPassword() {
           }}
         >
           ახალი პაროლის დაყენება 🔑
-        </h2>
+        </h1>
         <p
           style={{
             color: "var(--text)",

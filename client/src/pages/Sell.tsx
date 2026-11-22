@@ -6,6 +6,8 @@ import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Boombox } from "../components/NostalgiaBits";
 import SellEstimator from "../components/SellEstimator";
+import SeoHead from "../components/SeoHead";
+import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 
 type QuoteItem = {
   id: string;
@@ -83,6 +85,17 @@ export default function Sell() {
 
   return (
     <div className="sell-page">
+      <SeoHead
+        title="გაყიდე კონსოლი"
+        description="გაყიდე მეორადი კონსოლი ან თამაშები RetroBit-ზე. სწრაფი შეთავაზება თბილისში."
+        path="/sell"
+        jsonLd={jsonLdGraph([
+          breadcrumbGraph([
+            { name: "მთავარი", path: "/" },
+            { name: "გაყიდე კონსოლი", path: "/sell" },
+          ]),
+        ])}
+      />
       <section className="sell-hero nbit-slot">
         <Boombox />
         <div className="sell-hero-copy">
@@ -109,7 +122,11 @@ export default function Sell() {
             </a>
           </div>
         </div>
-        <img className="sell-chest neon-lift" src="/images/sell-chest.jpg" alt="" />
+        <img
+          className="sell-chest neon-lift"
+          src="/images/sell-chest.jpg"
+          alt="რეტრო კონსოლების სკივრი — გაყიდე RetroBit-ზე"
+        />
       </section>
 
       <ol className="sell-progress" aria-label="ნაბიჯები">
@@ -348,7 +365,11 @@ export default function Sell() {
             დაგვიკავშირდი
           </a>
         </div>
-        <img className="neon-lift" src="/images/sell-gameboy.jpg" alt="" />
+        <img
+          className="neon-lift"
+          src="/images/sell-gameboy.jpg"
+          alt="Game Boy — გაყიდე კონსოლი RetroBit-ზე"
+        />
       </section>
 
       <section className="sell-section">

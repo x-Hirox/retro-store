@@ -9,6 +9,14 @@ import { useLang } from "../i18n/LanguageContext";
 import { suggestAddons } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
 import { Polaroid } from "../components/NostalgiaBits";
+import SeoHead from "../components/SeoHead";
+import { productImageAlt } from "../utils/imageAlt";
+import {
+  SITE_URL,
+  absUrl,
+  breadcrumbGraph,
+  jsonLdGraph,
+} from "../seo/site";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -48,7 +56,13 @@ export default function ProductDetail() {
   if (error || !product) {
     return (
       <div className="pd-status">
-        <h2>{error || "პროდუქტი არ არსებობს"}</h2>
+        <SeoHead
+          title="პროდუქტი ვერ მოიძებნა"
+          description="ეს პროდუქტი აღარ არის RetroBit-ზე."
+          path={`/product/${id || ""}`}
+          noindex
+        />
+        <h1>{error || "პროდუქტი არ არსებობს"}</h1>
         <button type="button" className="pd-ghost" onClick={() => navigate("/")}>
           მთავარ გვერდზე დაბრუნება
         </button>
@@ -69,8 +83,55 @@ export default function ProductDetail() {
     }
   };
 
+  const path = `/product/${product._id}`;
+  const description = String(product.description || product.title).slice(0, 300);
+  const jsonLd = jsonLdGraph([
+    breadcrumbGraph([
+      { name: "მთავარი", path: "/" },
+      {
+        name: product.category || "კატეგორია",
+        path: `/category/${encodeURIComponent(product.category || "Nintendo")}`,
+      },
+      { name: product.title, path },
+    ]),
+    {
+      "@type": "Product",
+      name: product.title,
+      description,
+      image: [
+        absUrl(product.imageUrl),
+        ...(product.images || []).map((url) => absUrl(url)),
+      ],
+      brand: {
+        "@type": "Brand",
+        name: product.platform || product.category || "RetroBit",
+      },
+      category: product.category,
+      offers: {
+        "@type": "Offer",
+        url: `${SITE_URL}${path}`,
+        priceCurrency: "GEL",
+        price: sale.final.toFixed(2),
+        availability:
+          stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        itemCondition: "https://schema.org/UsedCondition",
+        seller: { "@id": `${SITE_URL}/#organization` },
+      },
+    },
+  ]);
+
   return (
     <div className="pd-page nbit-slot">
+      <SeoHead
+        title={product.title}
+        description={description}
+        path={path}
+        image={product.imageUrl}
+        type="product"
+        jsonLd={jsonLd}
+      />
       <Polaroid />
       <button type="button" className="pd-ghost" onClick={() => navigate(-1)}>
         ← უკან
@@ -170,7 +231,10 @@ export default function ProductDetail() {
               return (
                 <article key={item._id} className="pd-addon">
                   <Link to={`/product/${item._id}`}>
-                    <img src={item.imageUrl || ""} alt={item.title} />
+                    <img
+                      src={item.imageUrl || ""}
+                      alt={productImageAlt(item)}
+                    />
                     <h3>{item.title}</h3>
                   </Link>
                   <div className="pd-addon-row">
@@ -221,7 +285,7 @@ function ProductPhotos({
     <div className="pd-gallery">
       <div className="pd-photo">
         {current ? (
-          <img src={current} alt={title} />
+          <img src={current} alt={productImageAlt({ title })} />
         ) : (
           <span style={{ fontSize: "3rem" }}>🕹️</span>
         )}
@@ -234,9 +298,9 @@ function ProductPhotos({
               type="button"
               className={item === index ? "is-on" : ""}
               onClick={() => onSelect(item)}
-              aria-label={`${title} ${item + 1}`}
+              aria-label={`${title} — ფოტო ${item + 1}`}
             >
-              <img src={url} alt="" />
+              <img src={url} alt={`${title} — ფოტო ${item + 1} | RetroBit`} />
             </button>
           ))}
         </div>

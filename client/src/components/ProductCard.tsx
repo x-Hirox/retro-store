@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
 import { formatGel, getSalePrice } from "../utils/pricing";
 import HoloCard from "./HoloCard";
+import { productImageAlt } from "../utils/imageAlt";
 
 export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
-            alt={product.title}
+            alt={productImageAlt(product)}
             loading="lazy"
             decoding="async"
           />

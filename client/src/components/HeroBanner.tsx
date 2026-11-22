@@ -33,7 +33,7 @@ export default function HeroBanner({ heroBanner, searchQuery, onReady }: Props) 
     >
       <img
         src={src}
-        alt={heroBanner?.title || "RetroBit"}
+        alt={heroBanner?.title || "RetroBit — რეტრო კონსოლები და თამაშები საქართველოში"}
         onLoad={() => onReady?.()}
         onError={() => onReady?.()}
       />

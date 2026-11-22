@@ -65,6 +65,10 @@ export const messages = {
     catBundles: "პროდუქტების ბუნდლები",
     catBundlesDesc: "კონსოლი, თამაშები და აქსესუარები ერთად.",
     sellNav: "გაყიდე კონსოლი",
+    gifts: "საჩუქრები",
+    giftsDesc:
+      "რეტრო საჩუქრები თბილისიდან: კონსოლის ბუნდლები, Nintendo, PlayStation და კომპლექტები RetroBit-ზე.",
+    giftsLead: "კონსოლი, თამაშები ან ბუნდლი — საჩუქრად მეორადი რეტრო ტექნიკა.",
   },
   en: {
     topBanner: "🔥 Free delivery in Georgia — used retro consoles",
@@ -130,6 +134,10 @@ export const messages = {
     catBundles: "Bundles",
     catBundlesDesc: "Console, games and accessories together.",
     sellNav: "Sell your console",
+    gifts: "Gifts",
+    giftsDesc:
+      "Retro gifts from Tbilisi: console bundles, Nintendo, PlayStation and sets on RetroBit.",
+    giftsLead: "A console, games or a bundle — used retro gear as a gift.",
   },
 } as const;
 

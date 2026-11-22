@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import ActivationCodeForm from "../components/ActivationCodeForm";
 import { authService } from "../services/authService";
 import { afterLoginPath, saveAuthSession } from "../lib/authSession";
+import SeoHead from "../components/SeoHead";
 
 export function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -44,7 +45,13 @@ export function VerifyEmail() {
   return (
     <div className="auth-container">
       <div className="auth-card" style={{ textAlign: "center" }}>
-        <h2 style={{ color: "var(--text-h)", marginBottom: "15px" }}>
+        <SeoHead
+          title="ელ-ფოსტის დადასტურება"
+          description="დაადასტურე RetroBit ანგარიში."
+          path="/verify-email"
+          noindex
+        />
+        <h1 style={{ color: "var(--text-h)", marginBottom: "15px" }}>
           {status === "success"
             ? "წარმატება! 🎉"
             : status === "error"
@@ -52,7 +59,7 @@ export function VerifyEmail() {
               : status === "code"
                 ? "აქტივაციის კოდი"
                 : "აქტივაცია ⏳"}
-        </h2>
+        </h1>
         <p
           style={{
             color: "var(--text)",

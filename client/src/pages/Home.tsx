@@ -15,6 +15,12 @@ import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { Tamagotchi, FloppyDisk, Rubik } from "../components/NostalgiaBits";
+import SeoHead from "../components/SeoHead";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  jsonLdGraph,
+} from "../seo/site";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -48,6 +54,10 @@ export default function Home() {
   const middleBanner = products?.find((p) => p.category === "banner-middle");
   const bottomBanner = products?.find((p) => p.category === "banner-bottom");
 
+  const homeTitle = searchQuery
+    ? `ძებნა: ${searchQuery}`
+    : DEFAULT_TITLE;
+
   return (
     <div
       style={{
@@ -60,6 +70,13 @@ export default function Home() {
         fontFamily: "'Noto Serif Georgian', sans-serif",
       }}
     >
+      <SeoHead
+        title={homeTitle}
+        description={DEFAULT_DESCRIPTION}
+        path={searchQuery ? `/?search=${encodeURIComponent(searchQuery)}` : "/"}
+        jsonLd={jsonLdGraph()}
+        noindex={Boolean(searchQuery)}
+      />
       {!searchQuery ? (
         <RetroStage>
           <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
@@ -67,6 +84,7 @@ export default function Home() {
       ) : (
         <HeroBanner heroBanner={heroBanner} searchQuery={searchQuery} />
       )}
+      <h1 className="home-seo-h1">{DEFAULT_TITLE}</h1>
 
       {/* 2. ბესტსელერები */}
       <div className="nbit-slot" style={{ paddingTop: "25px", overflow: "visible" }}>
@@ -106,7 +124,7 @@ export default function Home() {
         >
           <img
             src={middleBanner.imageUrl}
-            alt="Middle Banner"
+            alt="RetroBit — რეტრო კონსოლების შუა ბანერი"
             style={{
               width: "100%",
               maxHeight: "300px",
@@ -125,7 +143,7 @@ export default function Home() {
         >
           <img
             src={bottomBanner.imageUrl}
-            alt="Bottom Banner"
+            alt="RetroBit — რეტრო კონსოლების ქვედა ბანერი"
             style={{
               width: "100%",
               maxHeight: "300px",

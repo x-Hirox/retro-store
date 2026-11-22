@@ -137,7 +137,7 @@ export async function seedContentIfEmpty() {
         name: "Nintendo NES",
         slug: "nes",
         year: "1985",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/nes.png",
         order: 1,
       },
       {
@@ -145,7 +145,7 @@ export async function seedContentIfEmpty() {
         name: "Super Nintendo (SNES)",
         slug: "snes",
         year: "1991",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/snes.png",
         order: 2,
       },
       {
@@ -153,7 +153,7 @@ export async function seedContentIfEmpty() {
         name: "Nintendo 64",
         slug: "n64",
         year: "1996",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/n64.png",
         order: 3,
       },
       {
@@ -161,7 +161,7 @@ export async function seedContentIfEmpty() {
         name: "Nintendo GameCube",
         slug: "gamecube",
         year: "2001",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/gamecube.png",
         order: 4,
       },
       {
@@ -169,7 +169,7 @@ export async function seedContentIfEmpty() {
         name: "Nintendo Wii",
         slug: "wii",
         year: "2006",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/wii.png",
         order: 5,
       },
       {
@@ -177,7 +177,7 @@ export async function seedContentIfEmpty() {
         name: "Nintendo Wii U",
         slug: "wiiu",
         year: "2012",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/wii-u.png",
         order: 6,
       },
       {
@@ -185,7 +185,7 @@ export async function seedContentIfEmpty() {
         name: "Nintendo Switch",
         slug: "switch",
         year: "2017",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/switch.png",
         order: 7,
       },
       {
@@ -193,7 +193,7 @@ export async function seedContentIfEmpty() {
         name: "Game Boy Advance",
         slug: "gba",
         year: "2001",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/gba.png",
         order: 8,
       },
       {
@@ -201,24 +201,32 @@ export async function seedContentIfEmpty() {
         name: "Nintendo DS",
         slug: "nds",
         year: "2004",
-        imageUrl: "/nintendo.svg",
+        imageUrl: "/images/platforms/nds.png",
         order: 9,
+      },
+      {
+        brand: "nintendo",
+        name: "Nintendo DS Lite",
+        slug: "dsl",
+        year: "2006",
+        imageUrl: "/images/platforms/dsl.png",
+        order: 10,
       },
       {
         brand: "nintendo",
         name: "Nintendo DSi",
         slug: "ndsi",
         year: "2008",
-        imageUrl: "/nintendo.svg",
-        order: 10,
+        imageUrl: "/images/platforms/ndsi.png",
+        order: 11,
       },
       {
         brand: "nintendo",
         name: "Nintendo 3DS",
         slug: "3ds",
         year: "2011",
-        imageUrl: "/nintendo.svg",
-        order: 11,
+        imageUrl: "/images/platforms/3ds.png",
+        order: 12,
       },
       {
         brand: "playstation",
@@ -317,38 +325,61 @@ export async function seedContentIfEmpty() {
       name: "Game Boy Advance",
       slug: "gba",
       year: "2001",
-      imageUrl: "/nintendo.svg",
-      order: 8,
+      imageUrl: "/images/platforms/gba.png",
+      order: 5,
     },
     {
       brand: "nintendo",
       name: "Nintendo DS",
       slug: "nds",
       year: "2004",
-      imageUrl: "/nintendo.svg",
-      order: 9,
+      imageUrl: "/images/platforms/nds.png",
+      order: 4,
+    },
+    {
+      brand: "nintendo",
+      name: "Nintendo DS Lite",
+      slug: "dsl",
+      year: "2006",
+      imageUrl: "/images/platforms/dsl.png",
+      order: 1,
     },
     {
       brand: "nintendo",
       name: "Nintendo DSi",
       slug: "ndsi",
       year: "2008",
-      imageUrl: "/nintendo.svg",
-      order: 10,
+      imageUrl: "/images/platforms/ndsi.png",
+      order: 2,
     },
     {
       brand: "nintendo",
       name: "Nintendo 3DS",
       slug: "3ds",
       year: "2011",
-      imageUrl: "/nintendo.svg",
-      order: 11,
+      imageUrl: "/images/platforms/3ds.png",
+      order: 3,
     },
   ];
   for (const card of nintendoHandhelds) {
+    const existing = await PlatformCard.findOne({
+      brand: card.brand,
+      slug: card.slug,
+    });
+    const $set: Record<string, unknown> = {
+      name: card.name,
+      year: card.year,
+      order: card.order,
+    };
+    const current = String(existing?.imageUrl || "");
+    const generic =
+      !current ||
+      /\/(nintendo|playstation|xbox|sega)\.svg$/i.test(current) ||
+      /^\/[a-z0-9-]+\.svg$/i.test(current);
+    if (generic) $set.imageUrl = card.imageUrl;
     await PlatformCard.findOneAndUpdate(
       { brand: card.brand, slug: card.slug },
-      { $setOnInsert: card },
+      { $set },
       { upsert: true },
     );
   }

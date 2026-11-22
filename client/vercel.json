@@ -5,7 +5,46 @@
       "VITE_GOOGLE_CLIENT_ID": "705256865199-knjkntc2vkcq46n9lapi1kl0savtc1cq.apps.googleusercontent.com"
     }
   },
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "https://retro-store.onrender.com/sitemap.xml"
+    },
+    {
+      "source": "/product/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|google-inspectiontool|bingbot|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|pinterest|discordbot|applebot).*"
+        }
+      ],
+      "destination": "https://retro-store.onrender.com/product/:id"
+    },
+    {
+      "source": "/category/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|google-inspectiontool|bingbot|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|pinterest|discordbot|applebot).*"
+        }
+      ],
+      "destination": "https://retro-store.onrender.com/category/:path*"
+    },
+    {
+      "source": "/gifts",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|google-inspectiontool|bingbot|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|pinterest|discordbot|applebot).*"
+        }
+      ],
+      "destination": "https://retro-store.onrender.com/gifts"
+    },
+    { "source": "/(.*)", "destination": "/" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

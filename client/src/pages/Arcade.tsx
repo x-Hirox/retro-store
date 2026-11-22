@@ -1,10 +1,23 @@
 import GameCovers from "../components/GameCovers";
 import { InsertCoin } from "../components/NostalgiaBits";
 import SoundToggle from "../components/SoundToggle";
+import SeoHead from "../components/SeoHead";
+import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 
 export default function Arcade() {
   return (
     <div className="arcade-page">
+      <SeoHead
+        title="რეტრო არკადა"
+        description="ითამაშე ლეგალური homebrew და HTML5 რეტრო თამაშები ბრაუზერში — RetroBit Arcade."
+        path="/play"
+        jsonLd={jsonLdGraph([
+          breadcrumbGraph([
+            { name: "მთავარი", path: "/" },
+            { name: "არკადა", path: "/play" },
+          ]),
+        ])}
+      />
       <div className="arcade-cabinet">
         <div className="arcade-marquee" aria-hidden>
           <span>RETROBIT ARCADE</span>

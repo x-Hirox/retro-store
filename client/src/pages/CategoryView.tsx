@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getProducts } from "../services/productService";
 import {
   getCollectionPage,
@@ -13,8 +13,12 @@ import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
 import BestSellersSlider from "../components/BestSellersSlider";
+import PlatformCarousel from "../components/PlatformCarousel";
 import GameCovers from "../components/GameCovers";
 import { brandKey, matchesBrand } from "../utils/brandMatch";
+import { platformArtUrl } from "../utils/platformArt";
+import SeoHead from "../components/SeoHead";
+import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 
 const fallbackCards: Record<
   string,
@@ -40,42 +44,53 @@ const fallbackCards: Record<
     },
   ],
   nintendo: [
-    { name: "Nintendo NES", slug: "nes", image: "/nes.svg", year: "1985" },
     {
-      name: "Super Nintendo (SNES)",
-      slug: "snes",
-      image: "/snes.svg",
-      year: "1991",
+      name: "Nintendo DS Lite",
+      slug: "dsl",
+      image: platformArtUrl("dsl"),
+      year: "2006",
     },
-    { name: "Nintendo 64", slug: "n64", image: "/n64.svg", year: "1996" },
-    {
-      name: "Nintendo GameCube",
-      slug: "gamecube",
-      image: "/gamecube.svg",
-      year: "2001",
-    },
-    { name: "Nintendo Wii", slug: "wii", image: "/wii.svg", year: "2006" },
-    { name: "Nintendo Wii U", slug: "wii-u", image: "/wii.svg", year: "2012" },
-    {
-      name: "Nintendo Switch",
-      slug: "switch",
-      image: "/switch.svg",
-      year: "2017",
-    },
-    {
-      name: "Game Boy Advance",
-      slug: "gba",
-      image: "/nintendo.svg",
-      year: "2001",
-    },
-    { name: "Nintendo DS", slug: "nds", image: "/nintendo.svg", year: "2004" },
     {
       name: "Nintendo DSi",
       slug: "ndsi",
-      image: "/nintendo.svg",
+      image: platformArtUrl("ndsi"),
       year: "2008",
     },
-    { name: "Nintendo 3DS", slug: "3ds", image: "/nintendo.svg", year: "2011" },
+    { name: "Nintendo 3DS", slug: "3ds", image: platformArtUrl("3ds"), year: "2011" },
+    { name: "Nintendo DS", slug: "nds", image: platformArtUrl("nds"), year: "2004" },
+    {
+      name: "Game Boy Advance",
+      slug: "gba",
+      image: platformArtUrl("gba"),
+      year: "2001",
+    },
+    {
+      name: "Nintendo Switch",
+      slug: "switch",
+      image: platformArtUrl("switch"),
+      year: "2017",
+    },
+    { name: "Nintendo NES", slug: "nes", image: platformArtUrl("nes"), year: "1985" },
+    {
+      name: "Super Nintendo (SNES)",
+      slug: "snes",
+      image: platformArtUrl("snes"),
+      year: "1991",
+    },
+    { name: "Nintendo 64", slug: "n64", image: platformArtUrl("n64"), year: "1996" },
+    {
+      name: "Nintendo GameCube",
+      slug: "gamecube",
+      image: platformArtUrl("gamecube"),
+      year: "2001",
+    },
+    { name: "Nintendo Wii", slug: "wii", image: platformArtUrl("wii"), year: "2006" },
+    {
+      name: "Nintendo Wii U",
+      slug: "wii-u",
+      image: platformArtUrl("wii-u"),
+      year: "2012",
+    },
   ],
   xbox: [
     { name: "Xbox", slug: "xbox", image: "/xbox.svg" },
@@ -127,6 +142,59 @@ function normalize(value?: string) {
     .trim();
 }
 
+function isGenericPlatformArt(url?: string) {
+  const path = decodeURIComponent(url || "")
+    .split("?")[0]
+    .toLowerCase()
+    .trim();
+  return !path || /\/(nintendo|playstation|xbox|sega)\.svg$/.test(path);
+}
+
+function matchesPlatformCard(
+  product: IProduct,
+  card?: IPlatformCard,
+  raw?: string,
+) {
+  const slug = normalize(card?.slug || raw);
+  const name = normalize(card?.name || raw);
+  const platform = normalize(product.platform);
+  const hay =
+    `${product.title} ${product.platform || ""} ${product.description}`.toLowerCase();
+  const isOriginalDs = slug === "nds" || name === "nintendo ds";
+  const isDsLite = slug === "dsl" || name === "nintendo ds lite";
+  const isDsi = slug === "ndsi" || name === "nintendo dsi";
+  if (isOriginalDs) {
+    return (
+      (platform === "nds" ||
+        platform === "nintendo ds" ||
+        /\bnintendo ds\b/i.test(hay) ||
+        /\bnds\b/i.test(hay)) &&
+      !/ds lite|\bdsl\b|ndsi|\bdsi\b|\b3ds\b/.test(hay)
+    );
+  }
+  if (isDsLite) {
+    return (
+      platform === "dsl" ||
+      platform === "nintendo ds lite" ||
+      /ds lite|\bdsl\b/i.test(hay)
+    );
+  }
+  if (isDsi) {
+    return (
+      platform === "ndsi" ||
+      platform === "nintendo dsi" ||
+      /nintendo dsi|\bndsi\b|\bdsi\b/i.test(hay)
+    );
+  }
+  if (platform && (platform === slug || platform === name)) return true;
+  if (name && hay.includes(name)) return true;
+  if (slug) {
+    const safe = slug.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^a-z0-9])${safe}([^a-z0-9]|$)`, "i").test(hay);
+  }
+  return false;
+}
+
 function matchesSub(
   product: IProduct,
   sub?: string,
@@ -137,12 +205,7 @@ function matchesSub(
   const card = cards.find(
     (c) => normalize(c.slug) === s || normalize(c.name) === s,
   );
-  const aliases = [s, card?.name, card?.slug]
-    .filter(Boolean)
-    .map((v) => normalize(String(v)));
-  const hay =
-    `${product.title} ${product.platform || ""} ${product.description}`.toLowerCase();
-  return aliases.some((alias) => hay.includes(alias));
+  return matchesPlatformCard(product, card, s);
 }
 
 export default function CategoryView() {
@@ -190,7 +253,27 @@ export default function CategoryView() {
       bySlug.set(normalize(card.slug), card);
     }
     for (const card of cards) {
-      bySlug.set(normalize(card.slug), card);
+      const key = normalize(card.slug);
+      const existing = bySlug.get(key);
+      if (existing) {
+        bySlug.set(key, {
+          ...existing,
+          ...card,
+          name: existing.name,
+          slug: existing.slug,
+          order: existing.order,
+          imageUrl:
+            /^https?:\/\//i.test(card.imageUrl || "") &&
+            !isGenericPlatformArt(card.imageUrl)
+              ? card.imageUrl
+              : existing.imageUrl,
+        });
+      } else {
+        bySlug.set(key, {
+          ...card,
+          order: fallback.length + bySlug.size,
+        });
+      }
     }
     return Array.from(bySlug.values()).sort(
       (a, b) => (a.order ?? 0) - (b.order ?? 0),
@@ -216,10 +299,15 @@ export default function CategoryView() {
     const price = Number(p.price) || 0;
     if (price > maxPrice) return false;
     if (selectedPlatforms.length) {
-      const hay = `${p.platform || ""} ${p.title}`.toLowerCase();
-      if (!selectedPlatforms.some((item) => hay.includes(item.toLowerCase()))) {
-        return false;
-      }
+      const hit = selectedPlatforms.some((item) => {
+        const card = currentCards.find(
+          (c) =>
+            normalize(c.name) === normalize(item) ||
+            normalize(c.slug) === normalize(item),
+        );
+        return matchesPlatformCard(p, card, item);
+      });
+      if (!hit) return false;
     }
     if (selectedGenres.length && !selectedGenres.includes(p.genre || "")) {
       return false;
@@ -230,6 +318,27 @@ export default function CategoryView() {
   const visible = filteredProducts.slice(0, visibleCount);
   const bannerColor =
     bannerColors[brand] || collection?.bannerColor || "#7c3aed";
+  const categoryTitle =
+    collection?.title || decodeURIComponent(platform || "Nintendo");
+  const subCard = currentCards.find(
+    (card) =>
+      normalize(card.slug) === normalize(sub) ||
+      normalize(card.name) === normalize(sub),
+  );
+  const subLabel = subCard?.name || (sub ? decodeURIComponent(sub) : "");
+  const seoTitle = subLabel ? `${categoryTitle} — ${subLabel}` : categoryTitle;
+  const seoPath = subCard
+    ? `/category/${encodeURIComponent(platform || "")}/${encodeURIComponent(subCard.slug)}`
+    : `/category/${encodeURIComponent(platform || "")}`;
+  const seoDescription = `${seoTitle} — მეორადი რეტრო კონსოლები და თამაშები RetroBit-ზე. მიწოდება საქართველოში.`;
+  const seoCrumbs = [
+    { name: "მთავარი", path: "/" },
+    {
+      name: categoryTitle,
+      path: `/category/${encodeURIComponent(platform || "")}`,
+    },
+  ];
+  if (subLabel) seoCrumbs.push({ name: subLabel, path: seoPath });
 
   const toggleValue = (
     list: string[],
@@ -252,33 +361,27 @@ export default function CategoryView() {
         ["--banner" as string]: bannerColor,
       }}
     >
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        path={seoPath}
+        jsonLd={jsonLdGraph([breadcrumbGraph(seoCrumbs)])}
+      />
       <div
         className="collection-banner"
         style={{ ["--banner" as string]: bannerColor }}
       >
-        <div className="collection-consoles">
-          {currentCards.map((item) => {
-            const active =
-              normalize(sub) === normalize(item.slug) ||
-              normalize(sub) === normalize(item.name);
-            return (
-              <Link
-                key={item._id || item.slug}
-                to={`/category/${encodeURIComponent(platform || "")}/${encodeURIComponent(item.slug)}`}
-                className={`collection-console arcade-tab ${active ? "is-active" : ""}`}
-              >
-                <img src={item.imageUrl} alt="" />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
-        </div>
+        <PlatformCarousel
+          cards={currentCards}
+          brandPath={platform || ""}
+          activeSub={sub}
+        />
       </div>
 
       <div className="shop-title-row">
         <span className="ny-orb" aria-hidden />
         <h1 className="collection-title" style={{ color: bannerColor }}>
-          {collection?.title || decodeURIComponent(platform || "")}
+          {seoTitle}
         </h1>
         <span className="ny-orb ny-orb-alt" aria-hidden />
       </div>

@@ -99,7 +99,7 @@ export default function CategoriesSection() {
               <h3>{t(cat.title)}</h3>
               <p>{t(cat.desc)}</p>
             </div>
-            <img className="cat-art" src={img(cat.imageKey)} alt="" />
+            <img className="cat-art" src={img(cat.imageKey)} alt={t(cat.title)} />
           </HoloCard>
         ))}
       </div>

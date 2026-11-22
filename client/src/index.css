@@ -2241,6 +2241,16 @@ body.dark .profile-chip.is-ok {
   }
 }
 
+.home-seo-h1 {
+  margin: 22px 16px 0;
+  text-align: center;
+  font-family: var(--heading);
+  font-size: clamp(1.15rem, 3vw, 1.85rem);
+  color: var(--text-h);
+  line-height: 1.35;
+  font-weight: 800;
+}
+
 .shop-page {
   --banner: #003791;
   background:
@@ -2249,12 +2259,82 @@ body.dark .profile-chip.is-ok {
 }
 
 .collection-banner {
-  padding: 32px 16px 28px;
-  overflow-x: auto;
+  padding: 32px 16px 20px;
+  overflow: hidden;
   background:
     radial-gradient(ellipse 85% 110% at 50% -20%, color-mix(in srgb, var(--banner) 55%, #3d8bff) 0%, transparent 50%),
     linear-gradient(180deg, color-mix(in srgb, var(--banner) 82%, #000) 0%, var(--banner) 42%, color-mix(in srgb, var(--banner) 62%, #000) 100%);
   box-shadow: inset 0 -28px 36px rgba(0, 0, 0, 0.35);
+}
+
+.collection-strip {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.collection-strip-viewport {
+  overflow: hidden;
+  width: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.collection-strip-viewport:active {
+  cursor: grabbing;
+}
+
+.collection-strip-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.45s ease;
+}
+
+.collection-strip-page {
+  flex: 0 0 100%;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  gap: 16px;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+.collection-strip-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.collection-strip-nav button {
+  border: none;
+  cursor: pointer;
+  background: #555;
+  color: #fff;
+}
+
+.collection-strip-arrow {
+  background: #222;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-weight: 700;
+}
+
+.collection-strip-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.collection-strip-dot.is-on {
+  width: 24px;
+  border-radius: 4px;
+  background: #0066ff;
 }
 
 .collection-consoles {
@@ -2265,11 +2345,14 @@ body.dark .profile-chip.is-ok {
 }
 
 .collection-console {
-  width: 152px;
+  width: auto;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
   border: 0;
   background: rgba(0, 0, 0, 0.42);
   border-radius: 16px;
-  padding: 10px 8px 12px;
+  padding: 14px 12px 16px;
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -2277,13 +2360,13 @@ body.dark .profile-chip.is-ok {
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  overflow: visible;
+  overflow: hidden;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .collection-console img {
   width: 100%;
-  height: 132px;
+  height: 200px;
   object-fit: contain;
   object-position: center;
   background: none;

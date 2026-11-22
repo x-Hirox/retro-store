@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
 import { formatGel, getSalePrice, isBannerProduct } from "../utils/pricing";
@@ -20,7 +20,22 @@ export default function BestSellersSlider({
 }: Props) {
   const navigate = useNavigate();
   const sliderRef = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
   const { t } = useLang();
+
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const id = window.setInterval(() => {
+      if (paused.current || el.scrollWidth <= el.clientWidth + 8) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 12;
+      el.scrollTo({
+        left: atEnd ? 0 : el.scrollLeft + el.clientWidth,
+        behavior: "smooth",
+      });
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, [products, loading, searchQuery, selectedCategory]);
 
   const regularProducts = products.filter((p) => {
     if (isBannerProduct(p)) return false;
@@ -107,6 +122,33 @@ export default function BestSellersSlider({
           {/* 👈 აქ დავამატეთ paddingTop და overflow: visible, რომ ბარათს ზემოთ ასვლისას ჰქონდეს ადგილი */}
           <div
             ref={sliderRef}
+            onMouseEnter={() => {
+              paused.current = true;
+            }}
+            onMouseLeave={() => {
+              paused.current = false;
+            }}
+            onPointerDown={(event) => {
+              const node = sliderRef.current;
+              if (!node) return;
+              paused.current = true;
+              node.dataset.drag = "1";
+              node.dataset.startX = String(event.clientX);
+              node.dataset.startScroll = String(node.scrollLeft);
+              node.setPointerCapture(event.pointerId);
+            }}
+            onPointerMove={(event) => {
+              const node = sliderRef.current;
+              if (!node || node.dataset.drag !== "1") return;
+              const startX = Number(node.dataset.startX || 0);
+              const startScroll = Number(node.dataset.startScroll || 0);
+              node.scrollLeft = startScroll - (event.clientX - startX);
+            }}
+            onPointerUp={() => {
+              const node = sliderRef.current;
+              if (node) node.dataset.drag = "";
+              paused.current = false;
+            }}
             style={{
               display: "flex",
               gap: "24px",
@@ -116,6 +158,7 @@ export default function BestSellersSlider({
               paddingTop: "15px",
               paddingBottom: "15px",
               scrollbarWidth: "none",
+              cursor: "grab",
             }}
           >
             {(regularProducts.some((p) => p.isBestSeller)
@@ -158,7 +201,7 @@ export default function BestSellersSlider({
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
-                      alt={product.title}
+                      alt={`${product.title}${product.platform ? ` — ${product.platform}` : ""} | RetroBit`}
                       loading="lazy"
                       decoding="async"
                     />

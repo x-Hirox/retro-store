@@ -8,6 +8,7 @@ import {
   saveAuthSession,
 } from "../lib/authSession";
 import { isValidEmail } from "../utils/validate";
+import SeoHead from "../components/SeoHead";
 
 // დეკლარაცია Google-ის გლობალური ობიექტისთვის TypeScript-ში
 declare global {
@@ -117,7 +118,13 @@ export default function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2
+        <SeoHead
+          title="შესვლა"
+          description="შედი RetroBit ანგარიშში."
+          path="/login"
+          noindex
+        />
+        <h1
           style={{
             color: "var(--text-h)",
             marginBottom: "10px",
@@ -125,7 +132,7 @@ export default function Login() {
           }}
         >
           შესვლა 🔑
-        </h2>
+        </h1>
         <p
           style={{
             color: "var(--text)",

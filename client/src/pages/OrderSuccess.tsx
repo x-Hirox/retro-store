@@ -11,6 +11,7 @@ import {
 } from "../utils/invoice";
 import OrderTracker from "../components/OrderTracker";
 import { statusLabel } from "../utils/orderStatus";
+import SeoHead from "../components/SeoHead";
 
 export default function OrderSuccess() {
   const { id } = useParams();
@@ -112,6 +113,12 @@ export default function OrderSuccess() {
           boxShadow: "var(--shadow)",
         }}
       >
+        <SeoHead
+          title="შეკვეთა მიღებულია"
+          description="შენი RetroBit შეკვეთა მიღებულია."
+          path={`/order-success/${order._id}`}
+          noindex
+        />
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
           <h1 style={{ color: "var(--text-h)", marginBottom: "10px" }}>
             {order.paymentStatus === "paid"

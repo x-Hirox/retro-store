@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { formatGel, getSalePrice } from "../utils/pricing";
+import SeoHead from "../components/SeoHead";
+import { productImageAlt } from "../utils/imageAlt";
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
@@ -14,7 +16,13 @@ export default function Cart() {
   if (cart.length === 0) {
     return (
       <div className="pd-status">
-        <h2>შენი კალათა ცარიელია</h2>
+        <SeoHead
+          title="კალათა"
+          description="შენი RetroBit კალათა."
+          path="/cart"
+          noindex
+        />
+        <h1>შენი კალათა ცარიელია</h1>
         <button type="button" className="pd-add-cart" onClick={() => navigate("/")}>
           პროდუქტების დათვალიერება
         </button>
@@ -24,13 +32,19 @@ export default function Cart() {
 
   return (
     <div className="cart-page">
+      <SeoHead
+        title="კალათა"
+        description="შენი RetroBit კალათა."
+        path="/cart"
+        noindex
+      />
       <h1>სავაჭრო კალათა</h1>
       <ul className="cart-page-list">
         {cart.map((item) => {
           const sale = getSalePrice(item);
           return (
             <li key={item._id} className="cart-page-item">
-              <img src={item.imageUrl || ""} alt="" />
+              <img src={item.imageUrl || ""} alt={productImageAlt(item)} />
               <div>
                 <h3>{item.title}</h3>
                 <p>

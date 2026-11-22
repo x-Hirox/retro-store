@@ -59,7 +59,7 @@ export default function CartDrawer() {
               const sale = getSalePrice(item);
               return (
                 <li key={item._id} className="cart-drawer-item">
-                  <img src={item.imageUrl || ""} alt="" />
+                  <img src={item.imageUrl || ""} alt={item.title || "RetroBit"} />
                   <div>
                     <strong>{item.title}</strong>
                     <span>

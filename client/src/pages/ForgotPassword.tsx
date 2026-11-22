@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { authService } from "../services/authService";
 import { isValidEmail } from "../utils/validate";
+import SeoHead from "../components/SeoHead";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -46,7 +47,13 @@ export default function ForgotPassword() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2
+        <SeoHead
+          title="პაროლის აღდგენა"
+          description="აღადგინე RetroBit პაროლი."
+          path="/forgot-password"
+          noindex
+        />
+        <h1
           style={{
             color: "var(--text-h)",
             marginBottom: "10px",
@@ -54,7 +61,7 @@ export default function ForgotPassword() {
           }}
         >
           პაროლის აღდგენა 🔑
-        </h2>
+        </h1>
         <p
           style={{
             color: "var(--text)",

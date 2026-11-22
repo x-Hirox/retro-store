@@ -15,6 +15,7 @@ import OrderTracker from "../components/OrderTracker";
 import { canCustomerCancel, statusLabel } from "../utils/orderStatus";
 import { isValidPersonName, normalizeGePhone } from "../utils/validate";
 import { GiftStack } from "../components/NostalgiaBits";
+import SeoHead from "../components/SeoHead";
 
 type Order = {
   _id: string;
@@ -178,6 +179,12 @@ export default function Profile() {
 
   return (
     <div className="profile-page nbit-slot">
+      <SeoHead
+        title="პროფილი"
+        description="შენი RetroBit პროფილი და შეკვეთები."
+        path="/profile"
+        noindex
+      />
       <GiftStack />
       <header className="profile-hero">
         <div className="profile-avatar" aria-hidden>

@@ -188,6 +188,7 @@ export default function Header({
             )}
           </div>
         ))}
+        <Link to="/gifts">{t("gifts")}</Link>
         <Link to="/sell" className="sell-nav-link">
           {t("sellNav")}
         </Link>

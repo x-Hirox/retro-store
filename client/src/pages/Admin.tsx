@@ -12,8 +12,47 @@ import ImageUrlField, { GalleryImagesField } from "../components/ImageUrlField";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
+import SeoHead from "../components/SeoHead";
 
 type Tab = "overview" | "orders" | "products" | "customers" | "content";
+
+const CATEGORY_OPTIONS = [
+  "Nintendo",
+  "PlayStation",
+  "Xbox",
+  "Sega",
+  "Chinese Consoles",
+  "Bundles",
+  "Atari & More",
+];
+
+const PLATFORM_OPTIONS = [
+  "Nintendo DS Lite",
+  "Nintendo DSi",
+  "Nintendo 3DS",
+  "Nintendo DS",
+  "Game Boy Advance",
+  "Nintendo Switch",
+  "Nintendo NES",
+  "Super Nintendo (SNES)",
+  "Nintendo 64",
+  "Nintendo GameCube",
+  "Nintendo Wii",
+  "Nintendo Wii U",
+  "PlayStation 1",
+  "PlayStation 2",
+  "PlayStation 3",
+  "PlayStation 4",
+  "PlayStation 5",
+  "PlayStation Portable",
+  "PlayStation Vita",
+  "Original Xbox",
+  "Xbox 360",
+  "Xbox One",
+  "Sega Genesis",
+  "Sega Saturn",
+  "Sega Dreamcast",
+];
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
@@ -150,6 +189,7 @@ export default function Admin() {
 
   return (
     <div className="admin-shell">
+      <SeoHead title="ადმინი" description="RetroBit ადმინი." path="/admin" noindex />
       <header className="admin-head">
         <div>
           <h1>RetroBit ადმინი</h1>
@@ -266,10 +306,16 @@ export default function Admin() {
                 </div>
               )}
 
+              <p className="admin-muted" style={{ margin: 0 }}>
+                {isHeroBanner
+                  ? "ბანერის სურათი Cloudinary-ზე ადის ამ ფორმიდან."
+                  : "გასაყიდი პროდუქტის ფოტოები Cloudinary-ზეა. აქვე აირჩიე ფაილი კომპიუტერიდან (მთავარი + კიდევ რამდენიმე). კონსოლის ბარათები (DS Lite, DSi) ლოკალური SVG-ებია — პროდუქტს ისინი არ ებმის."}
+              </p>
               <ImageUrlField
                 value={imageUrl}
                 onChange={setImageUrl}
-                placeholder="მთავარი სურათის Cloudinary ლინკი"
+                placeholder="მთავარი ფოტო — აირჩიე ფაილი ან ჩასვი Cloudinary ლინკი"
+                hint="ფაილის არჩევა ადის Cloudinary-ზე. ეს არის პროდუქტის ფოტო, არა კონსოლის SVG."
               />
               {!isHeroBanner && (
                 <GalleryImagesField images={images} onChange={setImages} />
@@ -277,21 +323,39 @@ export default function Admin() {
 
               {!isHeroBanner && (
                 <>
-                  <input
-                    type="text"
-                    placeholder="კატეგორია (მაგ: Nintendo, Sega, PlayStation)"
+                  <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     required
                     style={inputStyle}
-                  />
-                  <input
-                    type="text"
-                    placeholder="პლატფორმა / ქვეკატეგორია (მაგ: PS2, NES, Switch)"
+                  >
+                    {(CATEGORY_OPTIONS.includes(category)
+                      ? CATEGORY_OPTIONS
+                      : [category, ...CATEGORY_OPTIONS]
+                    ).map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                  <select
                     value={platform}
                     onChange={(e) => setPlatform(e.target.value)}
+                    required
                     style={inputStyle}
-                  />
+                  >
+                    <option value="">პლატფორმა (DS Lite, DSi, 3DS, PS2...)</option>
+                    {(PLATFORM_OPTIONS.includes(platform)
+                      ? PLATFORM_OPTIONS
+                      : platform
+                        ? [platform, ...PLATFORM_OPTIONS]
+                        : PLATFORM_OPTIONS
+                    ).map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
                   <input
                     type="text"
                     placeholder="ჟანრი (მაგ: ექშენი, რბოლა, RPG)"
@@ -307,10 +371,6 @@ export default function Admin() {
                     />
                     ბესტსელერებში გამოჩენა
                   </label>
-                  <p className="admin-muted">
-                    სურათი ატვირთე Cloudinary-ზე ამ ფორმიდან. მარაგი ყიდვისას
-                    თავისით იკლებს; გაუქმებისას ბრუნდება.
-                  </p>
                 </>
               )}
 

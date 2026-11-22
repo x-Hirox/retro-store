@@ -223,14 +223,16 @@ function InboxAdmin() {
 }
 
 function PlatformsAdmin() {
-  const [items, setItems] = useState<IPlatformCard[]>([]);
-  const [form, setForm] = useState({
+  const emptyForm = {
     brand: "nintendo",
     name: "",
     slug: "",
     imageUrl: "",
     year: "",
-  });
+  };
+  const [items, setItems] = useState<IPlatformCard[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(emptyForm);
   const load = () => getPlatformCards().then(setItems);
   useEffect(() => {
     load();
@@ -238,23 +240,69 @@ function PlatformsAdmin() {
 
   return (
     <CrudBlock
-      title="კონსოლების ბარათები (სურათის ლინკი Cloudinary-დან ან /nintendo.svg)"
+      title="კონსოლების ბარათები"
+      submitLabel={editingId ? "სურათის შენახვა" : "დამატება"}
       onSubmit={async () => {
-        await createContent("platform-cards", form);
-        setForm({ brand: "nintendo", name: "", slug: "", imageUrl: "", year: "" });
+        if (editingId) {
+          await updateContent("platform-cards", editingId, form);
+          setEditingId(null);
+        } else {
+          await createContent("platform-cards", form);
+        }
+        setForm(emptyForm);
         load();
       }}
     >
+      <p style={{ margin: 0, fontSize: 13, color: "#94a3b8" }}>
+        კონსოლის ბარათის სურათი ჩააგდე აქ: client/public/images/platforms/
+        ფაილის სახელი = slug, მაგ. dsl.png, ndsi.png, 3ds.png (ან .jpg / .svg).
+        სანამ ფაილი არაა, ბარათზე გატეხილი სურათი ჩანს. ან აქ ატვირთე Cloudinary-ზე.
+      </p>
       <input style={inputStyle} placeholder="ბრენდი: nintendo / playstation / xbox" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} required />
       <input style={inputStyle} placeholder="სახელი, მაგ: Nintendo 64" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
       <input style={inputStyle} placeholder="slug, მაგ: n64" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
-      <ImageUrlField value={form.imageUrl} onChange={(imageUrl) => setForm({ ...form, imageUrl })} />
+      <ImageUrlField
+        value={form.imageUrl}
+        onChange={(imageUrl) => setForm({ ...form, imageUrl })}
+        placeholder="მაგ: /images/platforms/dsl.png ან Cloudinary ლინკი"
+        hint="ან ჩააგდე client/public/images/platforms/dsl.png — ან ატვირთე აქ Cloudinary-ზე."
+      />
       <input style={inputStyle} placeholder="წელი" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} />
+      {editingId && (
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(null);
+            setForm(emptyForm);
+          }}
+          style={smallBtn("#475569")}
+        >
+          გაუქმება
+        </button>
+      )}
       <List
         items={items.map((item) => ({
           id: item._id,
           title: `${item.brand} — ${item.name}`,
           subtitle: item.imageUrl,
+          extra: (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(item._id);
+                setForm({
+                  brand: item.brand,
+                  name: item.name,
+                  slug: item.slug,
+                  imageUrl: item.imageUrl,
+                  year: item.year || "",
+                });
+              }}
+              style={smallBtn("#f59e0b")}
+            >
+              სურათის შეცვლა
+            </button>
+          ),
         }))}
         onDelete={async (id) => {
           await deleteContent("platform-cards", id);
@@ -419,10 +467,12 @@ function CrudBlock({
   title,
   onSubmit,
   children,
+  submitLabel = "დამატება",
 }: {
   title: string;
   onSubmit: () => Promise<void>;
   children: ReactNode;
+  submitLabel?: string;
 }) {
   return (
     <form
@@ -435,7 +485,7 @@ function CrudBlock({
       <h3>{title}</h3>
       {children}
       <button type="submit" style={{ ...smallBtn("#10b981"), padding: 12 }}>
-        დამატება
+        {submitLabel}
       </button>
     </form>
   );

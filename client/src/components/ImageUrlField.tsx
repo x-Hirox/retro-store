@@ -4,13 +4,15 @@ import API from "../services/api";
 export default function ImageUrlField({
   value,
   onChange,
-  placeholder = "სურათის Cloudinary ლინკი",
+  placeholder = "სურათის Cloudinary ლინკი ან /images/platforms/dsl.png",
   required = true,
+  hint: fallbackHint,
 }: {
   value: string;
   onChange: (url: string) => void;
   placeholder?: string;
   required?: boolean;
+  hint?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [hint, setHint] = useState("");
@@ -45,10 +47,10 @@ export default function ImageUrlField({
         required={required}
       />
       <label className="image-file-btn">
-        {busy ? "იტვირთება..." : "ფაილის არჩევა"}
+        {busy ? "იტვირთება..." : "ფოტოს ატვირთვა კომპიუტერიდან"}
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg"
           hidden
           disabled={busy}
           onChange={(e) => onFile(e.target.files?.[0])}
@@ -59,7 +61,8 @@ export default function ImageUrlField({
       )}
       <p className="image-url-hint">
         {hint ||
-          "ლაივ საიტისთვის სურათი Cloudinary-ზე უნდა იყოს, არა შენს კომპიუტერში."}
+          fallbackHint ||
+          "ლაივ საიტისთვის სურათი Cloudinary-ზე უნდა იყოს, არა შენს კომპიუტერში. SVG-ც შეგიძლია ატვირთო ან /nds.svg ჩაწერო."}
       </p>
     </div>
   );

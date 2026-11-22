@@ -6,6 +6,7 @@ import { authService } from "../services/authService";
 import { getSalePrice } from "../utils/pricing";
 import PaymentMarks from "../components/PaymentMarks";
 import { normalizeGePhone } from "../utils/validate";
+import SeoHead from "../components/SeoHead";
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
@@ -146,6 +147,12 @@ export default function Checkout() {
           boxShadow: "var(--shadow)",
         }}
       >
+        <SeoHead
+          title="შეკვეთა"
+          description="გააფორმე RetroBit შეკვეთა."
+          path="/checkout"
+          noindex
+        />
         <h1 style={{ color: "var(--text-h)", marginBottom: "30px" }}>
           შეკვეთის გაფორმება 🚀
         </h1>
