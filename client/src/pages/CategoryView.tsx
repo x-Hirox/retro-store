@@ -62,6 +62,20 @@ const fallbackCards: Record<
       image: "/switch.svg",
       year: "2017",
     },
+    {
+      name: "Game Boy Advance",
+      slug: "gba",
+      image: "/nintendo.svg",
+      year: "2001",
+    },
+    { name: "Nintendo DS", slug: "nds", image: "/nintendo.svg", year: "2004" },
+    {
+      name: "Nintendo DSi",
+      slug: "ndsi",
+      image: "/nintendo.svg",
+      year: "2008",
+    },
+    { name: "Nintendo 3DS", slug: "3ds", image: "/nintendo.svg", year: "2011" },
   ],
   xbox: [
     { name: "Xbox", slug: "xbox", image: "/xbox.svg" },
@@ -161,18 +175,27 @@ export default function CategoryView() {
       .finally(() => setLoading(false));
   }, [brand]);
 
-  const currentCards: IPlatformCard[] =
-    cards.length > 0
-      ? cards
-      : (fallbackCards[brand] || []).map((item, index) => ({
-          _id: item.slug,
-          brand,
-          name: item.name,
-          slug: item.slug,
-          imageUrl: item.image,
-          year: item.year,
-          order: index,
-        }));
+  const currentCards: IPlatformCard[] = useMemo(() => {
+    const fallback = (fallbackCards[brand] || []).map((item, index) => ({
+      _id: item.slug,
+      brand,
+      name: item.name,
+      slug: item.slug,
+      imageUrl: item.image,
+      year: item.year,
+      order: index,
+    }));
+    const bySlug = new Map<string, IPlatformCard>();
+    for (const card of fallback) {
+      bySlug.set(normalize(card.slug), card);
+    }
+    for (const card of cards) {
+      bySlug.set(normalize(card.slug), card);
+    }
+    return Array.from(bySlug.values()).sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
+  }, [brand, cards]);
 
   const catalogProducts = products.filter((p) => !isBannerProduct(p));
 

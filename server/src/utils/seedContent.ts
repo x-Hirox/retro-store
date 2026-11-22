@@ -189,6 +189,38 @@ export async function seedContentIfEmpty() {
         order: 7,
       },
       {
+        brand: "nintendo",
+        name: "Game Boy Advance",
+        slug: "gba",
+        year: "2001",
+        imageUrl: "/nintendo.svg",
+        order: 8,
+      },
+      {
+        brand: "nintendo",
+        name: "Nintendo DS",
+        slug: "nds",
+        year: "2004",
+        imageUrl: "/nintendo.svg",
+        order: 9,
+      },
+      {
+        brand: "nintendo",
+        name: "Nintendo DSi",
+        slug: "ndsi",
+        year: "2008",
+        imageUrl: "/nintendo.svg",
+        order: 10,
+      },
+      {
+        brand: "nintendo",
+        name: "Nintendo 3DS",
+        slug: "3ds",
+        year: "2011",
+        imageUrl: "/nintendo.svg",
+        order: 11,
+      },
+      {
         brand: "playstation",
         name: "PlayStation 1",
         slug: "ps1",
@@ -277,6 +309,48 @@ export async function seedContentIfEmpty() {
         order: 1,
       },
     ]);
+  }
+
+  const nintendoHandhelds = [
+    {
+      brand: "nintendo",
+      name: "Game Boy Advance",
+      slug: "gba",
+      year: "2001",
+      imageUrl: "/nintendo.svg",
+      order: 8,
+    },
+    {
+      brand: "nintendo",
+      name: "Nintendo DS",
+      slug: "nds",
+      year: "2004",
+      imageUrl: "/nintendo.svg",
+      order: 9,
+    },
+    {
+      brand: "nintendo",
+      name: "Nintendo DSi",
+      slug: "ndsi",
+      year: "2008",
+      imageUrl: "/nintendo.svg",
+      order: 10,
+    },
+    {
+      brand: "nintendo",
+      name: "Nintendo 3DS",
+      slug: "3ds",
+      year: "2011",
+      imageUrl: "/nintendo.svg",
+      order: 11,
+    },
+  ];
+  for (const card of nintendoHandhelds) {
+    await PlatformCard.findOneAndUpdate(
+      { brand: card.brand, slug: card.slug },
+      { $setOnInsert: card },
+      { upsert: true },
+    );
   }
 
   if ((await CollectionPage.countDocuments()) === 0) {
