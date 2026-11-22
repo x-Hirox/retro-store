@@ -104,11 +104,25 @@ mongoose
   .connect(MONGO_URI)
   .then(async () => {
     console.log("MongoDB Atlas ბაზასთან კავშირი დამყარებულია!");
-    await seedContentIfEmpty();
+    try {
+      await seedContentIfEmpty();
+    } catch (err) {
+      console.error("seedContentIfEmpty:", err);
+    }
     app.listen(PORT, () => {
       console.log(`სერვერი გაეშვა პორტზე: ${PORT}`);
     });
   })
   .catch((err) => {
     console.error("ბაზასთან დაკავშირების შეცდომა:", err);
+    process.exit(1);
   });
+
+process.on("uncaughtException", (err) => {
+  console.error("uncaughtException:", err);
+  process.exit(1);
+});
+process.on("unhandledRejection", (err) => {
+  console.error("unhandledRejection:", err);
+  process.exit(1);
+});

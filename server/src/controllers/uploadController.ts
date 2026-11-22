@@ -4,15 +4,18 @@ import { v2 as cloudinary } from "cloudinary";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 
 function parseCloudinaryUrl(raw: string) {
-  const trimmed = raw.trim().replace(/^cloudinary:\/\//i, "");
-  const at = trimmed.lastIndexOf("@");
-  if (at < 1) return null;
-  const creds = trimmed.slice(0, at);
-  const cloud_name = trimmed.slice(at + 1).split(/[/?#]/)[0] || "";
-  const colon = creds.indexOf(":");
-  if (colon < 1) return null;
-  const api_key = decodeURIComponent(creds.slice(0, colon));
-  const api_secret = decodeURIComponent(creds.slice(colon + 1));
+  const cleaned = raw
+    .trim()
+    .replace(/^['"]+|['"]+$/g, "")
+    .replace(/^CLOUDINARY_URL\s*=\s*/i, "")
+    .trim();
+  const match = cleaned.match(
+    /cloudinary:\/\/([^:/\s]+):([^@/\s]+)@([a-z0-9-]+)/i,
+  );
+  if (!match) return null;
+  const api_key = decodeURIComponent(match[1] || "");
+  const api_secret = decodeURIComponent(match[2] || "");
+  const cloud_name = match[3] || "";
   if (
     !api_key ||
     !api_secret ||
