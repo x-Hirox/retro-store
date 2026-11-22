@@ -33,7 +33,7 @@ export async function seoCrawlerMiddleware(
   try {
     const productMatch = path.match(PRODUCT_RE);
     if (productMatch?.[1]) {
-      await productCrawlerHtml(decodeURIComponent(productMatch[1]), res);
+      await productCrawlerHtml(decodeURIComponent(productMatch[1]), path, res);
       return;
     }
     const categoryMatch = path.match(CATEGORY_RE);

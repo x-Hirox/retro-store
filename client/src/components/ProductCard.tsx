@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { IProduct } from "../types";
+import { productPath } from "../seo/productUrl";
 import { formatGel, getSalePrice, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { productImageAlt } from "../utils/imageAlt";
@@ -65,7 +66,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
   if (sold) return card;
 
   return (
-    <Link to={`/product/${product._id}`} className="product-card-link" draggable={false}>
+    <Link to={productPath(product)} className="product-card-link" draggable={false}>
       {card}
     </Link>
   );

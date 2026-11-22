@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
+import { productPath } from "../seo/productUrl";
 
 interface Props {
   products: IProduct[];
@@ -97,7 +98,7 @@ export default function PopularBundlesSlider({ products }: Props) {
                 position: "relative",
                 flexShrink: 0,
               }}
-              onClick={() => navigate(`/product/${product._id || product._id}`)}
+              onClick={() => navigate(productPath(product))}
             >
               <span
                 style={{

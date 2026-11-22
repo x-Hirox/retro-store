@@ -38,29 +38,39 @@ function withSameAs(jsonLd: unknown, sameAs: string[]) {
 }
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
-  const selector = `meta[${attr}="${key}"][data-seo="1"]`;
-  let el = document.head.querySelector(selector) as HTMLMetaElement | null;
+  const tagged = `meta[${attr}="${key}"][data-seo="1"]`;
+  const existing = `meta[${attr}="${key}"]`;
+  let el = document.head.querySelector(tagged) as HTMLMetaElement | null;
+  if (!el) {
+    el = document.head.querySelector(existing) as HTMLMetaElement | null;
+  }
   if (!el) {
     el = document.createElement("meta");
     el.setAttribute(attr, key);
-    el.setAttribute("data-seo", "1");
     document.head.appendChild(el);
   }
+  el.setAttribute("data-seo", "1");
   el.setAttribute("content", content);
 }
 
 function upsertLink(rel: string, href: string, extra?: Record<string, string>) {
   const hreflang = extra?.hrefLang || "";
-  const selector = hreflang
+  const tagged = hreflang
     ? `link[rel="${rel}"][hreflang="${hreflang}"][data-seo="1"]`
     : `link[rel="${rel}"][data-seo="1"]:not([hreflang])`;
-  let el = document.head.querySelector(selector) as HTMLLinkElement | null;
+  const existing = hreflang
+    ? `link[rel="${rel}"][hreflang="${hreflang}"]`
+    : `link[rel="${rel}"]:not([hreflang])`;
+  let el = document.head.querySelector(tagged) as HTMLLinkElement | null;
+  if (!el) {
+    el = document.head.querySelector(existing) as HTMLLinkElement | null;
+  }
   if (!el) {
     el = document.createElement("link");
     el.setAttribute("rel", rel);
-    el.setAttribute("data-seo", "1");
     document.head.appendChild(el);
   }
+  el.setAttribute("data-seo", "1");
   el.setAttribute("href", href);
   if (extra) {
     for (const [key, value] of Object.entries(extra)) {
@@ -125,11 +135,16 @@ export default function SeoHead({
       'script[type="application/ld+json"][data-seo="1"]',
     ) as HTMLScriptElement | null;
     if (!script) {
+      script = document.head.querySelector(
+        'script[type="application/ld+json"]',
+      ) as HTMLScriptElement | null;
+    }
+    if (!script) {
       script = document.createElement("script");
       script.type = "application/ld+json";
-      script.setAttribute("data-seo", "1");
       document.head.appendChild(script);
     }
+    script.setAttribute("data-seo", "1");
     script.textContent = encodedJson;
   }, [title, description, path, image, type, encodedJson, noindex, keywords]);
 

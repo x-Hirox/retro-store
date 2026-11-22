@@ -11,6 +11,10 @@
       "destination": "https://retro-store.onrender.com/sitemap.xml"
     },
     {
+      "source": "/robots.txt",
+      "destination": "https://retro-store.onrender.com/robots.txt"
+    },
+    {
       "source": "/",
       "has": [
         {
@@ -23,6 +27,17 @@
     },
     {
       "source": "/product/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(googlebot|google-inspectiontool|bingbot|slurp|duckduckbot|baiduspider|yandex|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|telegrambot|whatsapp|pinterest|discordbot|applebot).*"
+        }
+      ],
+      "destination": "https://retro-store.onrender.com/product/:id"
+    },
+    {
+      "source": "/product/:id/",
       "has": [
         {
           "type": "header",

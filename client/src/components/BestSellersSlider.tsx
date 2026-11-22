@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
+import { productPath } from "../seo/productUrl";
 import { formatGel, getSalePrice, isBannerProduct, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { useLang } from "../i18n/LanguageContext";
@@ -204,7 +205,7 @@ export default function BestSellersSlider({
               return (
               <Link
                 key={product._id}
-                to={`/product/${product._id}`}
+                to={productPath(product)}
                 className="product-card-link slider-card"
                 draggable={false}
               >

@@ -25,6 +25,7 @@ export interface IProduct extends Document {
   tags?: string[];
   isBestSeller?: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -57,7 +58,6 @@ const ProductSchema = new Schema<IProduct>({
   genre: { type: String, default: "" },
   tags: { type: [String], default: [] },
   isBestSeller: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
 export default model<IProduct>("Product", ProductSchema);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { getProductById, getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import type { IProduct } from "../types";
@@ -10,12 +10,7 @@ import { suggestAddons } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
 import SeoHead from "../components/SeoHead";
 import { productImageAlt } from "../utils/imageAlt";
-import {
-  SITE_URL,
-  absUrl,
-  breadcrumbGraph,
-  jsonLdGraph,
-} from "../seo/site";
+import { parseProductParam, productJsonLd, productPath } from "../seo/product";
 import { productKeywords } from "../utils/tags";
 import {
   availableStock,
@@ -29,8 +24,11 @@ import {
 } from "../utils/productColors";
 
 export default function ProductDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { slugId = "" } = useParams<{ slugId: string }>();
+  const parsed = parseProductParam(slugId);
+  const id = parsed?.id;
   const navigate = useNavigate();
+  const location = useLocation();
   const { cart, addToCart, closeCartDrawer } = useCart();
   const { t } = useLang();
   const [product, setProduct] = useState<IProduct | null>(null);
@@ -44,7 +42,14 @@ export default function ProductDetail() {
   const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setProduct(null);
+      setError("პროდუქტი ვერ მოიძებნა.");
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
     setPhoto(0);
     setQty(1);
     setColorName("");
@@ -60,10 +65,19 @@ export default function ProductDetail() {
           .catch(() => setAddons([]));
       })
       .catch(() => {
+        setProduct(null);
         setError("პროდუქტი ვერ მოიძებნა.");
         setLoading(false);
       });
   }, [id]);
+
+  useEffect(() => {
+    if (!product) return;
+    const canonical = productPath(product);
+    if (location.pathname !== canonical) {
+      navigate(canonical, { replace: true });
+    }
+  }, [product, location.pathname, navigate]);
 
   useEffect(() => {
     const el = ctaRef.current;
@@ -86,7 +100,7 @@ export default function ProductDetail() {
         <SeoHead
           title="პროდუქტი ვერ მოიძებნა"
           description="ეს პროდუქტი აღარ არის RetroBit-ზე."
-          path={`/product/${id || ""}`}
+          path={id ? `/product/${id}` : "/"}
           noindex
         />
         <h1>{error || "პროდუქტი არ არსებობს"}</h1>
@@ -116,43 +130,10 @@ export default function ProductDetail() {
     }
   };
 
-  const path = `/product/${product._id}`;
+  const path = productPath(product);
   const description = String(product.description || product.title).slice(0, 300);
   const keywords = productKeywords(product);
-  const jsonLd = jsonLdGraph([
-    breadcrumbGraph([
-      { name: "მთავარი", path: "/" },
-      {
-        name: product.category || "კატეგორია",
-        path: `/category/${encodeURIComponent(product.category || "Nintendo")}`,
-      },
-      { name: product.title, path },
-    ]),
-    {
-      "@type": "Product",
-      name: product.title,
-      description,
-      image: photos.map((url) => absUrl(url)),
-      brand: {
-        "@type": "Brand",
-        name: product.platform || product.category || "RetroBit",
-      },
-      category: product.category,
-      keywords,
-      offers: {
-        "@type": "Offer",
-        url: `${SITE_URL}${path}`,
-        priceCurrency: "GEL",
-        price: sale.final.toFixed(2),
-        availability:
-          anyLeft
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-        itemCondition: "https://schema.org/UsedCondition",
-        seller: { "@id": `${SITE_URL}/#organization` },
-      },
-    },
-  ]);
+  const jsonLd = productJsonLd(product);
 
   return (
     <div className={`pd-page nbit-slot${sticky && stock > 0 ? " has-sticky" : ""}`}>
@@ -320,7 +301,7 @@ export default function ProductDetail() {
               const added = cart.some((c) => c._id === item._id);
               return (
                 <article key={item._id} className="pd-addon">
-                  <Link to={`/product/${item._id}`}>
+                  <Link to={productPath(item)}>
                     <img
                       src={item.imageUrl || ""}
                       alt={productImageAlt(item)}

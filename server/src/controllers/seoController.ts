@@ -17,12 +17,13 @@ import {
   escapeXml,
   sitePath,
 } from "../seo/config.js";
-import { productKeywords } from "../utils/tags.js";
 import {
   breadcrumbGraph,
   crawlerDocument,
   jsonLdGraph,
 } from "../seo/html.js";
+import { parseProductParam, productPath, requestProductPath } from "../seo/productUrl.js";
+import { productCrawlerPayload } from "../seo/productOffer.js";
 
 function isBanner(product: {
   isHeroBanner?: boolean;
@@ -34,13 +35,6 @@ function isBanner(product: {
     product.category === "banner-middle" ||
     product.category === "banner-bottom"
   );
-}
-
-function salePrice(product: { price?: number; discount?: number }) {
-  const original = Number(product.price) || 0;
-  const discount = Number(product.discount) || 0;
-  const final = discount > 0 ? original * (1 - discount / 100) : original;
-  return Number(final.toFixed(2));
 }
 
 async function loadSameAs() {
@@ -68,7 +62,7 @@ export async function sitemapXml(_req: Request, res: Response) {
       isHeroBanner: { $ne: true },
       category: { $nin: ["banner-hero", "banner-middle", "banner-bottom"] },
     })
-      .select("title imageUrl createdAt category")
+      .select("title imageUrl createdAt updatedAt category")
       .lean(),
     PlatformCard.find().select("brand slug name").lean(),
   ]);
@@ -114,15 +108,14 @@ export async function sitemapXml(_req: Request, res: Response) {
 
   for (const product of products) {
     if (isBanner(product)) continue;
-    const loc = sitePath(`/product/${product._id}`);
     urls.push({
-      loc,
-      lastmod: isoDay(product.createdAt),
+      loc: sitePath(productPath(product)),
+      lastmod: isoDay(product.updatedAt || product.createdAt),
       changefreq: "weekly",
       priority: "0.8",
-      image: product.imageUrl
-        ? { loc: absUrl(product.imageUrl), title: product.title }
-        : undefined,
+      ...(product.imageUrl
+        ? { image: { loc: absUrl(product.imageUrl), title: product.title } }
+        : {}),
     });
   }
 
@@ -156,92 +149,54 @@ export function robotsTxt(_req: Request, res: Response) {
   );
 }
 
-export async function productCrawlerHtml(id: string, res: Response) {
-  if (!mongoose.isValidObjectId(id)) {
-    res.status(404).type("html").send(
-      crawlerDocument({
-        title: "პროდუქტი ვერ მოიძებნა",
-        description: DEFAULT_DESCRIPTION,
-        path: `/product/${id}`,
-        jsonLd: jsonLdGraph([]),
-        h1: "პროდუქტი ვერ მოიძებნა",
-        bodyHtml: "<p>ეს პროდუქტი აღარ არის RetroBit-ზე.</p>",
-        noindex: true,
-      }),
-    );
+function productNotFoundHtml(path: string, res: Response) {
+  res.status(404).type("html").send(
+    crawlerDocument({
+      title: "პროდუქტი ვერ მოიძებნა",
+      description: DEFAULT_DESCRIPTION,
+      path,
+      jsonLd: jsonLdGraph([]),
+      h1: "პროდუქტი ვერ მოიძებნა",
+      bodyHtml: "<p>ეს პროდუქტი აღარ არის RetroBit-ზე.</p>",
+      noindex: true,
+    }),
+  );
+}
+
+export async function productCrawlerHtml(
+  param: string,
+  reqPath: string,
+  res: Response,
+) {
+  const parsed = parseProductParam(param);
+  const incomingPath = requestProductPath(reqPath) || `/product/${param}`;
+  if (!parsed || !mongoose.isValidObjectId(parsed.id)) {
+    productNotFoundHtml(incomingPath, res);
     return;
   }
-  const product = await Product.findById(id).lean();
+  const product = await Product.findById(parsed.id).lean();
   if (!product || isBanner(product)) {
-    res.status(404).type("html").send(
-      crawlerDocument({
-        title: "პროდუქტი ვერ მოიძებნა",
-        description: DEFAULT_DESCRIPTION,
-        path: `/product/${id}`,
-        jsonLd: jsonLdGraph([]),
-        h1: "პროდუქტი ვერ მოიძებნა",
-        bodyHtml: "<p>ეს პროდუქტი აღარ არის RetroBit-ზე.</p>",
-        noindex: true,
-      }),
-    );
+    productNotFoundHtml(incomingPath, res);
     return;
   }
-  const price = salePrice(product);
-  const inStock = (product.stock ?? 0) > 0;
-  const path = `/product/${product._id}`;
-  const description = String(product.description || DEFAULT_DESCRIPTION).slice(
-    0,
-    300,
-  );
-  const crumbs = [
-    { name: "მთავარი", path: "/" },
-    {
-      name: product.category || "კატეგორია",
-      path: `/category/${encodeURIComponent(product.category || "Nintendo")}`,
-    },
-    { name: product.title, path },
-  ];
-  const keywords = productKeywords(product);
-  const jsonLd = jsonLdGraph(
-    [
-      breadcrumbGraph(crumbs),
-      {
-        "@type": "Product",
-        name: product.title,
-        description,
-        image: [absUrl(product.imageUrl), ...(product.images || []).map(absUrl)],
-        brand: {
-          "@type": "Brand",
-          name: product.platform || product.category || "RetroBit",
-        },
-        category: product.category,
-        keywords,
-        offers: {
-          "@type": "Offer",
-          url: sitePath(path),
-          priceCurrency: "GEL",
-          price: price.toFixed(2),
-          availability: inStock
-            ? "https://schema.org/InStock"
-            : "https://schema.org/OutOfStock",
-          itemCondition: "https://schema.org/UsedCondition",
-          seller: { "@id": `${SITE_URL}/#organization` },
-        },
-      },
-    ],
-    await loadSameAs(),
-  );
+  const payload = productCrawlerPayload(product, await loadSameAs());
+  if (incomingPath !== payload.path) {
+    res.setHeader("Cache-Control", "public, max-age=600");
+    res.redirect(301, payload.url);
+    return;
+  }
+  const gallery = payload.photos[0] || product.imageUrl;
   res.type("html").send(
     crawlerDocument({
       title: product.title,
-      description,
-      path,
-      image: product.imageUrl,
-      jsonLd,
+      description: payload.description,
+      path: payload.path,
+      image: gallery,
+      jsonLd: payload.jsonLd,
       h1: product.title,
       type: "product",
-      keywords,
-      bodyHtml: `<p>${escapeHtml(description)}</p><p>ფასი: ${price} GEL. ${inStock ? "მარაგშია" : "ამოიწურა"}.</p><p><img src="${escapeHtml(absUrl(product.imageUrl))}" alt="${escapeHtml(product.title)}" /></p>`,
+      keywords: payload.keywords,
+      bodyHtml: `<p>${escapeHtml(payload.description)}</p><p>ფასი: ${payload.price.toFixed(2)} GEL. ${payload.inStock ? "მარაგშია" : "ამოიწურა"}.</p><p><img src="${escapeHtml(absUrl(gallery))}" alt="${escapeHtml(product.title)}" /></p>`,
     }),
   );
 }
