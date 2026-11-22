@@ -91,6 +91,12 @@ if (!MONGO_URI) {
   console.error("MONGO_URI აკლია. ჩაწერე server/.env ან Render Environment-ში.");
   process.exit(1);
 }
+console.log(
+  "Cloudinary:",
+  process.env.CLOUDINARY_URL || process.env.CLOUDINARY_API_KEY
+    ? "env set"
+    : "missing",
+);
 
 mongoose.set("sanitizeFilter", true);
 
