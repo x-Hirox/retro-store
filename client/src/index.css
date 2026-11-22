@@ -4084,6 +4084,27 @@ html.fx-cursor select {
   margin-bottom: 12px;
 }
 .admin-form-grid { display: grid; gap: 12px; }
+.admin-form-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #450a0a;
+  color: #fecaca;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.image-url-hint.is-warn { color: #fca5a5; }
+.image-url-more {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+.image-url-more summary {
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+.image-url-more input[type="text"] {
+  width: 100%;
+}
 .admin-check {
   display: flex;
   align-items: center;

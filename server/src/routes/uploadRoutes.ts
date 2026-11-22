@@ -19,5 +19,24 @@ const upload = multer({
 });
 
 const router = Router();
-router.post("/", protect, adminOnly, upload.single("image"), uploadImage);
+router.post(
+  "/",
+  protect,
+  adminOnly,
+  (req, res, next) => {
+    upload.single("image")(req, res, (err: unknown) => {
+      if (!err) {
+        next();
+        return;
+      }
+      const multerErr = err as { code?: string; message?: string };
+      const message =
+        multerErr.code === "LIMIT_FILE_SIZE"
+          ? "სურათი 4MB-ზე დიდია — შეამცირე ან ჩასვი Cloudinary ლინკი."
+          : multerErr.message || "სურათის ატვირთვა ვერ მოხდა";
+      res.status(400).json({ message });
+    });
+  },
+  uploadImage,
+);
 export default router;

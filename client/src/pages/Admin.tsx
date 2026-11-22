@@ -86,6 +86,8 @@ export default function Admin() {
   const [tags, setTags] = useState("");
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [colors, setColors] = useState<IProductColor[]>([]);
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -104,10 +106,25 @@ export default function Admin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!imageUrl.trim()) {
-      alert("ატვირთე პროდუქტის ფოტო");
+    const missing = !title.trim()
+      ? "სათაური აკლია."
+      : !description.trim()
+        ? "აღწერა აკლია."
+        : !imageUrl.trim()
+          ? "მთავარი ფოტო აკლია — ატვირთე ფაილი ან ჩასვი Cloudinary ლინკი."
+          : !isHeroBanner && !platform
+            ? "აირჩიე პლატფორმა."
+            : !isHeroBanner && !price
+              ? "ჩაწერე ფასი."
+              : !isHeroBanner && stock === ""
+                ? "ჩაწერე მარაგი."
+                : "";
+    if (missing) {
+      setFormError(missing);
       return;
     }
+    setFormError("");
+    setSaving(true);
     try {
       const productData = {
         title,
@@ -136,9 +153,14 @@ export default function Admin() {
 
       resetForm();
       fetchProducts();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("ოპერაციის შეცდომა:", err);
-      alert("მოქმედება ვერ შესრულდა");
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setFormError(
+        axiosErr.response?.data?.message || "მოქმედება ვერ შესრულდა",
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -179,6 +201,8 @@ export default function Admin() {
     setTags("");
     setIsBestSeller(false);
     setColors([]);
+    setFormError("");
+    setSaving(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -255,6 +279,7 @@ export default function Admin() {
         <>
           <form
             onSubmit={handleSubmit}
+            noValidate
             className="admin-form"
             style={{ borderColor: editingId ? "#f59e0b" : "#334155" }}
           >
@@ -406,8 +431,13 @@ export default function Admin() {
                 </>
               )}
 
-              <button type="submit" className="admin-btn primary">
-                {editingId ? "ცვლილებების შენახვა" : "დამატება"}
+              {formError && <p className="admin-form-error">{formError}</p>}
+              <button type="submit" className="admin-btn primary" disabled={saving}>
+                {saving
+                  ? "ინახება..."
+                  : editingId
+                    ? "ცვლილებების შენახვა"
+                    : "დამატება"}
               </button>
             </div>
           </form>

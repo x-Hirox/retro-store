@@ -59,7 +59,6 @@ export default function ImageUrlField({
           accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg"
           hidden
           disabled={busy}
-          required={required && !value && !allowUrl}
           onChange={(e) => {
             onFile(e.target.files?.[0]);
             e.currentTarget.value = "";
@@ -74,10 +73,25 @@ export default function ImageUrlField({
           </button>
         </div>
       )}
-      <p className="image-url-hint">
+      {required && !value && (
+        <p className="image-url-hint is-warn">საჭიროა ფოტო — ატვირთე ან ჩასვი ლინკი.</p>
+      )}
+      <details
+        className="image-url-more"
+        open={allowUrl || (required && !value) || hint.includes("ვერ")}
+      >
+        <summary>ან Cloudinary ლინკის ჩასმა</summary>
+        <input
+          type="text"
+          placeholder={placeholder || "https://res.cloudinary.com/..."}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </details>
+      <p className={`image-url-hint${hint.includes("ვერ") ? " is-warn" : ""}`}>
         {hint ||
           fallbackHint ||
-          "ფაილი ადის Cloudinary-ზე. ლინკის ჩასმა აღარ გჭირდება."}
+          "ფაილი ადის Cloudinary-ზე. თუ ატვირთვა ვერ მოხდა, ჩასვი ლინკი."}
       </p>
     </div>
   );
