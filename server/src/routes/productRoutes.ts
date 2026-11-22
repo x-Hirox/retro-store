@@ -25,13 +25,26 @@ function cleanHex(value: unknown): string {
   return "#111111";
 }
 
-function cleanColors(value: unknown): { name: string; hex: string; imageUrl: string }[] {
+function cleanStock(value: unknown): number {
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(999, n);
+}
+
+function cleanColors(
+  value: unknown,
+): { name: string; hex: string; imageUrl: string; stock: number }[] {
   if (!Array.isArray(value)) return [];
-  const out: { name: string; hex: string; imageUrl: string }[] = [];
+  const out: { name: string; hex: string; imageUrl: string; stock: number }[] = [];
   const seen = new Set<string>();
   for (const item of value) {
     if (!item || typeof item !== "object") continue;
-    const row = item as { name?: unknown; hex?: unknown; imageUrl?: unknown };
+    const row = item as {
+      name?: unknown;
+      hex?: unknown;
+      imageUrl?: unknown;
+      stock?: unknown;
+    };
     const name = String(row.name || "").trim().slice(0, 40);
     if (!name || seen.has(name.toLowerCase())) continue;
     const imageUrl = String(row.imageUrl || "").trim();
@@ -39,7 +52,12 @@ function cleanColors(value: unknown): { name: string; hex: string; imageUrl: str
       continue;
     }
     seen.add(name.toLowerCase());
-    out.push({ name, hex: cleanHex(row.hex), imageUrl });
+    out.push({
+      name,
+      hex: cleanHex(row.hex),
+      imageUrl,
+      stock: cleanStock(row.stock),
+    });
     if (out.length >= 8) break;
   }
   return out;
@@ -119,6 +137,11 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       colors,
     } = req.body;
 
+    const nextColors = cleanColors(colors);
+    const nextStock = nextColors.length
+      ? nextColors.reduce((sum, item) => sum + item.stock, 0)
+      : Math.max(0, Math.floor(Number(stock) || 0));
+
     const newProduct = new Product({
       title,
       description,
@@ -126,8 +149,8 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       category,
       imageUrl,
       images: cleanImages(images),
-      colors: cleanColors(colors),
-      stock,
+      colors: nextColors,
+      stock: nextStock,
       discount: discount || 0,
       isHeroBanner: !!isHeroBanner,
       platform: platform || "",
@@ -164,6 +187,10 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
       isBestSeller,
       colors,
     } = req.body;
+    const nextColors = cleanColors(colors);
+    const nextStock = nextColors.length
+      ? nextColors.reduce((sum, item) => sum + item.stock, 0)
+      : Math.max(0, Math.floor(Number(stock) || 0));
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       {
@@ -173,8 +200,8 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
         category,
         imageUrl,
         images: cleanImages(images),
-        colors: cleanColors(colors),
-        stock,
+        colors: nextColors,
+        stock: nextStock,
         discount: discount || 0,
         isHeroBanner: !!isHeroBanner,
         platform: platform || "",

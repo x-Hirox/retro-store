@@ -19,15 +19,44 @@ import {
 } from "../utils/orderStatus.js";
 import { trySendEmail } from "../utils/sendEmail.js";
 
+async function changeStock(
+  productId: unknown,
+  qty: number,
+  color?: string,
+) {
+  const abs = Math.abs(qty);
+  if (color) {
+    const filter =
+      qty < 0
+        ? {
+            _id: productId,
+            colors: { $elemMatch: { name: color, stock: { $gte: abs } } },
+          }
+        : { _id: productId, colors: { $elemMatch: { name: color } } };
+    return Product.findOneAndUpdate(
+      filter,
+      { $inc: { stock: qty, "colors.$.stock": qty } },
+      { new: true },
+    );
+  }
+  const filter =
+    qty < 0
+      ? { _id: productId, stock: { $gte: abs } }
+      : { _id: productId };
+  return Product.findOneAndUpdate(
+    filter,
+    { $inc: { stock: qty } },
+    { new: true },
+  );
+}
+
 async function restoreStock(order: {
   status: string;
-  orderItems: { product: unknown; quantity: number }[];
+  orderItems: { product: unknown; quantity: number; color?: string }[];
 }) {
   if (order.status === "Cancelled") return;
   for (const item of order.orderItems) {
-    await Product.findByIdAndUpdate(item.product, {
-      $inc: { stock: item.quantity },
-    });
+    await changeStock(item.product, item.quantity, item.color || "");
   }
 }
 
@@ -77,7 +106,7 @@ export const addOrderItems = async (
       return;
     }
 
-    const decremented: { id: string; qty: number }[] = [];
+    const decremented: { id: string; qty: number; color: string }[] = [];
     const pricedItems: {
       product: string;
       quantity: number;
@@ -98,18 +127,22 @@ export const addOrderItems = async (
         if (!product) {
           throw new Error("missing");
         }
-        const updated = await Product.findOneAndUpdate(
-          { _id: product._id, stock: { $gte: qty } },
-          { $inc: { stock: -qty } },
-          { new: true },
+        const color = clampText(item.color, 40);
+        const hasColors = Array.isArray(product.colors) && product.colors.length > 0;
+        if (hasColors && !color) {
+          throw new Error("stock");
+        }
+        const updated = await changeStock(
+          product._id,
+          -qty,
+          hasColors ? color : "",
         );
         if (!updated) {
           throw new Error("stock");
         }
         const price = unitPrice(product);
-        const color = clampText(item.color, 40);
         const colorMatch = product.colors?.find((row) => row.name === color);
-        decremented.push({ id: String(product._id), qty });
+        decremented.push({ id: String(product._id), qty, color: hasColors ? color : "" });
         pricedItems.push({
           product: String(product._id),
           quantity: qty,
@@ -122,9 +155,7 @@ export const addOrderItems = async (
       }
     } catch (err) {
       for (const item of decremented) {
-        await Product.findByIdAndUpdate(item.id, {
-          $inc: { stock: item.qty },
-        });
+        await changeStock(item.id, item.qty, item.color);
       }
       if ((err as Error).message === "stock") {
         res.status(400).json({ message: "პროდუქტი გაიყიდა ან მარაგი არ ჰყოფნის" });

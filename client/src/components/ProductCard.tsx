@@ -3,12 +3,14 @@ import type { IProduct } from "../types";
 import { formatGel, getSalePrice } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { productImageAlt } from "../utils/imageAlt";
+import { colorStock, totalStock } from "../utils/productColors";
 
 export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
   const { original, final, discount } = getSalePrice(product);
-  const sold = (product.stock ?? 0) <= 0;
-  const low = !sold && product.stock <= 3;
+  const left = totalStock(product);
+  const sold = left <= 0;
+  const low = !sold && left <= 3;
 
   return (
     <HoloCard
@@ -19,7 +21,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
       }}
     >
       {sold && <span className="sold-badge">SOLD</span>}
-      {low && <span className="left-badge">დარჩა {product.stock}</span>}
+      {low && <span className="left-badge">დარჩა {left}</span>}
       {discount > 0 && !sold && (
         <span className="card-sale">-{discount}%</span>
       )}
@@ -44,7 +46,7 @@ export default function ProductCard({ product }: { product: IProduct }) {
             <i
               key={item.name}
               style={{ background: item.hex }}
-              title={item.name}
+              title={`${item.name} — ${colorStock(item)} ცალი`}
             />
           ))}
         </div>

@@ -17,6 +17,7 @@ import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
 import SeoHead from "../components/SeoHead";
 import { parseTags, productSearchText } from "../utils/tags";
+import { totalStock } from "../utils/productColors";
 
 type Tab = "overview" | "orders" | "products" | "customers" | "content";
 
@@ -114,11 +115,13 @@ export default function Admin() {
           ? "მთავარი ფოტო აკლია — ატვირთე ფაილი ან ჩასვი Cloudinary ლინკი."
           : !isHeroBanner && !platform
             ? "აირჩიე პლატფორმა."
-            : !isHeroBanner && !price
-              ? "ჩაწერე ფასი."
-              : !isHeroBanner && stock === ""
-                ? "ჩაწერე მარაგი."
-                : "";
+          : !isHeroBanner && !price
+            ? "ჩაწერე ფასი."
+            : !isHeroBanner &&
+                colors.filter((item) => item.name.trim()).length === 0 &&
+                stock === ""
+              ? "ჩაწერე მარაგი, ან დაამატე ფერები და თითოზე ცალი."
+              : "";
     if (missing) {
       setFormError(missing);
       return;
@@ -126,17 +129,26 @@ export default function Admin() {
     setFormError("");
     setSaving(true);
     try {
+      const namedColors = isHeroBanner
+        ? []
+        : colors.filter((item) => item.name.trim());
+      const stockFromColors = namedColors.reduce(
+        (sum, item) => sum + Math.max(0, Number(item.stock) || 0),
+        0,
+      );
       const productData = {
         title,
         description,
         price: isHeroBanner ? 0 : Number(price),
         discount: isHeroBanner ? 0 : Number(discount) || 0,
-        stock: isHeroBanner ? 1 : Number(stock),
+        stock: isHeroBanner
+          ? 1
+          : namedColors.length
+            ? stockFromColors
+            : Number(stock),
         imageUrl,
         images: isHeroBanner ? [] : images,
-        colors: isHeroBanner
-          ? []
-          : colors.filter((item) => item.name.trim()),
+        colors: namedColors,
         category: isHeroBanner ? "banner-hero" : category,
         isHeroBanner,
         platform: isHeroBanner ? "" : platform,
@@ -219,8 +231,9 @@ export default function Admin() {
     return products.filter((p) => {
       const hay = productSearchText(p);
       if (productQ && !hay.includes(productQ.toLowerCase())) return false;
-      if (stockFilter === "sold" && (p.isHeroBanner || (p.stock ?? 0) > 0)) return false;
-      if (stockFilter === "low" && (p.isHeroBanner || (p.stock ?? 0) > 3 || (p.stock ?? 0) <= 0))
+      const left = totalStock(p);
+      if (stockFilter === "sold" && (p.isHeroBanner || left > 0)) return false;
+      if (stockFilter === "low" && (p.isHeroBanner || left > 3 || left <= 0))
         return false;
       return true;
     });
@@ -342,15 +355,27 @@ export default function Admin() {
                     onChange={(e) => setDiscount(e.target.value)}
                     style={inputStyle}
                   />
-                  <input
-                    type="number"
-                    placeholder="მარაგი"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    required
-                    min={0}
-                    style={inputStyle}
-                  />
+                  {colors.filter((item) => item.name.trim()).length > 0 ? (
+                    <p className="admin-muted" style={{ margin: 0 }}>
+                      სულ მარაგი:{" "}
+                      {colors
+                        .filter((item) => item.name.trim())
+                        .reduce(
+                          (sum, item) => sum + Math.max(0, Number(item.stock) || 0),
+                          0,
+                        )}{" "}
+                      ცალი — რაოდენობა თითო ფერზე ქვემოთ.
+                    </p>
+                  ) : (
+                    <input
+                      type="number"
+                      placeholder="მარაგი"
+                      value={stock}
+                      onChange={(e) => setStock(e.target.value)}
+                      min={0}
+                      style={inputStyle}
+                    />
+                  )}
                 </div>
               )}
 
@@ -486,12 +511,17 @@ export default function Admin() {
                         {p.isHeroBanner
                           ? "სარეკლამო ბანერი"
                           : `${p.price} ₾ ${p.discount ? `(−${p.discount}%)` : ""} · ${
-                              (p.stock ?? 0) <= 0
+                              totalStock(p) <= 0
                                 ? "SOLD"
-                                : `მარაგი ${p.stock}`
+                                : `მარაგი ${totalStock(p)}`
                             }${p.platform ? ` · ${p.platform}` : ""}${
                               p.colors?.length
-                                ? ` · ${p.colors.map((c) => c.name).join(", ")}`
+                                ? ` · ${p.colors
+                                    .map(
+                                      (c) =>
+                                        `${c.name} ${Number(c.stock) || 0}`,
+                                    )
+                                    .join(", ")}`
                                 : ""
                             }`}
                       </p>

@@ -190,7 +190,7 @@ export function ProductColorsField({
     if (name && colors.some((item) => item.name === name)) return;
     onChange([
       ...colors,
-      { name, hex: preset?.hex || "#111111", imageUrl: "" },
+      { name, hex: preset?.hex || "#111111", imageUrl: "", stock: 0 },
     ]);
   };
 
@@ -200,12 +200,26 @@ export function ProductColorsField({
     );
   };
 
+  const total = colors.reduce(
+    (sum, item) => sum + Math.max(0, Number(item.stock) || 0),
+    0,
+  );
+
   return (
     <div className="color-admin">
       <p className="image-url-hint">
-        ერთი მოდელი, სხვადასხვა ფერი — ცალკე პროდუქტი არ დადო. მყიდველი გვერდზე
-        აირჩევს შავს ან იასამნისფერს.
+        ერთი მოდელი, სხვადასხვა ფერი. თითო ფერზე ჩაწერე რამდენი ცალი გაქვს —
+        მაგ. იასამნისფერი 3, შავი 2.
       </p>
+      {colors.length > 0 && (
+        <p className="color-admin-total">
+          სულ {total} ცალი
+          {colors
+            .filter((item) => item.name.trim())
+            .map((item) => ` · ${item.name} ${Number(item.stock) || 0}`)
+            .join("")}
+        </p>
+      )}
       <div className="color-admin-presets">
         {COLOR_PRESETS.map((preset) => (
           <button
@@ -236,6 +250,19 @@ export function ProductColorsField({
             value={item.name}
             onChange={(e) => patch(index, { name: e.target.value })}
           />
+          <label className="color-admin-qty">
+            ცალი
+            <input
+              type="number"
+              min={0}
+              max={999}
+              placeholder="0"
+              value={item.stock ?? 0}
+              onChange={(e) =>
+                patch(index, { stock: Math.max(0, Number(e.target.value) || 0) })
+              }
+            />
+          </label>
           <ImageUrlField
             value={item.imageUrl || ""}
             onChange={(url) => patch(index, { imageUrl: url })}

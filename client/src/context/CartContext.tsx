@@ -26,13 +26,8 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function lineCap(cart: CartItem[], product: IProduct, lineKey: string) {
-  const others = cart
-    .filter(
-      (item) => item._id === product._id && cartLineKey(item) !== lineKey,
-    )
-    .reduce((sum, item) => sum + item.quantity, 0);
-  return Math.max(0, (product.stock ?? 0) - others);
+function lineCap(product: IProduct) {
+  return Math.max(0, product.stock ?? 0);
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -55,7 +50,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const addBy = Math.max(1, Math.floor(qty));
     const key = cartLineKey(product);
     setCart((prevCart) => {
-      const cap = lineCap(prevCart, product, key);
+      const cap = lineCap(product);
       if (cap < 1) return prevCart;
       const existingIndex = prevCart.findIndex(
         (item) => cartLineKey(item) === key,
@@ -86,7 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (quantity <= 0) {
         return prevCart.filter((item) => cartLineKey(item) !== lineKey);
       }
-      const cap = lineCap(prevCart, current, lineKey);
+      const cap = lineCap(current);
       const nextQty = Math.min(quantity, cap);
       if (nextQty === current.quantity) return prevCart;
       return prevCart.map((item) =>

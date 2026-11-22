@@ -2230,6 +2230,27 @@ body.dark .profile-chip.is-ok {
   background: transparent;
   cursor: pointer;
 }
+.color-admin-total {
+  margin: 0;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+.color-admin-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.color-admin-qty input {
+  width: 88px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: #0f172a;
+  color: #fff;
+}
 
 .image-url-hint {
   margin: 0;
@@ -3668,6 +3689,9 @@ html.fx-cursor select {
 }
 .pd-swatches button.is-on {
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #7c3aed;
+}
+.pd-swatches button.is-sold {
+  opacity: 0.35;
 }
 .card-colors {
   display: flex;

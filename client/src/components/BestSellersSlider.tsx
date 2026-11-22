@@ -4,6 +4,7 @@ import type { IProduct } from "../types";
 import { formatGel, getSalePrice, isBannerProduct } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { useLang } from "../i18n/LanguageContext";
+import { colorStock, totalStock } from "../utils/productColors";
 
 interface Props {
   products: IProduct[];
@@ -170,13 +171,13 @@ export default function BestSellersSlider({
                 className="product-card glass-card slider-card"
                 onClick={() => navigate(`/product/${product._id}`)}
               >
-                {(product.stock ?? 0) <= 0 && (
+                {totalStock(product) <= 0 && (
                   <span className="sold-badge">SOLD</span>
                 )}
-                {(product.stock ?? 0) > 0 && product.stock <= 3 && (
-                  <span className="left-badge">დარჩა {product.stock}</span>
+                {totalStock(product) > 0 && totalStock(product) <= 3 && (
+                  <span className="left-badge">დარჩა {totalStock(product)}</span>
                 )}
-                {sale.discount > 0 && (product.stock ?? 0) > 0 && (
+                {sale.discount > 0 && totalStock(product) > 0 && (
                 <span
                   style={{
                     position: "absolute",
@@ -235,7 +236,7 @@ export default function BestSellersSlider({
                         <i
                           key={item.name}
                           style={{ background: item.hex }}
-                          title={item.name}
+                          title={`${item.name} — ${colorStock(item)} ცალი`}
                         />
                       ))}
                     </div>

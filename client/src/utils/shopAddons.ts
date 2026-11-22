@@ -1,6 +1,7 @@
 import type { IProduct } from "../types";
 import { matchesBrand } from "./brandMatch";
 import { isBannerProduct } from "./pricing";
+import { totalStock } from "./productColors";
 
 function hay(product: IProduct) {
   return `${product.category} ${product.title} ${product.platform} ${product.description} ${product.genre}`.toLowerCase();
@@ -27,7 +28,7 @@ export function suggestAddons(
   const rest = all.filter(
     (item) =>
       (!current || item._id !== current._id) &&
-      (item.stock ?? 0) > 0 &&
+      totalStock(item) > 0 &&
       !isBannerProduct(item),
   );
   const brand = current?.platform || current?.category;

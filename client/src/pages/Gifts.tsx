@@ -6,6 +6,7 @@ import SeoHead from "../components/SeoHead";
 import { isBannerProduct } from "../utils/pricing";
 import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 import { useLang } from "../i18n/LanguageContext";
+import { totalStock } from "../utils/productColors";
 
 function isGiftProduct(product: IProduct) {
   if (isBannerProduct(product)) return false;
@@ -30,7 +31,7 @@ export default function Gifts() {
     const matched = products.filter(isGiftProduct);
     if (matched.length) return matched;
     return products.filter(
-      (item) => !isBannerProduct(item) && (item.stock ?? 0) > 0,
+      (item) => !isBannerProduct(item) && totalStock(item) > 0,
     );
   }, [products]);
 

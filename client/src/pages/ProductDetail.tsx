@@ -18,10 +18,13 @@ import {
 } from "../seo/site";
 import { productKeywords } from "../utils/tags";
 import {
+  availableStock,
   cartLineKey,
+  colorStock,
   pickColor,
   productColors,
   productPhotos,
+  totalStock,
   withSelectedColor,
 } from "../utils/productColors";
 
@@ -95,9 +98,10 @@ export default function ProductDetail() {
   }
 
   const sale = getSalePrice(product);
-  const stock = product.stock ?? 0;
   const colors = productColors(product);
   const selected = pickColor(product, colorName);
+  const stock = availableStock(product, colorName);
+  const anyLeft = totalStock(product) > 0;
   const line = withSelectedColor(product, colorName);
   const inCart =
     cart.find((item) => cartLineKey(item) === cartLineKey(line))?.quantity ?? 0;
@@ -141,7 +145,7 @@ export default function ProductDetail() {
         priceCurrency: "GEL",
         price: sale.final.toFixed(2),
         availability:
-          stock > 0
+          anyLeft
             ? "https://schema.org/InStock"
             : "https://schema.org/OutOfStock",
         itemCondition: "https://schema.org/UsedCondition",
@@ -181,7 +185,7 @@ export default function ProductDetail() {
         <div className="pd-buy">
           <p className="pd-kicker">{product.platform || product.category}</p>
           <h1>{product.title}</h1>
-          {stock > 0 && <p className="pd-ok">შემოწმებული და მუშა</p>}
+          {anyLeft && <p className="pd-ok">შემოწმებული და მუშა</p>}
 
           <div className="pd-price">
             <strong>{formatGel(sale.final)}</strong>
@@ -197,19 +201,21 @@ export default function ProductDetail() {
             <div className="pd-colors">
               <p>
                 ფერი: <strong>{selected?.name}</strong>
+                {selected ? ` · ${colorStock(selected)} ცალი` : ""}
               </p>
               <div className="pd-swatches">
                 {colors.map((item) => (
                   <button
                     key={item.name}
                     type="button"
-                    className={item.name === selected?.name ? "is-on" : ""}
+                    className={`${item.name === selected?.name ? "is-on" : ""}${colorStock(item) <= 0 ? " is-sold" : ""}`}
                     style={{ background: item.hex }}
-                    aria-label={item.name}
-                    title={item.name}
+                    aria-label={`${item.name} — ${colorStock(item)} ცალი`}
+                    title={`${item.name} — ${colorStock(item)} ცალი`}
                     onClick={() => {
                       setColorName(item.name);
                       setPhoto(0);
+                      setQty(1);
                     }}
                   />
                 ))}
@@ -234,7 +240,9 @@ export default function ProductDetail() {
 
           {stock <= 0 ? (
             <button type="button" className="pd-sold" disabled>
-              {t("sold")}
+              {anyLeft && selected
+                ? `${selected.name} ამოიწურა — აირჩიე სხვა ფერი`
+                : t("sold")}
             </button>
           ) : (
             <>
@@ -279,6 +287,7 @@ export default function ProductDetail() {
               {stock <= 3 && (
                 <p className="pd-low">
                   {t("left")} {stock}
+                  {selected ? ` · ${selected.name}` : ""}
                 </p>
               )}
             </>
@@ -312,7 +321,7 @@ export default function ProductDetail() {
                     <strong>{formatGel(itemSale.final)}</strong>
                     <button
                       type="button"
-                      disabled={added || (item.stock ?? 0) <= 0}
+                      disabled={added || totalStock(item) <= 0}
                       onClick={() => addToCart(item)}
                     >
                       {added ? "კალათაშია" : "დამატება"}
