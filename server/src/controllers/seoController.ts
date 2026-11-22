@@ -56,13 +56,19 @@ function isoDay(date?: Date | string) {
   return value.toISOString().slice(0, 10);
 }
 
+function sendSitemap(res: Response, body: string) {
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=1800");
+  res.send(
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${body}</urlset>`,
+  );
+}
+
 export async function sitemapXml(_req: Request, res: Response) {
+  try {
   const [products, cards] = await Promise.all([
-    Product.find({
-      isHeroBanner: { $ne: true },
-      category: { $nin: ["banner-hero", "banner-middle", "banner-bottom"] },
-    })
-      .select("title imageUrl createdAt updatedAt category")
+    Product.find()
+      .select("title imageUrl createdAt updatedAt category isHeroBanner")
       .lean(),
     PlatformCard.find().select("brand slug name").lean(),
   ]);
@@ -134,11 +140,14 @@ export async function sitemapXml(_req: Request, res: Response) {
     })
     .join("");
 
-  res.setHeader("Content-Type", "application/xml; charset=utf-8");
-  res.setHeader("Cache-Control", "public, max-age=1800");
-  res.send(
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${body}</urlset>`,
-  );
+  sendSitemap(res, body);
+  } catch (err) {
+    console.error("sitemap.xml:", err);
+    sendSitemap(
+      res,
+      `<url><loc>${escapeXml(sitePath("/"))}</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+    );
+  }
 }
 
 export function robotsTxt(_req: Request, res: Response) {

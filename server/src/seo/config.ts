@@ -1,8 +1,18 @@
 import type { Request } from "express";
 
-export const SITE_URL = (process.env.SITE_URL || "https://retrobit.ge").replace(
-  /\/+$/,
-  "",
+function publicSiteUrl(raw: string) {
+  const trimmed = String(raw || "").replace(/\/+$/, "");
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname === "retrobit.ge") url.hostname = "www.retrobit.ge";
+    return url.origin;
+  } catch {
+    return "https://www.retrobit.ge";
+  }
+}
+
+export const SITE_URL = publicSiteUrl(
+  process.env.SITE_URL || "https://www.retrobit.ge",
 );
 
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/retrobit.png`;

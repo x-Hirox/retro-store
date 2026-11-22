@@ -11,4 +11,4 @@ Disallow: /reset-password
 Disallow: /verify-email
 Disallow: /order-success
 
-Sitemap: https://retrobit.ge/sitemap.xml
+Sitemap: https://www.retrobit.ge/sitemap.xml

@@ -1,4 +1,4 @@
-export const SITE_URL = "https://retrobit.ge";
+export const SITE_URL = "https://www.retrobit.ge";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/retrobit.png`;
 export const DEFAULT_TITLE =
   "RetroBit — რეტრო კონსოლები და თამაშები საქართველოში";

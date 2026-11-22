@@ -51,8 +51,18 @@ app.use(
   }),
 );
 app.use(securityHeaders);
-app.get("/sitemap.xml", (req, res, next) => {
-  sitemapXml(req, res).catch(next);
+app.get("/sitemap.xml", (req, res) => {
+  sitemapXml(req, res).catch((err) => {
+    console.error("sitemap.xml:", err);
+    if (!res.headersSent) {
+      res.setHeader("Content-Type", "application/xml; charset=utf-8");
+      res
+        .status(200)
+        .send(
+          `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://www.retrobit.ge/</loc></url></urlset>`,
+        );
+    }
+  });
 });
 app.get("/robots.txt", robotsTxt);
 app.use(seoCrawlerMiddleware);
