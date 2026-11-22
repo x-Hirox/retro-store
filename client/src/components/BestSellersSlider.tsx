@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
-import { formatGel, getSalePrice, isBannerProduct } from "../utils/pricing";
+import { formatGel, getSalePrice, isBannerProduct, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { useLang } from "../i18n/LanguageContext";
 import { colorStock, totalStock } from "../utils/productColors";
@@ -165,6 +165,7 @@ export default function BestSellersSlider({
               : regularProducts
             ).map((product) => {
               const sale = getSalePrice(product);
+              const range = saleRange(product);
               return (
               <HoloCard
                 key={product._id}
@@ -273,7 +274,9 @@ export default function BestSellersSlider({
                         color: "var(--text-h)",
                       }}
                     >
-                      {formatGel(sale.final)}
+                      {range.min !== range.max
+                        ? `${formatGel(range.min)}-დან`
+                        : formatGel(sale.final)}
                     </span>
                     {sale.discount > 0 && (
                     <span

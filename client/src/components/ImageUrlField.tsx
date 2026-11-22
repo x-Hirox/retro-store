@@ -250,19 +250,56 @@ export function ProductColorsField({
             value={item.name}
             onChange={(e) => patch(index, { name: e.target.value })}
           />
-          <label className="color-admin-qty">
-            ცალი
-            <input
-              type="number"
-              min={0}
-              max={999}
-              placeholder="0"
-              value={item.stock ?? 0}
-              onChange={(e) =>
-                patch(index, { stock: Math.max(0, Number(e.target.value) || 0) })
-              }
-            />
-          </label>
+          <div className="color-admin-nums">
+            <label className="color-admin-qty">
+              ცალი
+              <input
+                type="number"
+                min={0}
+                max={999}
+                placeholder="0"
+                value={item.stock ?? 0}
+                onChange={(e) =>
+                  patch(index, { stock: Math.max(0, Number(e.target.value) || 0) })
+                }
+              />
+            </label>
+            <label className="color-admin-qty">
+              ფასი ₾
+              <input
+                type="number"
+                min={0}
+                step="1"
+                placeholder="როგორც პროდუქტზე"
+                value={item.price ?? ""}
+                onChange={(e) =>
+                  patch(index, {
+                    price: e.target.value === "" ? null : Number(e.target.value),
+                  })
+                }
+              />
+            </label>
+            <label className="color-admin-qty">
+              ფასდაკლება %
+              <input
+                type="number"
+                min={0}
+                max={90}
+                placeholder="როგორც პროდუქტზე"
+                value={item.discount ?? ""}
+                onChange={(e) =>
+                  patch(index, {
+                    discount:
+                      e.target.value === "" ? null : Number(e.target.value),
+                  })
+                }
+              />
+            </label>
+          </div>
+          <p className="image-url-hint">
+            ცარიელი ფასი/ფასდაკლება = პროდუქტის ზედა ველები. 0% ნიშნავს ამ ფერზე
+            ფასდაკლება არაა.
+          </p>
           <ImageUrlField
             value={item.imageUrl || ""}
             onChange={(url) => patch(index, { imageUrl: url })}

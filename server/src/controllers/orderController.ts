@@ -60,9 +60,25 @@ async function restoreStock(order: {
   }
 }
 
-function unitPrice(product: { price: number; discount?: number }): number {
-  const discount = Math.min(100, Math.max(0, Number(product.discount) || 0));
-  return Math.round(Number(product.price) * (1 - discount / 100) * 100) / 100;
+function unitPrice(
+  product: {
+    price: number;
+    discount?: number;
+    colors?: { name?: string; price?: number | null; discount?: number | null }[];
+  },
+  colorName?: string,
+): number {
+  const color = colorName
+    ? product.colors?.find((row) => row.name === colorName)
+    : undefined;
+  const price =
+    color && Number(color.price) > 0 ? Number(color.price) : Number(product.price);
+  const discountRaw =
+    color && color.discount != null && Number.isFinite(Number(color.discount))
+      ? Number(color.discount)
+      : Number(product.discount) || 0;
+  const discount = Math.min(100, Math.max(0, discountRaw || 0));
+  return Math.round(price * (1 - discount / 100) * 100) / 100;
 }
 
 export const addOrderItems = async (
@@ -140,7 +156,7 @@ export const addOrderItems = async (
         if (!updated) {
           throw new Error("stock");
         }
-        const price = unitPrice(product);
+        const price = unitPrice(product, hasColors ? color : "");
         const colorMatch = product.colors?.find((row) => row.name === color);
         decremented.push({ id: String(product._id), qty, color: hasColors ? color : "" });
         pricedItems.push({

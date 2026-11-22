@@ -1,4 +1,5 @@
 import type { IProduct } from "../types";
+import { productColors, withSelectedColor } from "./productColors";
 
 export function getSalePrice(product: IProduct) {
   const discount = Number(product.discount) || 0;
@@ -15,6 +16,18 @@ export function getSalePrice(product: IProduct) {
 export function formatGel(n: number) {
   const v = Math.round(Number(n) || 0);
   return `${v} ₾`;
+}
+
+export function saleRange(product: IProduct) {
+  const colors = productColors(product);
+  if (colors.length === 0) {
+    const sale = getSalePrice(product);
+    return { min: sale.final, max: sale.final };
+  }
+  const finals = colors.map(
+    (item) => getSalePrice(withSelectedColor(product, item.name)).final,
+  );
+  return { min: Math.min(...finals), max: Math.max(...finals) };
 }
 
 export function isBannerProduct(product: IProduct) {

@@ -97,12 +97,12 @@ export default function ProductDetail() {
     );
   }
 
-  const sale = getSalePrice(product);
   const colors = productColors(product);
   const selected = pickColor(product, colorName);
   const stock = availableStock(product, colorName);
   const anyLeft = totalStock(product) > 0;
   const line = withSelectedColor(product, colorName);
+  const sale = getSalePrice(line);
   const inCart =
     cart.find((item) => cartLineKey(item) === cartLineKey(line))?.quantity ?? 0;
   const maxQty = Math.max(1, stock);
@@ -204,21 +204,31 @@ export default function ProductDetail() {
                 {selected ? ` · ${colorStock(selected)} ცალი` : ""}
               </p>
               <div className="pd-swatches">
-                {colors.map((item) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    className={`${item.name === selected?.name ? "is-on" : ""}${colorStock(item) <= 0 ? " is-sold" : ""}`}
-                    style={{ background: item.hex }}
-                    aria-label={`${item.name} — ${colorStock(item)} ცალი`}
-                    title={`${item.name} — ${colorStock(item)} ცალი`}
-                    onClick={() => {
-                      setColorName(item.name);
-                      setPhoto(0);
-                      setQty(1);
-                    }}
-                  />
-                ))}
+                {colors.map((item) => {
+                  const option = getSalePrice(withSelectedColor(product, item.name));
+                  const left = colorStock(item);
+                  return (
+                    <button
+                      key={item.name}
+                      type="button"
+                      className={`pd-swatch${item.name === selected?.name ? " is-on" : ""}${left <= 0 ? " is-sold" : ""}`}
+                      onClick={() => {
+                        setColorName(item.name);
+                        setPhoto(0);
+                        setQty(1);
+                      }}
+                    >
+                      <i style={{ background: item.hex }} />
+                      <span>
+                        <strong>{item.name}</strong>
+                        <small>
+                          {left <= 0 ? "SOLD" : `${left} ცალი`} · {formatGel(option.final)}
+                          {option.discount > 0 ? ` (−${option.discount}%)` : ""}
+                        </small>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

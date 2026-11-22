@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
-import { formatGel, getSalePrice } from "../utils/pricing";
+import { formatGel, getSalePrice, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { productImageAlt } from "../utils/imageAlt";
 import { colorStock, totalStock } from "../utils/productColors";
@@ -8,9 +8,11 @@ import { colorStock, totalStock } from "../utils/productColors";
 export default function ProductCard({ product }: { product: IProduct }) {
   const navigate = useNavigate();
   const { original, final, discount } = getSalePrice(product);
+  const range = saleRange(product);
   const left = totalStock(product);
   const sold = left <= 0;
   const low = !sold && left <= 3;
+  const fromPrice = range.min !== range.max;
 
   return (
     <HoloCard
@@ -53,8 +55,10 @@ export default function ProductCard({ product }: { product: IProduct }) {
       )}
 
       <div className="card-price">
-        <span className="card-price-now">{formatGel(final)}</span>
-        {discount > 0 && (
+        <span className="card-price-now">
+          {fromPrice ? `${formatGel(range.min)}-დან` : formatGel(final)}
+        </span>
+        {discount > 0 && !fromPrice && (
           <span className="card-price-was">{formatGel(original)}</span>
         )}
       </div>

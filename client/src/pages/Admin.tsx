@@ -517,10 +517,16 @@ export default function Admin() {
                             }${p.platform ? ` · ${p.platform}` : ""}${
                               p.colors?.length
                                 ? ` · ${p.colors
-                                    .map(
-                                      (c) =>
-                                        `${c.name} ${Number(c.stock) || 0}`,
-                                    )
+                                    .map((c) => {
+                                      const qty = Number(c.stock) || 0;
+                                      const extra =
+                                        c.price
+                                          ? ` ${c.price}₾`
+                                          : c.discount != null
+                                            ? ` −${c.discount}%`
+                                            : "";
+                                      return `${c.name} ${qty}${extra}`;
+                                    })
                                     .join(", ")}`
                                 : ""
                             }`}

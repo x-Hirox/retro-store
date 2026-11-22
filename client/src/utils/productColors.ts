@@ -54,6 +54,19 @@ export function availableStock(product: IProduct, colorName?: string): number {
   return colorStock(pickColor(product, colorName));
 }
 
+export function variantPrice(product: IProduct, color?: IProductColor): number {
+  const n = Number(color?.price);
+  if (Number.isFinite(n) && n > 0) return n;
+  return Number(product.price) || 0;
+}
+
+export function variantDiscount(product: IProduct, color?: IProductColor): number {
+  if (color && color.discount != null && Number.isFinite(Number(color.discount))) {
+    return Math.min(90, Math.max(0, Number(color.discount)));
+  }
+  return Math.min(90, Math.max(0, Number(product.discount) || 0));
+}
+
 export function withSelectedColor(product: IProduct, colorName?: string) {
   const selected = pickColor(product, colorName);
   if (!selected) {
@@ -68,6 +81,8 @@ export function withSelectedColor(product: IProduct, colorName?: string) {
     ...product,
     imageUrl: selected.imageUrl || product.imageUrl,
     stock: availableStock(product, selected.name),
+    price: variantPrice(product, selected),
+    discount: variantDiscount(product, selected),
     selectedColor: selected.name,
     selectedColorHex: selected.hex,
   };

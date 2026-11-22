@@ -31,11 +31,37 @@ function cleanStock(value: unknown): number {
   return Math.min(999, n);
 }
 
-function cleanColors(
-  value: unknown,
-): { name: string; hex: string; imageUrl: string; stock: number }[] {
+function optionalPrice(value: unknown): number | null {
+  if (value === "" || value == null) return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.round(Math.min(99999, n) * 100) / 100;
+}
+
+function optionalDiscount(value: unknown): number | null {
+  if (value === "" || value == null) return null;
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n)) return null;
+  return Math.min(90, Math.max(0, n));
+}
+
+function cleanColors(value: unknown): {
+  name: string;
+  hex: string;
+  imageUrl: string;
+  stock: number;
+  price: number | null;
+  discount: number | null;
+}[] {
   if (!Array.isArray(value)) return [];
-  const out: { name: string; hex: string; imageUrl: string; stock: number }[] = [];
+  const out: {
+    name: string;
+    hex: string;
+    imageUrl: string;
+    stock: number;
+    price: number | null;
+    discount: number | null;
+  }[] = [];
   const seen = new Set<string>();
   for (const item of value) {
     if (!item || typeof item !== "object") continue;
@@ -44,6 +70,8 @@ function cleanColors(
       hex?: unknown;
       imageUrl?: unknown;
       stock?: unknown;
+      price?: unknown;
+      discount?: unknown;
     };
     const name = String(row.name || "").trim().slice(0, 40);
     if (!name || seen.has(name.toLowerCase())) continue;
@@ -57,6 +85,8 @@ function cleanColors(
       hex: cleanHex(row.hex),
       imageUrl,
       stock: cleanStock(row.stock),
+      price: optionalPrice(row.price),
+      discount: optionalDiscount(row.discount),
     });
     if (out.length >= 8) break;
   }

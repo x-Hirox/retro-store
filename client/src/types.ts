@@ -3,6 +3,8 @@ export interface IProductColor {
   hex: string;
   imageUrl?: string;
   stock?: number;
+  price?: number | null;
+  discount?: number | null;
 }
 
 export interface IProduct {

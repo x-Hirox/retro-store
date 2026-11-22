@@ -5,6 +5,8 @@ export interface IProductColor {
   hex: string;
   imageUrl?: string;
   stock?: number;
+  price?: number | null;
+  discount?: number | null;
 }
 
 export interface IProduct extends Document {
@@ -41,6 +43,8 @@ const ProductSchema = new Schema<IProduct>({
           hex: { type: String, default: "#111111" },
           imageUrl: { type: String, default: "" },
           stock: { type: Number, default: 0, min: 0 },
+          price: { type: Number, default: null },
+          discount: { type: Number, default: null },
         },
         { _id: false },
       ),
