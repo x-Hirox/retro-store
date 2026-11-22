@@ -1,6 +1,80 @@
+import { Readable } from "node:stream";
 import type { Response } from "express";
 import { v2 as cloudinary } from "cloudinary";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
+
+function parseCloudinaryUrl(raw: string) {
+  const trimmed = raw.trim().replace(/^cloudinary:\/\//i, "");
+  const at = trimmed.lastIndexOf("@");
+  if (at < 1) return null;
+  const creds = trimmed.slice(0, at);
+  const cloud_name = trimmed.slice(at + 1).split(/[/?#]/)[0] || "";
+  const colon = creds.indexOf(":");
+  if (colon < 1) return null;
+  const api_key = decodeURIComponent(creds.slice(0, colon));
+  const api_secret = decodeURIComponent(creds.slice(colon + 1));
+  if (
+    !api_key ||
+    !api_secret ||
+    !cloud_name ||
+    /your_api|api_key|api_secret|<|>/i.test(`${api_key}${api_secret}`)
+  ) {
+    return null;
+  }
+  return { api_key, api_secret, cloud_name };
+}
+
+function configureCloudinary(): boolean {
+  const fromUrl = parseCloudinaryUrl(process.env.CLOUDINARY_URL || "");
+  if (fromUrl) {
+    cloudinary.config({ ...fromUrl, secure: true });
+    return true;
+  }
+  const cloud_name = process.env.CLOUDINARY_CLOUD_NAME || "";
+  const api_key = process.env.CLOUDINARY_API_KEY || "";
+  const api_secret = process.env.CLOUDINARY_API_SECRET || "";
+  if (cloud_name && api_key && api_secret) {
+    cloudinary.config({ cloud_name, api_key, api_secret, secure: true });
+    return true;
+  }
+  return false;
+}
+
+function uploadBuffer(file: { buffer: Buffer }): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "retrobit",
+        resource_type: "image",
+        overwrite: false,
+      },
+      (error, result) => {
+        if (error || !result?.secure_url) {
+          reject(error || new Error("Cloudinary URL არ დაბრუნდა"));
+          return;
+        }
+        resolve(result.secure_url);
+      },
+    );
+    Readable.from(file.buffer).pipe(stream);
+  });
+}
+
+function publicUploadError(error: unknown): string {
+  const err = error as {
+    message?: string;
+    error?: { message?: string };
+    http_code?: number;
+  };
+  const msg = String(err.error?.message || err.message || "");
+  if (/api[_ ]?key|signature|cloud_name|must supply|invalid/i.test(msg)) {
+    return "Cloudinary გასაღები არასწორია. Render Environment-ში შეამოწმე CLOUDINARY_URL.";
+  }
+  if (/timeout|econnreset|enotfound|network/i.test(msg)) {
+    return "Cloudinary-სთან კავშირი ვერ დამყარდა. ცოტა ხანში სცადე.";
+  }
+  return "სურათის ატვირთვა ვერ მოხერხდა. JPG/PNG/WEBP, მაქსიმუმ 10MB.";
+}
 
 export const uploadImage = async (
   req: AuthenticatedRequest,
@@ -8,41 +82,23 @@ export const uploadImage = async (
 ): Promise<void> => {
   try {
     const file = req.file;
-    if (!file) {
+    if (!file?.buffer?.length) {
       res.status(400).json({ message: "სურათი არ არის არჩეული" });
       return;
     }
 
-    const cloudName =
-      process.env.CLOUDINARY_CLOUD_NAME ||
-      process.env.CLOUDINARY_URL?.match(/@([^/]+)/)?.[1];
-    if (!process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_API_KEY) {
+    if (!configureCloudinary()) {
       res.status(501).json({
         message:
-          "Cloudinary არ არის გამართული. ჩასვი სურათის ლინკი ან დაამატე CLOUDINARY_URL Render-ზე.",
+          "Cloudinary არ არის გამართული. Render-ზე ჩაწერე CLOUDINARY_URL (cloudinary://KEY:SECRET@CLOUD_NAME).",
       });
       return;
     }
 
-    if (process.env.CLOUDINARY_URL) {
-      cloudinary.config({ secure: true });
-    } else {
-      cloudinary.config({
-        cloud_name: cloudName,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-        secure: true,
-      });
-    }
-
-    const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-    const uploaded = await cloudinary.uploader.upload(dataUri, {
-      folder: "retrobit",
-      resource_type: "image",
-    });
-    res.json({ url: uploaded.secure_url });
+    const url = await uploadBuffer(file);
+    res.json({ url });
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({ message: "სურათის ატვირთვა ვერ მოხერხდა" });
+    res.status(500).json({ message: publicUploadError(error) });
   }
 };

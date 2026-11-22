@@ -61,6 +61,7 @@ app.post(
   express.raw({ type: "*/*", limit: "200kb" }),
   bogCallback,
 );
+app.use("/api/uploads", uploadRoutes);
 app.use(express.json({ limit: "80kb" }));
 app.post("/api/payments/tbc/callback", tbcCallback);
 app.get("/api/payments/return/:orderId", paymentReturn);
@@ -79,7 +80,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/content", contentRoutes);
-app.use("/api/uploads", uploadRoutes);
 
 app.get("/", (_req, res) => {
   res.status(200).send("Retro-Store API is running successfully!");

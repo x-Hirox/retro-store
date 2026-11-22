@@ -56,7 +56,7 @@ export default function ImageUrlField({
             : "ფოტოს ატვირთვა კომპიუტერიდან"}
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,.svg"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.svg"
           hidden
           disabled={busy}
           onChange={(e) => {
@@ -155,7 +155,7 @@ export function GalleryImagesField({
         {busy ? "იტვირთება..." : "კიდევ სურათის დამატება"}
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif"
           hidden
           disabled={busy || images.length >= 8}
           onChange={(e) => {

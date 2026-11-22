@@ -11,20 +11,26 @@ function resolveApiBaseUrl(): string {
 
 const API = axios.create({
   baseURL: resolveApiBaseUrl(),
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
-// მოთხოვნის გაგზავნისას ტოკენის მიმაგრება
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const headers = config.headers;
+  if (token && headers) {
+    headers.Authorization = `Bearer ${token}`;
   }
-  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
-    const headers = config.headers as { delete?: (key: string) => void };
-    headers.delete?.("Content-Type");
+  const isForm =
+    typeof FormData !== "undefined" && config.data instanceof FormData;
+  if (isForm && headers) {
+    if (typeof headers.delete === "function") {
+      headers.delete("Content-Type");
+      headers.delete("content-type");
+    } else {
+      delete (headers as { [key: string]: unknown })["Content-Type"];
+      delete (headers as { [key: string]: unknown })["content-type"];
+    }
+  } else if (headers && !headers["Content-Type"] && !headers["content-type"]) {
+    headers["Content-Type"] = "application/json";
   }
   return config;
 });

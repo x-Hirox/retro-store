@@ -5,11 +5,15 @@ import { uploadImage } from "../controllers/uploadController.js";
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 4 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
+    const type = String(file.mimetype || "").toLowerCase();
+    const name = String(file.originalname || "").toLowerCase();
     if (
-      /^image\/(jpeg|png|webp|gif|svg\+xml)$/.test(file.mimetype) ||
-      file.originalname?.toLowerCase().endsWith(".svg")
+      /^image\/(jpeg|jpg|pjpeg|png|webp|gif|svg\+xml|heic|heif|avif)$/.test(
+        type,
+      ) ||
+      /\.(jpe?g|png|webp|gif|svg|heic|heif|avif)$/.test(name)
     ) {
       cb(null, true);
       return;
@@ -32,7 +36,7 @@ router.post(
       const multerErr = err as { code?: string; message?: string };
       const message =
         multerErr.code === "LIMIT_FILE_SIZE"
-          ? "სურათი 4MB-ზე დიდია — შეამცირე ან ჩასვი Cloudinary ლინკი."
+          ? "სურათი 10MB-ზე დიდია — შეამცირე ან ჩასვი Cloudinary ლინკი."
           : multerErr.message || "სურათის ატვირთვა ვერ მოხდა";
       res.status(400).json({ message });
     });
