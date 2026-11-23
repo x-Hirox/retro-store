@@ -60,7 +60,7 @@ const categoriesData = [
   },
   {
     name: "Chinese Consoles",
-    sub: ["R36S", "Anbernic", "Miyoo Mini", "PowKiddy", "Retroid Pocket"],
+    sub: ["R36S", "M15 Pro", "Anbernic", "Miyoo Mini", "PowKiddy", "Retroid Pocket"],
   },
   {
     name: "Bundles",

@@ -11,7 +11,7 @@ import { totalStock } from "../utils/productColors";
 function isGiftProduct(product: IProduct) {
   if (isBannerProduct(product)) return false;
   const hay =
-    `${product.title} ${product.category} ${product.platform} ${product.genre} ${product.description}`.toLowerCase();
+    `${product.title} ${product.category} ${product.platform} ${product.genre} ${product.description} ${(product.tags || []).join(" ")}`.toLowerCase();
   return /gift|საჩუქარ|bundle|ბუნდლ|კომპლექტ|starter|collector/.test(hay);
 }
 

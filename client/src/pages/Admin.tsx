@@ -58,6 +58,7 @@ const PLATFORM_OPTIONS = [
   "Sega Saturn",
   "Sega Dreamcast",
   "R36S",
+  "M15 Pro",
   "Anbernic",
   "Miyoo Mini",
   "PowKiddy",
@@ -440,7 +441,7 @@ export default function Admin() {
                   />
                   <input
                     type="text"
-                    placeholder="თეგები: R36S, handheld, საჩუქარი"
+                    placeholder="თეგები: M15 Pro, Game Stick, საჩუქარი, ახალი"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     style={inputStyle}

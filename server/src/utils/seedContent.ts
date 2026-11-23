@@ -385,6 +385,14 @@ export async function seedContentIfEmpty() {
       imageUrl: "/images/platforms/r36s.png",
       order: 0,
     },
+    {
+      brand: "chinese consoles",
+      name: "M15 Pro",
+      slug: "m15-pro",
+      year: "2024",
+      imageUrl: "/images/platforms/m15-pro.png",
+      order: 1,
+    },
   ];
   for (const card of [...nintendoHandhelds, ...chineseHandhelds]) {
     const existing = await PlatformCard.findOne({
