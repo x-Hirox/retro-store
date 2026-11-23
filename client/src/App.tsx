@@ -19,6 +19,8 @@ import { VerifyEmail } from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import CartDrawer from "./components/CartDrawer";
 import SiteFooter from "./components/SiteFooter";
+import AuthModal from "./components/AuthModal";
+import { AuthModalProvider } from "./context/AuthModalContext";
 import Arcade from "./pages/Arcade";
 import Sell from "./pages/Sell";
 import Gifts from "./pages/Gifts";
@@ -101,6 +103,7 @@ export default function App() {
 
   return (
     <Router>
+      <AuthModalProvider>
       <div
         className="site-shell"
         style={{
@@ -180,7 +183,9 @@ export default function App() {
         </div>
         <SiteFooter />
         <CartDrawer />
+        <AuthModal />
       </div>
+      </AuthModalProvider>
     </Router>
   );
 }

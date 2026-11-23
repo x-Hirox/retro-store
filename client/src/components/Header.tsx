@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
+import { useAuthModal } from "../context/AuthModalContext";
 
 interface HeaderProps {
   categoriesData: Array<{
@@ -21,6 +22,7 @@ export default function Header({
 }: HeaderProps) {
   const { t, lang, setLang } = useLang();
   const { openCartDrawer } = useCart();
+  const authModal = useAuthModal();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDark, setIsDark] = useState(() => {
@@ -133,23 +135,15 @@ export default function Header({
               </button>
             </>
           ) : (
-            <>
-              <Link
-                to="/login"
-                className="neon-btn icon-btn auth-login"
-                title={t("login")}
-              >
-                🔑
-                <span className="btn-label">{t("login")}</span>
-              </Link>
-              <Link
-                to="/register"
-                className="neon-btn icon-btn auth-register"
-                title={t("register")}
-              >
-                <span className="btn-label">{t("register")}</span>
-              </Link>
-            </>
+            <button
+              type="button"
+              className="neon-btn icon-btn auth-login"
+              title={t("login")}
+              onClick={() => authModal.show("login")}
+            >
+              🔑
+              <span className="btn-label">{t("login")}</span>
+            </button>
           )}
         </div>
       </div>
@@ -184,7 +178,7 @@ export default function Header({
           </div>
         ))}
         <Link to="/gifts" className="gifts-nav-link">
-          GIFTS
+          {t("gifts")}
         </Link>
         <Link to="/sell" className="sell-nav-link">
           {t("sellNav")}

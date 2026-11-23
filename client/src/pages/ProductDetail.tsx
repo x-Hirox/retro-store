@@ -187,13 +187,6 @@ export default function ProductDetail() {
     }
   };
 
-  const pickPhoto = (index: number) => {
-    setPhoto(index);
-    const url = photos[index];
-    const match = colors.find((item) => item.imageUrl === url);
-    if (match) setColorName(match.name);
-  };
-
   return (
     <div className={`pd-page nbit-slot${sticky && stock > 0 ? " has-sticky" : ""}`}>
       <SeoHead
@@ -210,26 +203,28 @@ export default function ProductDetail() {
         <Link to="/">მთავარი</Link>
         <span>/</span>
         <Link to={categoryPath}>{product.category || "კატეგორია"}</Link>
-        <span>/</span>
-        <em>{product.title}</em>
       </nav>
+
+      <div className="pd-heading">
+        <div>
+          <p className="pd-kicker">{product.platform || product.category}</p>
+          <h1>{product.title}</h1>
+        </div>
+        <p className="pd-sku">#{shortProductId(product._id)}</p>
+      </div>
 
       <div className="pd-layout">
         <ProductPhotos
           title={product.title}
           photos={photos}
           active={photo}
-          onSelect={pickPhoto}
+          onSelect={setPhoto}
         />
 
         <div className="pd-facts">
-          <p className="pd-kicker">{product.platform || product.category}</p>
-          <h1>{product.title}</h1>
-          <p className="pd-sku">#{shortProductId(product._id)}</p>
-          {copy.intro ? <p className="pd-lead">{copy.intro}</p> : null}
           {facts.length > 0 ? (
             <dl className="pd-spec-table">
-              {facts.slice(0, 10).map((row) => (
+              {facts.slice(0, 7).map((row) => (
                 <div key={row.label}>
                   <dt>{row.label}</dt>
                   <dd>{row.value}</dd>
@@ -237,20 +232,7 @@ export default function ProductDetail() {
               ))}
             </dl>
           ) : (
-            <p className="pd-desc">{product.description}</p>
-          )}
-          {!!product.tags?.length && (
-            <div className="pd-tags">
-              {product.tags.map((tag) => (
-                <Link
-                  key={tag}
-                  to={`/?search=${encodeURIComponent(tag)}`}
-                  className="pd-tag"
-                >
-                  #{tag}
-                </Link>
-              ))}
-            </div>
+            <p className="pd-desc">{copy.intro || product.description}</p>
           )}
         </div>
 
@@ -272,9 +254,7 @@ export default function ProductDetail() {
 
           <div className="pd-trust">
             <span>{stock > 0 ? "მარაგშია" : "ამოიწურა"}</span>
-            <span>ფასი ₾</span>
             <span>თბილისი</span>
-            <span>ბარათი</span>
           </div>
 
           {colors.length > 0 && (
@@ -595,7 +575,10 @@ function ProductPhotos({
   onSelect: (index: number) => void;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
+  const drag = useRef({ x: 0, moved: false, down: false });
   const [open, setOpen] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [grabbing, setGrabbing] = useState(false);
   const index = photos.length === 0 ? 0 : Math.min(active, photos.length - 1);
   const current = photos[index];
 
@@ -605,7 +588,22 @@ function ProductPhotos({
   };
 
   const slideThumbs = (dir: number) => {
-    scroller.current?.scrollBy({ left: dir * 168, behavior: "smooth" });
+    scroller.current?.scrollBy({ left: dir * 140, behavior: "smooth" });
+  };
+
+  const endDrag = (clientX: number) => {
+    if (!drag.current.down) return;
+    const dx = clientX - drag.current.x;
+    const moved = drag.current.moved;
+    drag.current.down = false;
+    drag.current.moved = false;
+    setGrabbing(false);
+    setDragX(0);
+    if (moved && Math.abs(dx) > 42 && photos.length > 1) {
+      go(dx < 0 ? 1 : -1);
+      return;
+    }
+    if (!moved && current) setOpen(true);
   };
 
   useEffect(() => {
@@ -626,7 +624,36 @@ function ProductPhotos({
 
   return (
     <div className="pd-gallery">
-      <div className="pd-photo">
+      <div
+        className={`pd-photo${grabbing ? " is-grabbing" : ""}`}
+        role="button"
+        tabIndex={0}
+        aria-label="სურათის გადიდება. გადაადგილე ან გაიყვანე სხვა ფოტოზე."
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (current) setOpen(true);
+          }
+        }}
+        onPointerDown={(event) => {
+          if (event.button !== 0 || (event.target as HTMLElement).closest(".pd-photo-nav")) {
+            return;
+          }
+          drag.current = { x: event.clientX, moved: false, down: true };
+          setGrabbing(true);
+        }}
+        onPointerMove={(event) => {
+          if (!drag.current.down) return;
+          const dx = event.clientX - drag.current.x;
+          if (!drag.current.moved && Math.abs(dx) > 8) {
+            drag.current.moved = true;
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }
+          if (drag.current.moved) setDragX(dx);
+        }}
+        onPointerUp={(event) => endDrag(event.clientX)}
+        onPointerCancel={(event) => endDrag(event.clientX)}
+      >
         {photos.length > 1 && (
           <button
             type="button"
@@ -638,14 +665,14 @@ function ProductPhotos({
           </button>
         )}
         {current ? (
-          <button
-            type="button"
-            className="pd-photo-open"
-            onClick={() => setOpen(true)}
-            aria-label="სურათის გადიდება"
-          >
-            <img src={current} alt={productImageAlt({ title })} />
-          </button>
+          <img
+            src={current}
+            alt={productImageAlt({ title })}
+            draggable={false}
+            style={{
+              transform: dragX ? `translateX(${Math.round(dragX * 0.35)}px)` : undefined,
+            }}
+          />
         ) : (
           <span style={{ fontSize: "3rem" }}>🕹️</span>
         )}
@@ -676,6 +703,8 @@ function ProductPhotos({
                 key={url}
                 type="button"
                 className={item === index ? "is-on" : ""}
+                onMouseEnter={() => onSelect(item)}
+                onFocus={() => onSelect(item)}
                 onClick={() => onSelect(item)}
                 aria-label={`${title} — ფოტო ${item + 1}`}
               >
@@ -740,6 +769,7 @@ function ProductPhotos({
                     key={url}
                     type="button"
                     className={item === index ? "is-on" : ""}
+                    onMouseEnter={() => onSelect(item)}
                     onClick={() => onSelect(item)}
                   >
                     <img src={url} alt="" />

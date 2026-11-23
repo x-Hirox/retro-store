@@ -1,8 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getSiteSettings } from "../services/contentService";
 import type { ISiteSettings } from "../types";
 import { useLang } from "../i18n/LanguageContext";
+import {
+  ClockMark,
+  FacebookMark,
+  InstagramMark,
+  MailMark,
+  PhoneMark,
+  PinMark,
+  TiktokMark,
+  YoutubeMark,
+} from "./FooterMarks";
 
 const PAYMENTS = [
   "Visa",
@@ -27,13 +37,14 @@ export default function SiteFooter() {
 
   if (location.pathname.startsWith("/admin")) return null;
 
+  const phone = settings?.footerPhone || "+995 595 95 00 39";
+  const email = settings?.footerEmail || "retrobit.support@gmail.com";
   const socials = [
-    ["Facebook", settings?.socialFacebook],
-    ["Instagram", settings?.socialInstagram],
-    ["TikTok", settings?.socialTiktok],
-    ["YouTube", settings?.socialYoutube],
-    ["X", settings?.socialX],
-  ].filter(([, url]) => /^https?:\/\//i.test(String(url || "")));
+    { label: "Facebook", href: settings?.socialFacebook, icon: <FacebookMark /> },
+    { label: "Youtube", href: settings?.socialYoutube, icon: <YoutubeMark /> },
+    { label: "Instagram", href: settings?.socialInstagram, icon: <InstagramMark /> },
+    { label: "Tik Tok", href: settings?.socialTiktok, icon: <TiktokMark /> },
+  ];
 
   return (
     <footer className="site-footer">
@@ -57,32 +68,29 @@ export default function SiteFooter() {
         </div>
         <div>
           <h4>გამოგვყევი</h4>
-          {socials.length > 0 ? (
-            <div className="footer-socials" aria-label="სოციალური ქსელები">
-              {socials.map(([label, url]) => (
-                <a key={label} href={String(url)} target="_blank" rel="noreferrer">
-                  {label}
-                </a>
-              ))}
-            </div>
-          ) : (
-            <p className="footer-note">სოციალური ბმულები მალე დაემატება.</p>
-          )}
+          <div className="footer-rows" aria-label="სოციალური ქსელები">
+            {socials.map((item) => (
+              <FooterRow
+                key={item.label}
+                href={httpUrl(item.href)}
+                icon={item.icon}
+                label={item.label}
+              />
+            ))}
+          </div>
         </div>
         <div className="footer-contact">
-          <h4>კონტაქტები</h4>
-          <p>
-            <a href={`tel:${(settings?.footerPhone || "+995 595 95 00 39").replace(/\s|-/g, "")}`}>
-              {settings?.footerPhone || "+995 595 95 00 39"}
-            </a>
-          </p>
-          <p>
-            <a href={`mailto:${settings?.footerEmail || "retrobit.support@gmail.com"}`}>
-              {settings?.footerEmail || "retrobit.support@gmail.com"}
-            </a>
-          </p>
-          <p>{settings?.footerHours || "ორშ–კვი 10:00–22:00"}</p>
-          <p>{settings?.footerAddress || "თბილისი, საქართველო"}</p>
+          <h4>კონტაქტი</h4>
+          <div className="footer-rows">
+            <FooterRow href={`mailto:${email}`} icon={<MailMark />} label={email} />
+            <FooterRow
+              href={`tel:${phone.replace(/\s|-/g, "")}`}
+              icon={<PhoneMark />}
+              label={phone}
+            />
+            <FooterRow icon={<ClockMark />} label={settings?.footerHours || "ორშ–კვი 10:00–22:00"} />
+            <FooterRow icon={<PinMark />} label={settings?.footerAddress || "თბილისი, საქართველო"} />
+          </div>
         </div>
       </div>
 
@@ -99,6 +107,40 @@ export default function SiteFooter() {
       </p>
     </footer>
   );
+}
+
+function httpUrl(value?: string) {
+  return /^https?:\/\//i.test(String(value || "")) ? String(value) : "";
+}
+
+function FooterRow({
+  href,
+  icon,
+  label,
+}: {
+  href?: string;
+  icon: ReactNode;
+  label: string;
+}) {
+  const inner = (
+    <>
+      <span className="footer-ico">{icon}</span>
+      <span>{label}</span>
+    </>
+  );
+  if (href) {
+    const external = href.startsWith("http");
+    return (
+      <a
+        className="footer-row"
+        href={href}
+        {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+      >
+        {inner}
+      </a>
+    );
+  }
+  return <span className="footer-row">{inner}</span>;
 }
 
 function FooterLink({ to, children }: { to: string; children: string }) {
