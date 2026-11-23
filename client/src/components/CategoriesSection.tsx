@@ -86,7 +86,7 @@ export default function CategoriesSection() {
 
   return (
     <div className="cats-wrap">
-      <h2 className="section-title cats-title ny-title">{t("shopByCategory")}</h2>
+      <h2 className="section-title cats-title">{t("shopByCategory")}</h2>
       <div className="category-mosaic">
         {categories.map((cat) => (
           <HoloCard

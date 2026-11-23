@@ -31,7 +31,7 @@ export default function BrandsSection() {
       }}
     >
       <h2
-        className="ny-title"
+        className="section-title"
         style={{
           textAlign: "center",
           marginBottom: "35px",

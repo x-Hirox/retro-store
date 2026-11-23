@@ -87,7 +87,7 @@ export default function BestSellersSlider({
         }}
       >
         <h2
-          className="section-title ny-title"
+          className="section-title"
           style={{
             color: "var(--text-h)",
             fontWeight: "900",

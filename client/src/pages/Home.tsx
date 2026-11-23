@@ -85,7 +85,7 @@ export default function Home() {
       )}
       <h1 className="home-seo-h1">{DEFAULT_TITLE}</h1>
 
-      {/* 2. ბესტსელერები */}
+      {/* 2. ყველაზე გაყიდვადი */}
       <div style={{ paddingTop: "25px", overflow: "visible" }}>
         <BestSellersSlider
           products={products}
@@ -98,7 +98,7 @@ export default function Home() {
       {!searchQuery && newest.length > 0 && (
         <div className="section-gutter" style={{ paddingTop: "10px" }}>
           <h2
-            className="section-title ny-title"
+            className="section-title"
             style={{
               color: "var(--text-h)",
               fontWeight: 900,

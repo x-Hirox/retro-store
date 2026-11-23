@@ -13,7 +13,7 @@ export default function ReviewsSection() {
     >
       <div style={{ maxWidth: "1200px", margin: "0 auto", textAlign: "center" }}>
         <h2
-          className="ny-title"
+          className="section-title"
           style={{
             fontSize: "2rem",
             marginBottom: "10px",

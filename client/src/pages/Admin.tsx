@@ -451,7 +451,7 @@ export default function Admin() {
                       checked={isBestSeller}
                       onChange={(e) => setIsBestSeller(e.target.checked)}
                     />
-                    ბესტსელერებში გამოჩენა
+                    ყველაზე გაყიდვადებში გამოჩენა
                   </label>
                 </>
               )}

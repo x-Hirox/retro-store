@@ -23,7 +23,7 @@ export const messages = {
     bundles: "კომპლექტები",
     contact: "დაგვიკავშირდი",
     rights: "ყველა უფლება დაცულია.",
-    bestsellers: "ბესტსელერები",
+    bestsellers: "ყველაზე გაყიდვადი",
     seeAll: "ყველას ნახვა >",
     loading: "იტვირთება რეტრო სამყარო...",
     noProducts: "პროდუქტები ამჟამად არ მოიძებნება.",
