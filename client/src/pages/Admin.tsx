@@ -320,13 +320,17 @@ export default function Admin() {
                 style={inputStyle}
               />
               <textarea
-                placeholder="აღწერა"
+                placeholder={"პირველი აბზაცი ტექსტი.\n• მეხსიერება: 64 GB\n• კომპლექტში: 2 ჯოისტიკი, HDMI"}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
-                rows={2}
-                style={{ ...inputStyle, resize: "vertical" }}
+                rows={8}
+                style={{ ...inputStyle, resize: "vertical", minHeight: 140 }}
               />
+              <p className="admin-hint">
+                სპეცები ცალკე ხაზზე წერდი, ზუსტად როგორც R36S-ზე: წერტილი, სახელი, ორწერტილი. მაგ:
+                მეხსიერება: 64 GB. უბრალო აბზაცი ცხრილში არ იშლება.
+              </p>
 
               <label className="admin-check">
                 <input

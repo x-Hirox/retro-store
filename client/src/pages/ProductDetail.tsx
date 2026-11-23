@@ -231,9 +231,11 @@ export default function ProductDetail() {
                 </div>
               ))}
             </dl>
-          ) : (
-            <p className="pd-desc">{copy.intro || product.description}</p>
-          )}
+          ) : null}
+          {copy.intro ? <p className="pd-desc">{copy.intro}</p> : null}
+          {!facts.length && !copy.intro ? (
+            <p className="pd-desc">{product.description}</p>
+          ) : null}
         </div>
 
         <aside className="pd-buy">

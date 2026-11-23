@@ -3753,6 +3753,14 @@ html.fx-cursor select {
   font-weight: 800;
 }
 .pd-desc { line-height: 1.6; opacity: 0.92; }
+.pd-facts > .pd-desc {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .pd-tags {
   display: flex;
   flex-wrap: wrap;
@@ -4380,6 +4388,12 @@ html.fx-cursor select {
   align-items: center;
   gap: 8px;
   color: #cbd5e1;
+}
+.admin-hint {
+  margin: -4px 0 8px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #94a3b8;
 }
 .admin-product-list { display: grid; gap: 8px; }
 .admin-product-row {
