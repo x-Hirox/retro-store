@@ -64,7 +64,7 @@ function saleOf(original: number, discount: number) {
   return Number(final.toFixed(2));
 }
 
-function saleRange(product: LeanProduct) {
+export function saleRange(product: LeanProduct) {
   const colors = colorsOf(product);
   if (colors.length === 0) {
     const final = saleOf(Number(product.price) || 0, Number(product.discount) || 0);
@@ -91,6 +91,38 @@ export function productPhotos(product: LeanProduct) {
   return unique;
 }
 
+export function isNewProduct(product: {
+  title?: string;
+  description?: string;
+  tags?: string[];
+}) {
+  const hay = `${product.title || ""} ${product.description || ""} ${(product.tags || []).join(" ")}`.toLowerCase();
+  return /ახალი|\bnew\b|sealed|unopened/.test(hay);
+}
+
+export function productSeoTitle(product: { title?: string }, price: number) {
+  const gel = Math.round(Number(price) || 0);
+  return `${product.title || "პროდუქტი"} — ${gel} ₾ ყიდვა თბილისში`;
+}
+
+export function productSeoDescription(
+  product: { title?: string; description?: string },
+  price: number,
+) {
+  const gel = Math.round(Number(price) || 0);
+  const base = String(product.description || product.title || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 220);
+  return `${base} ფასი ${gel} GEL. ყიდვა RetroBit-ზე, თბილისი.`;
+}
+
+function itemCondition(product: LeanProduct) {
+  return isNewProduct(product)
+    ? "https://schema.org/NewCondition"
+    : "https://schema.org/UsedCondition";
+}
+
 function productOffers(product: LeanProduct, url: string) {
   const inStock = totalStock(product) > 0;
   const availability = inStock
@@ -100,7 +132,7 @@ function productOffers(product: LeanProduct, url: string) {
   const base = {
     priceCurrency: "GEL",
     availability,
-    itemCondition: "https://schema.org/UsedCondition",
+    itemCondition: itemCondition(product),
     seller: { "@id": `${SITE_URL}/#organization` },
     url,
   };
@@ -123,9 +155,9 @@ function productOffers(product: LeanProduct, url: string) {
 export function productCrawlerPayload(product: LeanProduct, sameAs: string[]) {
   const path = productPath(product);
   const url = sitePath(path);
-  const description = String(product.description || product.title).slice(0, 300);
-  const photos = productPhotos(product);
   const range = saleRange(product);
+  const description = productSeoDescription(product, range.min);
+  const photos = productPhotos(product);
   const inStock = totalStock(product) > 0;
   const jsonLd = jsonLdGraph(
     [
@@ -152,6 +184,7 @@ export function productCrawlerPayload(product: LeanProduct, sameAs: string[]) {
           name: product.platform || product.category || "RetroBit",
         },
         category: product.category,
+        itemCondition: itemCondition(product),
         keywords: productKeywords(product),
         offers: productOffers(product, url),
       },
@@ -162,6 +195,7 @@ export function productCrawlerPayload(product: LeanProduct, sameAs: string[]) {
     path,
     url,
     description,
+    title: productSeoTitle(product, range.min),
     keywords: productKeywords(product),
     photos,
     price: range.min,

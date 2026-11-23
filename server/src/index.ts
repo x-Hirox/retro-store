@@ -16,7 +16,11 @@ import {
 import { seedContentIfEmpty } from "./utils/seedContent.js";
 import { securityHeaders } from "./utils/security.js";
 import { seoCrawlerMiddleware } from "./middleware/seoCrawler.js";
-import { robotsTxt, sitemapXml } from "./controllers/seoController.js";
+import {
+  googleMerchantXml,
+  robotsTxt,
+  sitemapXml,
+} from "./controllers/seoController.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -65,6 +69,14 @@ app.get("/sitemap.xml", (req, res) => {
   });
 });
 app.get("/robots.txt", robotsTxt);
+app.get("/google-merchant.xml", (req, res) => {
+  googleMerchantXml(req, res).catch((err) => {
+    console.error("google-merchant.xml:", err);
+    if (!res.headersSent) {
+      res.status(500).type("text/plain").send("feed error");
+    }
+  });
+});
 app.use(seoCrawlerMiddleware);
 app.post(
   "/api/payments/bog/callback",

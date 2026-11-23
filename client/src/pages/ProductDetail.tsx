@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { getProductById, getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
@@ -6,11 +7,19 @@ import type { IProduct } from "../types";
 import { trackRecentlyViewed } from "../utils/recentlyViewed";
 import { formatGel, getSalePrice } from "../utils/pricing";
 import { useLang } from "../i18n/LanguageContext";
-import { suggestAddons } from "../utils/shopAddons";
+import { suggestAddons, suggestSimilar } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
+import ProductCard from "../components/ProductCard";
 import SeoHead from "../components/SeoHead";
 import { productImageAlt } from "../utils/imageAlt";
-import { parseProductParam, productJsonLd, productPath } from "../seo/product";
+import {
+  isNewProduct,
+  productJsonLd,
+  productPath,
+  productSeoDescription,
+  productSeoTitle,
+} from "../seo/product";
+import { shortProductId } from "../seo/productUrl";
 import { productKeywords } from "../utils/tags";
 import {
   availableStock,
@@ -22,27 +31,31 @@ import {
   totalStock,
   withSelectedColor,
 } from "../utils/productColors";
+import { specGroups, splitProductCopy } from "../utils/productSpecs";
+
+type ShopTab = "accessories" | "similar" | "specs";
 
 export default function ProductDetail() {
   const { slugId = "" } = useParams<{ slugId: string }>();
-  const parsed = parseProductParam(slugId);
-  const id = parsed?.id;
   const navigate = useNavigate();
   const location = useLocation();
   const { cart, addToCart, closeCartDrawer } = useCart();
   const { t } = useLang();
   const [product, setProduct] = useState<IProduct | null>(null);
   const [addons, setAddons] = useState<IProduct[]>([]);
+  const [similar, setSimilar] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [photo, setPhoto] = useState(0);
   const [qty, setQty] = useState(1);
   const [colorName, setColorName] = useState("");
   const [sticky, setSticky] = useState(false);
+  const [bundleOn, setBundleOn] = useState(true);
+  const [tab, setTab] = useState<ShopTab>("accessories");
   const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!id) {
+    if (!slugId) {
       setProduct(null);
       setError("პროდუქტი ვერ მოიძებნა.");
       setLoading(false);
@@ -54,22 +67,30 @@ export default function ProductDetail() {
     setQty(1);
     setColorName("");
     setSticky(false);
-    getProductById(id)
+    setBundleOn(true);
+    setTab("accessories");
+    getProductById(slugId)
       .then((data) => {
         setProduct(data);
         setColorName(productColors(data)[0]?.name || "");
         trackRecentlyViewed(data);
         setLoading(false);
         getProducts()
-          .then((list) => setAddons(suggestAddons(data, list, 8)))
-          .catch(() => setAddons([]));
+          .then((list) => {
+            setAddons(suggestAddons(data, list, 8));
+            setSimilar(suggestSimilar(data, list, 8));
+          })
+          .catch(() => {
+            setAddons([]);
+            setSimilar([]);
+          });
       })
       .catch(() => {
         setProduct(null);
         setError("პროდუქტი ვერ მოიძებნა.");
         setLoading(false);
       });
-  }, [id]);
+  }, [slugId]);
 
   useEffect(() => {
     if (!product) return;
@@ -90,6 +111,26 @@ export default function ProductDetail() {
     return () => io.disconnect();
   }, [product?._id, product?.stock]);
 
+  const copy = useMemo(
+    () => splitProductCopy(product?.description || ""),
+    [product?.description],
+  );
+  const facts = useMemo(() => {
+    if (!product) return [];
+    const extra = [
+      product.platform ? { label: "პლატფორმა", value: product.platform } : null,
+      product.category ? { label: "კატეგორია", value: product.category } : null,
+      product.genre ? { label: "ჟანრი", value: product.genre } : null,
+      { label: "მდგომარეობა", value: isNewProduct(product) ? "ახალი" : "მეორადი" },
+    ].filter(Boolean) as { label: string; value: string }[];
+    const merged = [...copy.specs];
+    for (const row of extra) {
+      if (!merged.some((item) => item.label === row.label)) merged.push(row);
+    }
+    return merged;
+  }, [copy.specs, product]);
+  const groups = useMemo(() => specGroups(facts), [facts]);
+
   if (loading) {
     return <div className="pd-status">{t("loading")}</div>;
   }
@@ -100,7 +141,7 @@ export default function ProductDetail() {
         <SeoHead
           title="პროდუქტი ვერ მოიძებნა"
           description="ეს პროდუქტი აღარ არის RetroBit-ზე."
-          path={id ? `/product/${id}` : "/"}
+          path={slugId ? `/product/${slugId}` : "/"}
           noindex
         />
         <h1>{error || "პროდუქტი არ არსებობს"}</h1>
@@ -121,24 +162,42 @@ export default function ProductDetail() {
     cart.find((item) => cartLineKey(item) === cartLineKey(line))?.quantity ?? 0;
   const maxQty = Math.max(1, stock);
   const photos = productPhotos(product, colorName);
+  const categoryPath = `/category/${encodeURIComponent(product.category || "Nintendo")}`;
+  const bundleMate = addons[0] || null;
+  const bundleSale = bundleMate ? getSalePrice(bundleMate) : null;
+  const bundleTotal = sale.final + (bundleOn && bundleSale ? bundleSale.final : 0);
+  const bundleWas =
+    sale.original + (bundleOn && bundleSale ? bundleSale.original : 0);
+  const path = productPath(product);
+  const description = productSeoDescription(product, sale.final);
+  const keywords = productKeywords(product);
+  const jsonLd = productJsonLd(product);
+  const notifyHref = `mailto:retrobit.support@gmail.com?subject=${encodeURIComponent(
+    `შემატყობინე: ${product.title}`,
+  )}`;
 
-  const add = (goCheckout: boolean) => {
+  const add = (goCheckout: boolean, withBundle = false) => {
     addToCart(line, qty, { drawer: !goCheckout });
+    if (withBundle && bundleMate && totalStock(bundleMate) > 0) {
+      addToCart(bundleMate, 1, { drawer: !goCheckout });
+    }
     if (goCheckout) {
       closeCartDrawer();
       navigate("/checkout");
     }
   };
 
-  const path = productPath(product);
-  const description = String(product.description || product.title).slice(0, 300);
-  const keywords = productKeywords(product);
-  const jsonLd = productJsonLd(product);
+  const pickPhoto = (index: number) => {
+    setPhoto(index);
+    const url = photos[index];
+    const match = colors.find((item) => item.imageUrl === url);
+    if (match) setColorName(match.name);
+  };
 
   return (
     <div className={`pd-page nbit-slot${sticky && stock > 0 ? " has-sticky" : ""}`}>
       <SeoHead
-        title={product.title}
+        title={productSeoTitle(product, sale.final)}
         description={description}
         path={path}
         image={photos[0] || product.imageUrl}
@@ -146,75 +205,40 @@ export default function ProductDetail() {
         jsonLd={jsonLd}
         keywords={keywords}
       />
-      <button type="button" className="pd-ghost" onClick={() => navigate(-1)}>
-        ← უკან
-      </button>
+
+      <nav className="pd-crumbs" aria-label="გზა">
+        <Link to="/">მთავარი</Link>
+        <span>/</span>
+        <Link to={categoryPath}>{product.category || "კატეგორია"}</Link>
+        <span>/</span>
+        <em>{product.title}</em>
+      </nav>
 
       <div className="pd-layout">
         <ProductPhotos
           title={product.title}
           photos={photos}
           active={photo}
-          onSelect={(index) => {
-            setPhoto(index);
-            const url = photos[index];
-            const match = colors.find((item) => item.imageUrl === url);
-            if (match) setColorName(match.name);
-          }}
+          onSelect={pickPhoto}
         />
 
-        <div className="pd-buy">
+        <div className="pd-facts">
           <p className="pd-kicker">{product.platform || product.category}</p>
           <h1>{product.title}</h1>
-          {anyLeft && <p className="pd-ok">შემოწმებული და მუშა</p>}
-
-          <div className="pd-price">
-            <strong>{formatGel(sale.final)}</strong>
-            {sale.discount > 0 && (
-              <>
-                <s>{formatGel(sale.original)}</s>
-                <em>-{sale.discount}%</em>
-              </>
-            )}
-          </div>
-
-          {colors.length > 0 && (
-            <div className="pd-colors">
-              <p>
-                ფერი: <strong>{selected?.name}</strong>
-                {selected ? ` · ${colorStock(selected)} ცალი` : ""}
-              </p>
-              <div className="pd-swatches">
-                {colors.map((item) => {
-                  const option = getSalePrice(withSelectedColor(product, item.name));
-                  const left = colorStock(item);
-                  return (
-                    <button
-                      key={item.name}
-                      type="button"
-                      className={`pd-swatch${item.name === selected?.name ? " is-on" : ""}${left <= 0 ? " is-sold" : ""}`}
-                      onClick={() => {
-                        setColorName(item.name);
-                        setPhoto(0);
-                        setQty(1);
-                      }}
-                    >
-                      <i style={{ background: item.hex }} />
-                      <span>
-                        <strong>{item.name}</strong>
-                        <small>
-                          {left <= 0 ? "SOLD" : `${left} ცალი`} · {formatGel(option.final)}
-                          {option.discount > 0 ? ` (−${option.discount}%)` : ""}
-                        </small>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          <p className="pd-sku">#{shortProductId(product._id)}</p>
+          {copy.intro ? <p className="pd-lead">{copy.intro}</p> : null}
+          {facts.length > 0 ? (
+            <dl className="pd-spec-table">
+              {facts.slice(0, 10).map((row) => (
+                <div key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd>{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="pd-desc">{product.description}</p>
           )}
-
-          <p className="pd-desc">{product.description}</p>
           {!!product.tags?.length && (
             <div className="pd-tags">
               {product.tags.map((tag) => (
@@ -228,13 +252,72 @@ export default function ProductDetail() {
               ))}
             </div>
           )}
+        </div>
+
+        <aside className="pd-buy">
+          <div className="pd-price">
+            <strong>{formatGel(sale.final)}</strong>
+            {sale.discount > 0 && (
+              <>
+                <s>{formatGel(sale.original)}</s>
+                <em>-{sale.discount}%</em>
+              </>
+            )}
+          </div>
+          {anyLeft && stock > 0 ? (
+            <p className="pd-ok">შემოწმებული და მუშა</p>
+          ) : (
+            <p className="pd-out">ამოიწურა</p>
+          )}
+
+          <div className="pd-trust">
+            <span>{stock > 0 ? "მარაგშია" : "ამოიწურა"}</span>
+            <span>ფასი ₾</span>
+            <span>თბილისი</span>
+            <span>ბარათი</span>
+          </div>
+
+          {colors.length > 0 && (
+            <div className="pd-colors">
+              <p>
+                ფერი: <strong>{selected?.name}</strong>
+                {selected ? ` · ${colorStock(selected)} ცალი` : ""}
+              </p>
+              <div className="pd-dots" role="listbox" aria-label="ფერი">
+                {colors.map((item) => {
+                  const left = colorStock(item);
+                  return (
+                    <button
+                      key={item.name}
+                      type="button"
+                      role="option"
+                      aria-selected={item.name === selected?.name}
+                      className={`pd-dot${item.name === selected?.name ? " is-on" : ""}${left <= 0 ? " is-sold" : ""}`}
+                      style={{ background: item.hex }}
+                      title={`${item.name} · ${left <= 0 ? "ამოიწურა" : `${left} ცალი`}`}
+                      onClick={() => {
+                        setColorName(item.name);
+                        setPhoto(0);
+                        setQty(1);
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {stock <= 0 ? (
-            <button type="button" className="pd-sold" disabled>
-              {anyLeft && selected
-                ? `${selected.name} ამოიწურა — აირჩიე სხვა ფერი`
-                : t("sold")}
-            </button>
+            <>
+              <button type="button" className="pd-sold" disabled>
+                {anyLeft && selected
+                  ? `${selected.name} ამოიწურა — აირჩიე სხვა ფერი`
+                  : t("sold")}
+              </button>
+              <a className="pd-notify" href={notifyHref}>
+                შემატყობინე
+              </a>
+            </>
           ) : (
             <>
               <div className="pd-stepper">
@@ -252,21 +335,20 @@ export default function ProductDetail() {
                   +
                 </button>
               </div>
-
               <div className="pd-cta" ref={ctaRef}>
                 <button
                   type="button"
                   className="pd-buy-now"
                   onClick={() => add(true)}
                 >
-                  ახლავე ყიდვა
+                  ყიდვა
                 </button>
                 <button
                   type="button"
                   className="pd-add-cart"
                   onClick={() => add(false)}
                 >
-                  {t("addToCart")} +
+                  დამატება
                 </button>
               </div>
               {inCart > 0 && (
@@ -288,42 +370,171 @@ export default function ProductDetail() {
           <p className="cart-ship-note">
             მიწოდება: პირობები მალე დაემატება. გარანტია ამ ეტაპზე არ არის.
           </p>
-        </div>
+        </aside>
       </div>
 
-      {addons.length > 0 && (
-        <section className="pd-addons">
-          <h2>დაამატე აქსესუარი ან თამაში</h2>
-          <p>შეარჩიე კონტროლერი, კაბელი ან თამაში ამ კონსოლისთვის.</p>
-          <div className="pd-addon-grid">
-            {addons.map((item) => {
-              const itemSale = getSalePrice(item);
-              const added = cart.some((c) => c._id === item._id);
-              return (
-                <article key={item._id} className="pd-addon">
-                  <Link to={productPath(item)}>
-                    <img
-                      src={item.imageUrl || ""}
-                      alt={productImageAlt(item)}
-                    />
-                    <h3>{item.title}</h3>
-                  </Link>
-                  <div className="pd-addon-row">
-                    <strong>{formatGel(itemSale.final)}</strong>
-                    <button
-                      type="button"
-                      disabled={added || totalStock(item) <= 0}
-                      onClick={() => addToCart(item)}
-                    >
-                      {added ? "კალათაშია" : "დამატება"}
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+      {bundleMate && bundleSale && (
+        <section className="pd-together" aria-label="ერთად იაფია">
+          <div className="pd-together-head">
+            <h2>ერთად იაფია</h2>
+            <label>
+              <input
+                type="checkbox"
+                checked={bundleOn}
+                onChange={(e) => setBundleOn(e.target.checked)}
+              />
+              დაამატე ნაკრები
+            </label>
+          </div>
+          <div className="pd-together-row">
+            <article>
+              <img src={photos[0] || product.imageUrl} alt={productImageAlt(product)} />
+              <div>
+                <h3>{product.title}</h3>
+                <strong>{formatGel(sale.final)}</strong>
+              </div>
+            </article>
+            <span className="pd-plus">+</span>
+            <article className={!bundleOn ? "is-off" : ""}>
+              <img
+                src={bundleMate.imageUrl || ""}
+                alt={productImageAlt(bundleMate)}
+              />
+              <div>
+                <h3>{bundleMate.title}</h3>
+                <strong>{formatGel(bundleSale.final)}</strong>
+                {bundleSale.discount > 0 && <s>{formatGel(bundleSale.original)}</s>}
+              </div>
+            </article>
+            <div className="pd-together-sum">
+              <span>ჯამი ({bundleOn ? 2 : 1})</span>
+              <strong>{formatGel(bundleTotal)}</strong>
+              {bundleOn && bundleWas > bundleTotal && <s>{formatGel(bundleWas)}</s>}
+              {stock > 0 && (
+                <button
+                  type="button"
+                  className="pd-buy-now"
+                  onClick={() => add(true, bundleOn)}
+                >
+                  ყიდვა
+                </button>
+              )}
+            </div>
           </div>
         </section>
       )}
+
+      <section className="pd-tabs">
+        <div className="pd-tab-bar" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "accessories"}
+            className={tab === "accessories" ? "is-on" : ""}
+            onClick={() => setTab("accessories")}
+          >
+            აქსესუარები
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "similar"}
+            className={tab === "similar" ? "is-on" : ""}
+            onClick={() => setTab("similar")}
+          >
+            მსგავსი
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "specs"}
+            className={tab === "specs" ? "is-on" : ""}
+            onClick={() => setTab("specs")}
+          >
+            მახასიათებლები
+          </button>
+        </div>
+
+        {tab === "accessories" && (
+          <div className="pd-addons">
+            <div className="pd-section-head">
+              <h2>აქსესუარები</h2>
+              <Link to="/category/accessories">მეტის ნახვა</Link>
+            </div>
+            {addons.length === 0 ? (
+              <p className="pd-empty">აქსესუარი ჯერ არ არის.</p>
+            ) : (
+              <div className="pd-addon-grid">
+                {addons.map((item) => {
+                  const itemSale = getSalePrice(item);
+                  const added = cart.some((row) => row._id === item._id);
+                  return (
+                    <article key={item._id} className="pd-addon">
+                      <Link to={productPath(item)}>
+                        <img src={item.imageUrl || ""} alt={productImageAlt(item)} />
+                        <h3>{item.title}</h3>
+                      </Link>
+                      <div className="pd-addon-row">
+                        <strong>{formatGel(itemSale.final)}</strong>
+                        <button
+                          type="button"
+                          disabled={added || totalStock(item) <= 0}
+                          onClick={() => addToCart(item)}
+                        >
+                          {added ? "კალათაშია" : "დამატება"}
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "similar" && (
+          <div className="pd-similar">
+            <div className="pd-section-head">
+              <h2>მსგავსი პროდუქტები</h2>
+              <Link to={categoryPath}>მეტის ნახვა</Link>
+            </div>
+            {similar.length === 0 ? (
+              <p className="pd-empty">მსგავსი პროდუქტი ჯერ არ არის.</p>
+            ) : (
+              <div className="pd-similar-grid">
+                {similar.map((item) => (
+                  <ProductCard key={item._id} product={item} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "specs" && (
+          <div className="pd-accordion">
+            {groups.length === 0 && copy.intro ? (
+              <p className="pd-desc">{copy.intro}</p>
+            ) : null}
+            {groups.map((group, index) => (
+              <AccordionItem key={group.title} title={group.title} startOpen={index === 0}>
+                <dl className="pd-spec-table">
+                  {group.items.map((row) => (
+                    <div key={row.label}>
+                      <dt>{row.label}</dt>
+                      <dd>{row.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </AccordionItem>
+            ))}
+            <AccordionItem title="მიწოდება">
+              <p className="pd-desc">
+                მიწოდების პირობები მალე დაემატება. ამ ეტაპზე გარანტია არ არის.
+              </p>
+            </AccordionItem>
+          </div>
+        )}
+      </section>
 
       {stock > 0 && (
         <div className={`pd-sticky${sticky ? " is-on" : ""}`} aria-hidden={!sticky}>
@@ -336,15 +547,39 @@ export default function ProductDetail() {
           </div>
           <div className="pd-sticky-cta">
             <button type="button" className="pd-buy-now" onClick={() => add(true)}>
-              ახლავე ყიდვა
+              ყიდვა
             </button>
             <button type="button" className="pd-add-cart" onClick={() => add(false)}>
-              {t("addToCart")} +
+              დამატება
             </button>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function AccordionItem({
+  title,
+  startOpen = false,
+  children,
+}: {
+  title: string;
+  startOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(startOpen);
+  return (
+    <details
+      open={open}
+      onToggle={(event) => {
+        const next = (event.currentTarget as HTMLDetailsElement).open;
+        if (next !== open) setOpen(next);
+      }}
+    >
+      <summary>{title}</summary>
+      {children}
+    </details>
   );
 }
 
@@ -360,6 +595,7 @@ function ProductPhotos({
   onSelect: (index: number) => void;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
   const index = photos.length === 0 ? 0 : Math.min(active, photos.length - 1);
   const current = photos[index];
 
@@ -371,6 +607,22 @@ function ProductPhotos({
   const slideThumbs = (dir: number) => {
     scroller.current?.scrollBy({ left: dir * 168, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+      if (event.key === "ArrowLeft") go(-1);
+      if (event.key === "ArrowRight") go(1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, index, photos.length]);
 
   return (
     <div className="pd-gallery">
@@ -386,7 +638,14 @@ function ProductPhotos({
           </button>
         )}
         {current ? (
-          <img src={current} alt={productImageAlt({ title })} />
+          <button
+            type="button"
+            className="pd-photo-open"
+            onClick={() => setOpen(true)}
+            aria-label="სურათის გადიდება"
+          >
+            <img src={current} alt={productImageAlt({ title })} />
+          </button>
         ) : (
           <span style={{ fontSize: "3rem" }}>🕹️</span>
         )}
@@ -434,6 +693,63 @@ function ProductPhotos({
           </button>
         </div>
       )}
+
+      {open &&
+        current &&
+        createPortal(
+          <div className="pd-lightbox" role="dialog" aria-modal="true" aria-label="გადიდებული სურათი">
+            <button
+              type="button"
+              className="pd-lightbox-dim"
+              aria-label="დახურვა"
+              onClick={() => setOpen(false)}
+            />
+            <button
+              type="button"
+              className="pd-lightbox-close"
+              onClick={() => setOpen(false)}
+              aria-label="დახურვა"
+            >
+              ×
+            </button>
+            {photos.length > 1 && (
+              <button
+                type="button"
+                className="pd-lightbox-nav prev"
+                onClick={() => go(-1)}
+                aria-label="წინა სურათი"
+              >
+                ‹
+              </button>
+            )}
+            <img src={current} alt={productImageAlt({ title })} />
+            {photos.length > 1 && (
+              <button
+                type="button"
+                className="pd-lightbox-nav next"
+                onClick={() => go(1)}
+                aria-label="შემდეგი სურათი"
+              >
+                ›
+              </button>
+            )}
+            {photos.length > 1 && (
+              <div className="pd-lightbox-thumbs">
+                {photos.map((url, item) => (
+                  <button
+                    key={url}
+                    type="button"
+                    className={item === index ? "is-on" : ""}
+                    onClick={() => onSelect(item)}
+                  >
+                    <img src={url} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

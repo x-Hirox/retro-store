@@ -52,3 +52,27 @@ export function suggestAddons(
   }
   return unique;
 }
+
+export function suggestSimilar(
+  current: IProduct | null,
+  all: IProduct[],
+  limit = 8,
+): IProduct[] {
+  const rest = all.filter(
+    (item) =>
+      (!current || item._id !== current._id) &&
+      !isBannerProduct(item),
+  );
+  const same = rest.filter(
+    (item) =>
+      current &&
+      (item.category === current.category ||
+        item.platform === current.platform),
+  );
+  const unique: IProduct[] = [];
+  for (const item of [...same, ...rest]) {
+    if (!unique.some((row) => row._id === item._id)) unique.push(item);
+    if (unique.length >= limit) break;
+  }
+  return unique;
+}

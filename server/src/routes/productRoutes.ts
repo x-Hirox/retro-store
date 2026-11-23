@@ -4,6 +4,7 @@ import Product from "../models/Product.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { escapeRegex } from "../utils/security.js";
 import { parseTags } from "../utils/tags.js";
+import { matchProduct } from "../seo/productUrl.js";
 
 const router = Router();
 
@@ -129,10 +130,18 @@ router.get("/search", async (req: Request, res: Response) => {
   }
 });
 
-// კონკრეტული პროდუქტის წამოღება ID-ით (GET) - ღიაა ყველასთვის
+// კონკრეტული პროდუქტის წამოღება ID-ით ან slug-ით (GET)
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const param = String(req.params.id || "");
+    let product = null;
+    if (/^[a-f0-9]{24}$/i.test(param)) {
+      product = await Product.findById(param);
+    }
+    if (!product) {
+      const all = await Product.find().lean();
+      product = matchProduct(all, param) || null;
+    }
     if (!product) {
       return res.status(404).json({ message: "პროდუქტი ვერ მოიძებნა" });
     }

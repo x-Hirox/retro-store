@@ -14,12 +14,14 @@ import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
+import ProductCard from "../components/ProductCard";
 import SeoHead from "../components/SeoHead";
 import {
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
   jsonLdGraph,
 } from "../seo/site";
+import { isBannerProduct } from "../utils/pricing";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -46,6 +48,10 @@ export default function Home() {
   );
   const middleBanner = products?.find((p) => p.category === "banner-middle");
   const bottomBanner = products?.find((p) => p.category === "banner-bottom");
+  const newest = [...(products || [])]
+    .filter((item) => !isBannerProduct(item))
+    .sort((a, b) => String(b._id).localeCompare(String(a._id)))
+    .slice(0, 4);
 
   const homeTitle = searchQuery
     ? `ძებნა: ${searchQuery}`
@@ -88,6 +94,28 @@ export default function Home() {
           selectedCategory={selectedCategory}
         />
       </div>
+
+      {!searchQuery && newest.length > 0 && (
+        <div className="section-gutter" style={{ paddingTop: "10px" }}>
+          <h2
+            className="section-title ny-title"
+            style={{
+              color: "var(--text-h)",
+              fontWeight: 900,
+              letterSpacing: "1.5px",
+              fontFamily: "'Noto Serif Georgian', serif",
+              marginBottom: "25px",
+            }}
+          >
+            ახალი დამატებული
+          </h2>
+          <div className="arcade-grid">
+            {newest.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 3. პოპულარული ბრენდები */}
       {!searchQuery && (

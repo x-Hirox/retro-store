@@ -1,5 +1,6 @@
 import API from "./api";
 import type { IProduct } from "../types";
+import { matchProduct } from "../seo/productUrl";
 
 export const getProducts = async (): Promise<IProduct[]> => {
   const response = await API.get("/products");
@@ -7,8 +8,15 @@ export const getProducts = async (): Promise<IProduct[]> => {
 };
 
 export const getProductById = async (id: string): Promise<IProduct> => {
-  const response = await API.get(`/products/${id}`);
-  return response.data;
+  try {
+    const response = await API.get(`/products/${encodeURIComponent(id)}`);
+    return response.data;
+  } catch (err) {
+    const list = await getProducts();
+    const hit = matchProduct(list, id);
+    if (hit) return hit;
+    throw err;
+  }
 };
 
 export const createProduct = async (

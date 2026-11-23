@@ -1,5 +1,4 @@
 import type { Request, Response } from "express";
-import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import PlatformCard from "../models/PlatformCard.js";
 import SiteSettings from "../models/SiteSettings.js";
@@ -22,8 +21,14 @@ import {
   crawlerDocument,
   jsonLdGraph,
 } from "../seo/html.js";
-import { parseProductParam, productPath, requestProductPath } from "../seo/productUrl.js";
-import { productCrawlerPayload } from "../seo/productOffer.js";
+import { matchProduct, productPath, requestProductPath } from "../seo/productUrl.js";
+import {
+  isNewProduct,
+  productCrawlerPayload,
+  productPhotos,
+  saleRange,
+  totalStock,
+} from "../seo/productOffer.js";
 
 function isBanner(product: {
   isHeroBanner?: boolean;
@@ -158,6 +163,44 @@ export function robotsTxt(_req: Request, res: Response) {
   );
 }
 
+export async function googleMerchantXml(_req: Request, res: Response) {
+  const products = await Product.find().lean();
+  const items = products
+    .filter((product) => !isBanner(product))
+    .map((product) => {
+      const range = saleRange(product);
+      const photos = productPhotos(product);
+      const link = sitePath(productPath(product));
+      const availability = totalStock(product) > 0 ? "in_stock" : "out_of_stock";
+      const condition = isNewProduct(product) ? "new" : "used";
+      const image = photos[0] ? absUrl(photos[0]) : "";
+      const extra = photos
+        .slice(1, 8)
+        .map(
+          (url) =>
+            `<g:additional_image_link>${escapeXml(absUrl(url))}</g:additional_image_link>`,
+        )
+        .join("");
+      return `<item>
+<g:id>${escapeXml(String(product._id))}</g:id>
+<title>${escapeXml(product.title)}</title>
+<description>${escapeXml(String(product.description || product.title).slice(0, 5000))}</description>
+<link>${escapeXml(link)}</link>
+<g:image_link>${escapeXml(image)}</g:image_link>
+${extra}<g:price>${range.min.toFixed(2)} GEL</g:price>
+<g:availability>${availability}</g:availability>
+<g:condition>${condition}</g:condition>
+<g:brand>${escapeXml(product.platform || product.category || "RetroBit")}</g:brand>
+</item>`;
+    })
+    .join("");
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=900");
+  res.send(
+    `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"><channel><title>RetroBit</title><link>${escapeXml(SITE_URL)}/</link><description>RetroBit product feed</description>${items}</channel></rss>`,
+  );
+}
+
 function productNotFoundHtml(path: string, res: Response) {
   res.status(404).type("html").send(
     crawlerDocument({
@@ -177,13 +220,12 @@ export async function productCrawlerHtml(
   reqPath: string,
   res: Response,
 ) {
-  const parsed = parseProductParam(param);
   const incomingPath = requestProductPath(reqPath) || `/product/${param}`;
-  if (!parsed || !mongoose.isValidObjectId(parsed.id)) {
-    productNotFoundHtml(incomingPath, res);
-    return;
+  const catalog = await Product.find().lean();
+  let product = matchProduct(catalog, param);
+  if (!product && /^[a-f0-9]{24}$/i.test(param)) {
+    product = (await Product.findById(param).lean()) || undefined;
   }
-  const product = await Product.findById(parsed.id).lean();
   if (!product || isBanner(product)) {
     productNotFoundHtml(incomingPath, res);
     return;
@@ -197,7 +239,7 @@ export async function productCrawlerHtml(
   const gallery = payload.photos[0] || product.imageUrl;
   res.type("html").send(
     crawlerDocument({
-      title: product.title,
+      title: payload.title,
       description: payload.description,
       path: payload.path,
       image: gallery,
