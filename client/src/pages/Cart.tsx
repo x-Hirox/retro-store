@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { formatGel, getSalePrice } from "../utils/pricing";
+import { cartTotals, formatGel, getSalePrice } from "../utils/pricing";
 import SeoHead from "../components/SeoHead";
 import { productImageAlt } from "../utils/imageAlt";
 import { cartLineKey } from "../utils/productColors";
@@ -9,10 +9,7 @@ export default function Cart() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
   const navigate = useNavigate();
 
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + getSalePrice(item).final * item.quantity,
-    0,
-  );
+  const money = cartTotals(cart);
 
   if (cart.length === 0) {
     return (
@@ -88,8 +85,13 @@ export default function Cart() {
       </ul>
       <div className="cart-page-foot">
         <h2>
-          სულ: <span>{formatGel(totalAmount)}</span>
+          სულ: <span>{formatGel(money.total)}</span>
         </h2>
+        {money.extraOff > 0 ? (
+          <p className="pd-together-off">
+            ნაკრები −{money.extraPct}% ({formatGel(money.subtotal)} → {formatGel(money.total)})
+          </p>
+        ) : null}
         <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
         <div className="pd-cta">
           <button type="button" className="pd-ghost" onClick={clearCart}>

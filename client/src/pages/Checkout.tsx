@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import API from "../services/api";
 import { authService } from "../services/authService";
-import { getSalePrice } from "../utils/pricing";
+import { cartTotals, formatGel, getSalePrice } from "../utils/pricing";
 import PaymentMarks from "../components/PaymentMarks";
 import { normalizeGePhone } from "../utils/validate";
 import SeoHead from "../components/SeoHead";
@@ -22,10 +22,8 @@ export default function Checkout() {
     paymentMethod: "card",
   });
 
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + getSalePrice(item).final * item.quantity,
-    0,
-  );
+  const money = cartTotals(cart);
+  const totalAmount = money.total;
 
   useEffect(() => {
     authService
@@ -453,7 +451,7 @@ export default function Checkout() {
                     (x{item.quantity})
                   </span>
                   <span style={{ fontWeight: "bold", color: "var(--text-h)" }}>
-                    {(getSalePrice(item).final * item.quantity).toFixed(2)} ₾
+                    {formatGel(getSalePrice(item).final * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -476,8 +474,14 @@ export default function Checkout() {
             >
               <span>სულ ჯამი:</span>
               <span style={{ color: "var(--accent)" }}>
-                {totalAmount.toFixed(2)} ₾
+                {formatGel(totalAmount)}
               </span>
+            </div>
+            {money.extraOff > 0 ? (
+              <p className="pd-together-off">
+                ნაკრები −{money.extraPct}% · ცალ-ცალკე {formatGel(money.subtotal)}
+              </p>
+            ) : null}
             </div>
             <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
           </div>

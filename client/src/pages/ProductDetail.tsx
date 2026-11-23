@@ -5,7 +5,7 @@ import { getProductById, getProducts } from "../services/productService";
 import { useCart } from "../context/CartContext";
 import type { IProduct } from "../types";
 import { trackRecentlyViewed } from "../utils/recentlyViewed";
-import { formatGel, getSalePrice } from "../utils/pricing";
+import { bundleTogether, formatGel, getSalePrice } from "../utils/pricing";
 import { useLang } from "../i18n/LanguageContext";
 import { suggestAddons, suggestSimilar } from "../utils/shopAddons";
 import PaymentMarks from "../components/PaymentMarks";
@@ -165,9 +165,12 @@ export default function ProductDetail() {
   const categoryPath = `/category/${encodeURIComponent(product.category || "Nintendo")}`;
   const bundleMate = addons[0] || null;
   const bundleSale = bundleMate ? getSalePrice(bundleMate) : null;
-  const bundleTotal = sale.final + (bundleOn && bundleSale ? bundleSale.final : 0);
-  const bundleWas =
-    sale.original + (bundleOn && bundleSale ? bundleSale.original : 0);
+  const bundleDeal =
+    bundleSale && bundleOn
+      ? bundleTogether(sale.final, bundleSale.final)
+      : { separate: sale.final, together: sale.final, extraPct: 0 };
+  const bundleTotal = bundleDeal.together;
+  const bundleWas = bundleOn && bundleSale ? bundleDeal.separate : 0;
   const path = productPath(product);
   const description = productSeoDescription(product, sale.final);
   const keywords = productKeywords(product);
@@ -392,6 +395,9 @@ export default function ProductDetail() {
               <span>ჯამი ({bundleOn ? 2 : 1})</span>
               <strong>{formatGel(bundleTotal)}</strong>
               {bundleOn && bundleWas > bundleTotal && <s>{formatGel(bundleWas)}</s>}
+              {bundleOn && bundleDeal.extraPct > 0 && bundleWas > bundleTotal ? (
+                <em className="pd-together-off">ნაკრები −{bundleDeal.extraPct}%</em>
+              ) : null}
               {stock > 0 && (
                 <button
                   type="button"

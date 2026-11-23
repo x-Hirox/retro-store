@@ -5112,6 +5112,12 @@ body:not(.dark) .collection-console span {
   min-width: 140px;
 }
 .pd-together-sum strong { font-size: 1.25rem; color: var(--accent); }
+.pd-together-off {
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 700;
+  color: #22c55e;
+}
 .pd-tabs { margin-top: 40px; }
 .pd-tab-bar {
   display: flex;

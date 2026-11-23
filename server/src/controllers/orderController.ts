@@ -78,7 +78,18 @@ function unitPrice(
       ? Number(color.discount)
       : Number(product.discount) || 0;
   const discount = Math.min(100, Math.max(0, discountRaw || 0));
-  return Math.round(price * (1 - discount / 100) * 100) / 100;
+  return Math.round(price * (1 - discount / 100));
+}
+
+function orderTotal(pricedItems: { product: string; quantity: number; price: number }[]) {
+  const subtotal = pricedItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+  const distinct = new Set(pricedItems.map((item) => item.product)).size;
+  if (distinct < 2) return subtotal;
+  const together = Math.round(subtotal * 0.99);
+  return Math.min(together, subtotal - 1);
 }
 
 export const addOrderItems = async (
@@ -169,6 +180,7 @@ export const addOrderItems = async (
         });
         totalPrice += price * qty;
       }
+      totalPrice = orderTotal(pricedItems);
     } catch (err) {
       for (const item of decremented) {
         await changeStock(item.id, item.qty, item.color);

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { getProducts } from "../services/productService";
 import type { IProduct } from "../types";
-import { formatGel, getSalePrice } from "../utils/pricing";
+import { cartTotals, formatGel, getSalePrice } from "../utils/pricing";
 import { suggestAddons } from "../utils/shopAddons";
 import { cartLineKey } from "../utils/productColors";
 
@@ -29,10 +29,7 @@ export default function CartDrawer() {
       .catch(() => setAddons([]));
   }, [drawerOpen, cart]);
 
-  const total = cart.reduce(
-    (sum, item) => sum + getSalePrice(item).final * item.quantity,
-    0,
-  );
+  const money = cartTotals(cart);
 
   if (!drawerOpen) return null;
 
@@ -131,8 +128,13 @@ export default function CartDrawer() {
         <footer className="cart-drawer-foot">
           <div className="cart-drawer-total">
             <span>ჯამი</span>
-            <strong>{formatGel(total)}</strong>
+            <strong>{formatGel(money.total)}</strong>
           </div>
+          {money.extraOff > 0 ? (
+            <p className="pd-together-off">
+              ნაკრები −{money.extraPct}%
+            </p>
+          ) : null}
           <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
           <button
             type="button"
