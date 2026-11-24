@@ -16,6 +16,7 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
 import AdminPlatformCards from "./admin/AdminPlatformCards";
+import AdminPageMedia from "./admin/AdminPageMedia";
 import { getPlatformCards } from "../services/contentService";
 import { PLATFORM_BRANDS } from "../utils/platformCatalog";
 import SeoHead from "../components/SeoHead";
@@ -36,7 +37,13 @@ import {
 } from "../utils/productKind";
 import { totalStock } from "../utils/productColors";
 
-type Tab = "overview" | "orders" | "products" | "customers" | "content";
+type Tab =
+  | "overview"
+  | "orders"
+  | "products"
+  | "page-media"
+  | "customers"
+  | "content";
 
 const CATEGORY_OPTIONS = [
   ...PLATFORM_BRANDS.map((item) => item.label),
@@ -287,6 +294,7 @@ export default function Admin() {
     ["overview", "მიმოხილვა"],
     ["orders", "შეკვეთები"],
     ["products", "პროდუქტები"],
+    ["page-media", "სექციების სურათები"],
     ["customers", "მომხმარებლები"],
     ["content", "საიტის კონტენტი"],
   ];
@@ -334,6 +342,8 @@ export default function Admin() {
       {activeTab === "orders" && <AdminOrders initialStatus={orderFilter} />}
 
       {activeTab === "customers" && <AdminCustomers />}
+
+      {activeTab === "page-media" && <AdminPageMedia />}
 
       {activeTab === "content" && <AdminContent />}
 

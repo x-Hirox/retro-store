@@ -6,7 +6,6 @@ import {
   getChatReplies,
   getCollections,
   getFaqs,
-  getPageMedia,
   getPlatformCards,
   getReviews,
   getSiteSettings,
@@ -15,13 +14,13 @@ import {
   updateSettings,
 } from "../services/contentService";
 import ImageUrlField from "../components/ImageUrlField";
+import AdminPageMedia from "./admin/AdminPageMedia";
 import type {
   IChatMessage,
   IChatQuickReply,
   ICollectionPage,
   IFaq,
   INewsletterSubscriber,
-  IPageMedia,
   IPlatformCard,
   IReview,
   ISiteSettings,
@@ -49,19 +48,19 @@ const inputStyle: CSSProperties = {
 };
 
 export default function AdminContent() {
-  const [tab, setTab] = useState<Tab>("reviews");
+  const [tab, setTab] = useState<Tab>("page-media");
 
   return (
     <div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {(
           [
+            ["page-media", "🏠 სექციების სურათები"],
+            ["platforms", "🖼️ კონსოლების ბარათები"],
             ["reviews", "⭐ შეფასებები"],
             ["faqs", "❓ კითხვები"],
             ["chat", "💬 ჩატის პასუხები"],
             ["inbox", "📥 ჩატის შემოსულები"],
-            ["platforms", "🖼️ კონსოლების ბარათები"],
-            ["page-media", "🏠 სექციების სურათები"],
             ["collections", "📂 კოლექციები"],
             ["settings", "⚙️ საიტის ტექსტები"],
             ["newsletter", "✉️ გამოწერები"],
@@ -89,7 +88,7 @@ export default function AdminContent() {
       {tab === "chat" && <ChatAdmin />}
       {tab === "inbox" && <InboxAdmin />}
       {tab === "platforms" && <PlatformsAdmin />}
-      {tab === "page-media" && <PageMediaAdmin />}
+      {tab === "page-media" && <AdminPageMedia />}
       {tab === "collections" && <CollectionsAdmin />}
       {tab === "settings" && <SettingsAdmin />}
       {tab === "newsletter" && <NewsletterAdmin />}
@@ -321,73 +320,6 @@ function PlatformsAdmin() {
         }}
       />
     </CrudBlock>
-  );
-}
-
-function PageMediaAdmin() {
-  const [items, setItems] = useState<IPageMedia[]>([]);
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [hint, setHint] = useState("");
-  const load = () => getPageMedia().then(setItems).catch(() => setItems([]));
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const save = async (item: IPageMedia, imageUrl: string) => {
-    if (imageUrl === item.imageUrl) return;
-    setSavingId(item._id);
-    setHint("");
-    try {
-      await updateContent("page-media", item._id, { imageUrl });
-      await load();
-      setHint(`${item.title} — შეინახა`);
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      setHint(axiosErr.response?.data?.message || "შენახვა ვერ მოხერხდა");
-    } finally {
-      setSavingId(null);
-    }
-  };
-
-  return (
-    <div className="admin-page-media">
-      <h3>მთავარი გვერდი და /sell სურათები</h3>
-      <p className="admin-muted" style={{ marginTop: 0 }}>
-        PNG, JPG, WebP, SVG ან GIF — ატვირთე კომპიუტერიდან (Cloudinary) ან ჩასვი
-        ლინკი. ცარიელი რომ დატოვო, საიტზე ძველი ლოკალური სურათი დარჩება.
-      </p>
-      {hint && <p className="admin-muted">{hint}</p>}
-      <div className="admin-product-list">
-        {items.map((item) => (
-          <div key={item._id} className="admin-product-row admin-page-media-row">
-            <div className="admin-product-info">
-              {item.imageUrl ? (
-                <img src={item.imageUrl} alt="" />
-              ) : null}
-              <div>
-                <h4>{item.title}</h4>
-                <p>{item.key}</p>
-              </div>
-            </div>
-            <div className="admin-page-media-upload">
-              <ImageUrlField
-                required={false}
-                allowUrl
-                value={item.imageUrl}
-                onChange={(imageUrl) => save(item, imageUrl)}
-                hint={
-                  savingId === item._id
-                    ? "ინახება..."
-                    : "ატვირთე ან ჩასვი Cloudinary ლინკი — ავტომატურად შეინახება."
-                }
-                placeholder="https://res.cloudinary.com/..."
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
