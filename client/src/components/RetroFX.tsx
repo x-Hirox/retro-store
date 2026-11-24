@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { arcadeBeep } from "../utils/arcadeBeep";
 
 const SFX =
-  ".neon-btn, .sell-btn, .sell-brand-bar, .main-nav-bar a, .category-card, .brand-crt, .glow-cover, .arcade-tab, .lang-switch";
+  ".neon-btn, .sell-btn, .sell-brand-bar, .main-nav-bar a, .brand-crt, .glow-cover, .arcade-tab, .lang-switch";
 
 export default function RetroFX() {
   const { pathname } = useLocation();

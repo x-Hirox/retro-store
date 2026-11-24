@@ -6,7 +6,7 @@ import CollectionPage from "../models/CollectionPage.js";
 import SiteSettings from "../models/SiteSettings.js";
 import PageMedia from "../models/PageMedia.js";
 import { PLATFORM_SEED, isGenericBrandLogo } from "./platformSeed.js";
-import { PAGE_MEDIA_SEED, isRemotePageImage } from "./pageMediaSeed.js";
+import { HOME_PAGE_MEDIA_KEYS, PAGE_MEDIA_SEED } from "./pageMediaSeed.js";
 
 export async function seedContentIfEmpty() {
   if ((await SiteSettings.countDocuments()) === 0) {
@@ -245,33 +245,22 @@ let pageMediaReady = false;
 export async function ensurePageMedia() {
   if (pageMediaReady) return;
 
-  const settings = (await SiteSettings.findOne().lean()) as
-    | Record<string, unknown>
-    | null;
+  await PageMedia.deleteMany({ key: { $in: HOME_PAGE_MEDIA_KEYS } });
 
   for (const item of PAGE_MEDIA_SEED) {
     const existing = await PageMedia.findOne({ key: item.key });
-    const fromSettings = item.settingsField
-      ? String(settings?.[item.settingsField] || "").trim()
-      : "";
-    const seeded = isRemotePageImage(fromSettings)
-      ? fromSettings
-      : item.imageUrl;
     if (!existing) {
       await PageMedia.create({
         key: item.key,
         title: item.title,
-        imageUrl: seeded,
+        imageUrl: item.imageUrl,
         order: item.order,
       });
       continue;
     }
     const $set: Record<string, unknown> = { title: item.title, order: item.order };
-    const current = String(existing.imageUrl || "").trim();
-    if (!current) {
-      $set.imageUrl = seeded;
-    } else if (!isRemotePageImage(current) && isRemotePageImage(fromSettings)) {
-      $set.imageUrl = fromSettings;
+    if (!String(existing.imageUrl || "").trim()) {
+      $set.imageUrl = item.imageUrl;
     }
     await PageMedia.updateOne({ _id: existing._id }, { $set });
   }

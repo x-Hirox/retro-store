@@ -1,10 +1,6 @@
 import type { IPageMedia } from "../types";
 
 export const PAGE_MEDIA_FALLBACK: Record<string, string> = {
-  home_consoles: "/images/console-home.png",
-  home_handhelds: "/images/handhelds.png",
-  home_games: "/images/games.png",
-  home_accessories: "/images/accessories.png",
   sell_hero: "/images/sell-chest.jpg",
   sell_collection: "/images/sell-gameboy.jpg",
 };

@@ -98,11 +98,6 @@ export interface ISiteSettings {
   socialTiktok?: string;
   socialYoutube?: string;
   socialX?: string;
-  catImageHome?: string;
-  catImageHand?: string;
-  catImageGames?: string;
-  catImageAcc?: string;
-  catImageBundles?: string;
 }
 
 export interface IChatMessage {

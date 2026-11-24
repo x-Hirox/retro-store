@@ -8,7 +8,6 @@ import HeroBanner from "../components/HeroBanner";
 import RetroStage from "../components/RetroStage";
 import BestSellersSlider from "../components/BestSellersSlider";
 import BrandsSection from "../components/BrandsSection";
-import CategoriesSection from "../components/CategoriesSection";
 import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
@@ -119,11 +118,6 @@ export default function Home() {
       {/* 3. პოპულარული ბრენდები */}
       {!searchQuery && (
         <BrandsSection />
-      )}
-
-      {/* 4. კატეგორიები */}
-      {!searchQuery && (
-        <CategoriesSection />
       )}
 
       {/* შუა ბანერი */}

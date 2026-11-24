@@ -14,7 +14,6 @@ import {
   updateSettings,
 } from "../services/contentService";
 import ImageUrlField from "../components/ImageUrlField";
-import AdminPageMedia from "./admin/AdminPageMedia";
 import type {
   IChatMessage,
   IChatQuickReply,
@@ -31,7 +30,6 @@ type Tab =
   | "faqs"
   | "chat"
   | "platforms"
-  | "page-media"
   | "collections"
   | "settings"
   | "inbox"
@@ -48,16 +46,15 @@ const inputStyle: CSSProperties = {
 };
 
 export default function AdminContent() {
-  const [tab, setTab] = useState<Tab>("page-media");
+  const [tab, setTab] = useState<Tab>("reviews");
 
   return (
     <div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
         {(
           [
-            ["page-media", "🏠 სექციების სურათები"],
-            ["platforms", "🖼️ კონსოლების ბარათები"],
             ["reviews", "⭐ შეფასებები"],
+            ["platforms", "🖼️ კონსოლების ბარათები"],
             ["faqs", "❓ კითხვები"],
             ["chat", "💬 ჩატის პასუხები"],
             ["inbox", "📥 ჩატის შემოსულები"],
@@ -88,7 +85,6 @@ export default function AdminContent() {
       {tab === "chat" && <ChatAdmin />}
       {tab === "inbox" && <InboxAdmin />}
       {tab === "platforms" && <PlatformsAdmin />}
-      {tab === "page-media" && <AdminPageMedia />}
       {tab === "collections" && <CollectionsAdmin />}
       {tab === "settings" && <SettingsAdmin />}
       {tab === "newsletter" && <NewsletterAdmin />}

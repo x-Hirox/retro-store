@@ -28,7 +28,7 @@ export default function HeroBanner({ heroBanner, searchQuery, onReady }: Props) 
 
   return (
     <div
-      className="hero-banner is-hot"
+      className="hero-banner"
       role="button"
       tabIndex={0}
       onClick={() => navigate("/category/playstation")}

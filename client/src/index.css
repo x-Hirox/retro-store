@@ -1982,93 +1982,6 @@ body:not(.dark) .site-header {
   min-width: 72px;
 }
 
-.cats-wrap {
-  width: 100%;
-  max-width: 1400px;
-  margin: 50px auto 0;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-
-.cats-title {
-  color: var(--text-h);
-  text-align: center;
-  margin: 0 0 40px;
-  font-family: "Noto Serif Georgian", serif;
-  font-weight: 900;
-  letter-spacing: 1.5px;
-}
-
-.category-mosaic {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-
-.category-card {
-  position: relative;
-  overflow: hidden;
-  border: 0;
-  border-radius: 24px;
-  min-height: 260px;
-  padding: 36px 32px;
-  color: #fff;
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.category-card:hover {
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
-}
-
-.category-card .cat-copy {
-  position: relative;
-  z-index: 2;
-  max-width: 46%;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-}
-
-.category-card .cat-copy h3 {
-  margin: 0 0 10px;
-  font-size: 1.55rem;
-  font-weight: 900;
-  font-family: "Noto Serif Georgian", serif;
-  line-height: 1.2;
-}
-
-.category-card.is-wide .cat-copy h3 {
-  font-size: 1.9rem;
-}
-
-.category-card .cat-copy p {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  opacity: 0.94;
-  font-weight: 500;
-}
-
-.category-card .cat-art {
-  position: absolute;
-  right: 0;
-  bottom: -6%;
-  top: auto;
-  width: 54%;
-  height: 112%;
-  object-fit: contain;
-  object-position: right bottom;
-  pointer-events: none;
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
-}
-
-.category-card.is-wide .cat-art {
-  width: 50%;
-}
-
 .section-gutter {
   padding: 24px 16px 0;
   width: 100%;
@@ -2089,10 +2002,6 @@ body:not(.dark) .site-header {
 }
 
 @media (min-width: 900px) {
-  .category-mosaic {
-    grid-template-columns: repeat(12, 1fr);
-    gap: 24px;
-  }
   .section-gutter {
     padding: 40px 40px 0;
   }
@@ -2160,22 +2069,6 @@ body:not(.dark) .site-header {
   }
   .nav-links-wrapper {
     min-width: 0;
-  }
-}
-
-@media (max-width: 899px) {
-  .category-card {
-    grid-column: 1 / -1 !important;
-    min-height: 200px !important;
-    padding: 22px !important;
-  }
-  .category-card .cat-copy {
-    max-width: 50% !important;
-  }
-  .category-card .cat-art {
-    width: 50%;
-    height: 100%;
-    bottom: 0;
   }
 }
 
@@ -3528,6 +3421,7 @@ img[src*="santa-hat"] {
   width: 100%;
   cursor: pointer;
   overflow: hidden;
+  transform: none;
 }
 .hero-banner-slot {
   height: 100%;
@@ -4676,20 +4570,6 @@ html.fx-cursor select {
   object-fit: contain;
   background: #0b1220;
 }
-.admin-page-media-row {
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-.admin-page-media-upload {
-  flex: 1 1 280px;
-  min-width: 240px;
-}
-.admin-page-media-row .admin-product-info img {
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  background: #0b1220;
-}
 .admin-table-wrap { overflow-x: auto; }
 .admin-table {
   width: 100%;
@@ -5196,9 +5076,6 @@ html.fx-cursor select {
 }
 body:not(.dark) .rab-a,
 body:not(.dark) .rab-b { opacity: 0.22; }
-.category-card .cat-copy,
-.category-card .cat-copy h3,
-.category-card .cat-copy p,
 .glow-cover-meta {
   position: relative;
   z-index: 4;
@@ -5534,7 +5411,7 @@ body:not(.dark) .collection-console span {
   button:not(:disabled):not(.pd-photo-nav):not(.pd-thumbs-nav),
   summary,
   select,
-  [role="button"]:not(.pd-photo):not(.is-grabbing),
+  [role="button"]:not(.pd-photo):not(.is-grabbing):not(.hero-banner),
   [role="link"],
   [role="menuitem"],
   [role="tab"],
@@ -5558,7 +5435,7 @@ body:not(.dark) .collection-console span {
   button:not(:disabled):not(.pd-photo-nav):not(.pd-thumbs-nav),
   summary,
   select,
-  [role="button"]:not(.pd-photo):not(.is-grabbing),
+  [role="button"]:not(.pd-photo):not(.is-grabbing):not(.hero-banner),
   [role="link"],
   [role="menuitem"],
   [role="tab"],
@@ -5572,7 +5449,7 @@ body:not(.dark) .collection-console span {
   button:not(:disabled):not(.pd-photo-nav):not(.pd-thumbs-nav),
   summary,
   select,
-  [role="button"]:not(.pd-photo),
+  [role="button"]:not(.pd-photo):not(.hero-banner),
   [role="link"],
   [role="menuitem"],
   [role="tab"],

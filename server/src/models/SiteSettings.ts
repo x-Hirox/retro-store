@@ -14,11 +14,6 @@ export interface ISiteSettings extends Document {
   socialTiktok?: string;
   socialYoutube?: string;
   socialX?: string;
-  catImageHome?: string;
-  catImageHand?: string;
-  catImageGames?: string;
-  catImageAcc?: string;
-  catImageBundles?: string;
 }
 
 const SiteSettingsSchema = new Schema<ISiteSettings>({
@@ -41,11 +36,6 @@ const SiteSettingsSchema = new Schema<ISiteSettings>({
   socialTiktok: { type: String, default: "" },
   socialYoutube: { type: String, default: "" },
   socialX: { type: String, default: "" },
-  catImageHome: { type: String, default: "" },
-  catImageHand: { type: String, default: "" },
-  catImageGames: { type: String, default: "" },
-  catImageAcc: { type: String, default: "" },
-  catImageBundles: { type: String, default: "" },
 });
 
 export default model<ISiteSettings>("SiteSettings", SiteSettingsSchema);
