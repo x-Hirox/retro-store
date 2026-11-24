@@ -256,9 +256,14 @@ export default function Admin() {
           <h1>RetroBit ადმინი</h1>
           <p>პროდუქტები, მარაგი, შეკვეთების პროცესი და კლიენტები — ერთი პანელიდან.</p>
         </div>
-        <Link to="/" className="admin-btn ghost">
-          საიტზე დაბრუნება
-        </Link>
+        <div className="admin-head-actions">
+          <Link to="/profile" className="admin-btn ghost">
+            პროფილი
+          </Link>
+          <Link to="/" className="admin-btn ghost">
+            საიტზე დაბრუნება
+          </Link>
+        </div>
       </header>
 
       <nav className="admin-tabs">

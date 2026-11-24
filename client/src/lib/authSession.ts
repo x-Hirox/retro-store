@@ -31,7 +31,6 @@ export function afterLoginPath(user?: {
   lastName?: string;
   phone?: string;
 }): string {
-  if (user?.role === "admin") return "/admin";
   const incomplete = !user?.firstName || !user?.lastName || !user?.phone;
   return incomplete ? "/profile?setup=1" : "/";
 }

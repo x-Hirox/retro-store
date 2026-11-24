@@ -4155,6 +4155,11 @@ html.fx-cursor select {
   gap: 16px;
   align-items: flex-start;
 }
+.admin-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .admin-head h1 {
   margin: 0 0 6px;
   font-size: 1.7rem;

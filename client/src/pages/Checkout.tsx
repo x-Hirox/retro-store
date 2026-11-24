@@ -482,7 +482,6 @@ export default function Checkout() {
                 ნაკრები −{money.extraPct}% · ცალ-ცალკე {formatGel(money.subtotal)}
               </p>
             ) : null}
-            </div>
             <p className="cart-ship-note">მიწოდების პირობები მალე დაემატება.</p>
           </div>
         </div>
