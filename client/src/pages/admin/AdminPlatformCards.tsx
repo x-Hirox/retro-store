@@ -75,12 +75,13 @@ export default function AdminPlatformCards() {
       bucket.push(item);
       byBrand.set(key, bucket);
     }
-    const order = PLATFORM_BRANDS.map((item) => item.value);
-    return Array.from(byBrand.entries()).sort((a, b) => {
-      const ai = order.indexOf(a[0]);
-      const bi = order.indexOf(b[0]);
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-    });
+    const brandRank = (brand: string) => {
+      const index = PLATFORM_BRANDS.findIndex((item) => item.value === brand);
+      return index === -1 ? 99 : index;
+    };
+    return Array.from(byBrand.entries()).sort(
+      (a, b) => brandRank(a[0]) - brandRank(b[0]),
+    );
   }, [items, filter]);
 
   const reset = () => {
