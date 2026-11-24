@@ -74,8 +74,10 @@ export function matchesBrand(
 ) {
   const brand = brandKey(platform);
   if (!brand || brand === "all") return true;
-  const keys = ALIASES[brand] || [brand];
-  const hay =
-    `${product.title || ""} ${product.category || ""} ${product.platform || ""} ${product.description || ""}`.toLowerCase();
-  return keys.some((k) => hay.includes(k));
+  const cat = brandKey(product.category);
+  if (!cat) return false;
+  if (cat === brand) return true;
+  const keys = ALIASES[brand];
+  if (!keys) return false;
+  return keys.some((k) => cat === k);
 }

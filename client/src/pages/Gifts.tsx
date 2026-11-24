@@ -6,13 +6,14 @@ import SeoHead from "../components/SeoHead";
 import { isBannerProduct } from "../utils/pricing";
 import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 import { useLang } from "../i18n/LanguageContext";
-import { totalStock } from "../utils/productColors";
 
 function isGiftProduct(product: IProduct) {
   if (isBannerProduct(product)) return false;
-  const hay =
-    `${product.title} ${product.category} ${product.platform} ${product.genre} ${product.description} ${(product.tags || []).join(" ")}`.toLowerCase();
-  return /gift|საჩუქარ|bundle|ბუნდლ|კომპლექტ|ნაკრებ|starter|collector/.test(hay);
+  const cat = String(product.category || "").toLowerCase();
+  const genre = String(product.genre || "").toLowerCase();
+  const tags = (product.tags || []).join(" ").toLowerCase();
+  const hay = `${cat} ${genre} ${tags}`;
+  return /gift|საჩუქარ|bundle|ბუნდლ|ნაკრებ/.test(hay);
 }
 
 export default function Gifts() {
@@ -27,13 +28,7 @@ export default function Gifts() {
       .finally(() => setLoading(false));
   }, []);
 
-  const gifts = useMemo(() => {
-    const matched = products.filter(isGiftProduct);
-    if (matched.length) return matched;
-    return products.filter(
-      (item) => !isBannerProduct(item) && totalStock(item) > 0,
-    );
-  }, [products]);
+  const gifts = useMemo(() => products.filter(isGiftProduct), [products]);
 
   const title = t("gifts");
   const description = t("giftsDesc");

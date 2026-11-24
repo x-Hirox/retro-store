@@ -169,8 +169,7 @@ function matchesPlatformCard(
   const slug = normalize(card?.slug || raw);
   const name = normalize(card?.name || raw);
   const platform = normalize(product.platform);
-  const hay =
-    `${product.title} ${product.platform || ""} ${product.description}`.toLowerCase();
+  const hay = `${product.title} ${product.platform || ""}`.toLowerCase();
   const isOriginalDs = slug === "nds" || name === "nintendo ds";
   const isDsLite = slug === "dsl" || name === "nintendo ds lite";
   const isDsi = slug === "ndsi" || name === "nintendo dsi";

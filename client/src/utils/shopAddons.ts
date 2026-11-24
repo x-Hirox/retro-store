@@ -16,8 +16,8 @@ function samePlatform(current: IProduct, item: IProduct) {
   const b = String(item.platform || "").trim().toLowerCase();
   if (a && b && a === b) return true;
   return (
-    matchesBrand(item, current.platform || current.category) ||
-    matchesBrand(current, item.platform || item.category)
+    matchesBrand(item, current.category) ||
+    matchesBrand(current, item.category)
   );
 }
 
