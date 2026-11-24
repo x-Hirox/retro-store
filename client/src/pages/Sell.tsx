@@ -1,5 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import API from "../services/api";
+import { getPageMedia } from "../services/contentService";
+import type { IPageMedia } from "../types";
+import { onPageMediaError, pageMediaUrl } from "../utils/pageMedia";
 import { SELL_BRANDS, SELL_FAQS } from "../data/sellCatalog";
 import ReviewsSection from "../components/ReviewsSection";
 import RecentlyViewed from "../components/RecentlyViewed";
@@ -27,6 +30,13 @@ export default function Sell() {
   const [step, setStep] = useState<"list" | "form" | "done">("list");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [media, setMedia] = useState<IPageMedia[]>([]);
+
+  useEffect(() => {
+    getPageMedia()
+      .then(setMedia)
+      .catch(() => setMedia([]));
+  }, []);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -122,8 +132,9 @@ export default function Sell() {
         </div>
         <img
           className="sell-chest neon-lift"
-          src="/images/sell-chest.jpg"
+          src={pageMediaUrl(media, "sell_hero")}
           alt="რეტრო კონსოლების სკივრი — გაყიდე RetroBit-ზე"
+          onError={(event) => onPageMediaError(event.currentTarget, "sell_hero")}
         />
       </section>
 
@@ -365,8 +376,11 @@ export default function Sell() {
         </div>
         <img
           className="neon-lift"
-          src="/images/sell-gameboy.jpg"
+          src={pageMediaUrl(media, "sell_collection")}
           alt="Game Boy — გაყიდე კონსოლი RetroBit-ზე"
+          onError={(event) =>
+            onPageMediaError(event.currentTarget, "sell_collection")
+          }
         />
       </section>
 

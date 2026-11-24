@@ -9,7 +9,8 @@ import SiteSettings from "../models/SiteSettings.js";
 import ChatMessage from "../models/ChatMessage.js";
 import SellQuote from "../models/SellQuote.js";
 import { inboxMail, sendEmail } from "../utils/sendEmail.js";
-import { ensurePlatformCatalog } from "../utils/seedContent.js";
+import PageMedia from "../models/PageMedia.js";
+import { ensurePlatformCatalog, ensurePageMedia } from "../utils/seedContent.js";
 
 function duplicateError(error: unknown) {
   return (error as { code?: number }).code === 11000;
@@ -21,6 +22,9 @@ function crud(Model: any) {
       try {
         if (Model.modelName === "PlatformCard") {
           await ensurePlatformCatalog();
+        }
+        if (Model.modelName === "PageMedia") {
+          await ensurePageMedia();
         }
         const sort = Model.schema.path("order") ? { order: 1 } : { createdAt: -1 };
         const items = await Model.find().sort(sort);
@@ -94,6 +98,7 @@ export const reviews = crud(Review);
 export const faqs = crud(Faq);
 export const chatReplies = crud(ChatQuickReply);
 export const platformCards = crud(PlatformCard);
+export const pageMedia = crud(PageMedia);
 export const collections = crud(CollectionPage);
 export const chatMessages = crud(ChatMessage);
 
@@ -119,6 +124,24 @@ export const getCollectionByBrand = async (req: Request, res: Response) => {
     res.json(page || null);
   } catch {
     res.status(500).json({ message: "სერვერის შეცდომა" });
+  }
+};
+
+export const updatePageMedia = async (req: Request, res: Response) => {
+  try {
+    const imageUrl = String(req.body?.imageUrl || "").trim();
+    const item = await PageMedia.findByIdAndUpdate(
+      req.params.id,
+      { $set: { imageUrl } },
+      { new: true, runValidators: true },
+    );
+    if (!item) {
+      res.status(404).json({ message: "ვერ მოიძებნა" });
+      return;
+    }
+    res.json(item);
+  } catch {
+    res.status(400).json({ message: "სურათი ვერ განახლდა" });
   }
 };
 

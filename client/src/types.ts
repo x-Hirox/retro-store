@@ -75,6 +75,14 @@ export interface ICollectionPage {
   bannerColor: string;
 }
 
+export interface IPageMedia {
+  _id: string;
+  key: string;
+  title: string;
+  imageUrl: string;
+  order: number;
+}
+
 export interface ISiteSettings {
   _id?: string;
   chatGreeting: string;

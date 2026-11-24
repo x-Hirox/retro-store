@@ -4676,6 +4676,20 @@ html.fx-cursor select {
   object-fit: contain;
   background: #0b1220;
 }
+.admin-page-media-row {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.admin-page-media-upload {
+  flex: 1 1 280px;
+  min-width: 240px;
+}
+.admin-page-media-row .admin-product-info img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  background: #0b1220;
+}
 .admin-table-wrap { overflow-x: auto; }
 .admin-table {
   width: 100%;

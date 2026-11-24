@@ -6,10 +6,12 @@ import {
   faqs,
   chatReplies,
   platformCards,
+  pageMedia,
   collections,
   chatMessages,
   listPlatformCardsByBrand,
   getCollectionByBrand,
+  updatePageMedia,
   getSettings,
   updateSettings,
   subscribeNewsletter,
@@ -26,6 +28,7 @@ router.get("/faqs", faqs.list);
 router.get("/chat-replies", chatReplies.list);
 router.get("/platform-cards", platformCards.list);
 router.get("/platform-cards/brand/:brand", listPlatformCardsByBrand);
+router.get("/page-media", pageMedia.list);
 router.get("/collections", collections.list);
 router.get("/collections/brand/:brand", getCollectionByBrand);
 router.get("/settings", getSettings);
@@ -52,6 +55,8 @@ router.delete("/chat-messages/:id", protect, adminOnly, chatMessages.remove);
 router.post("/platform-cards", protect, adminOnly, platformCards.create);
 router.put("/platform-cards/:id", protect, adminOnly, platformCards.update);
 router.delete("/platform-cards/:id", protect, adminOnly, platformCards.remove);
+
+router.put("/page-media/:id", protect, adminOnly, updatePageMedia);
 
 router.post("/collections", protect, adminOnly, collections.create);
 router.put("/collections/:id", protect, adminOnly, collections.update);

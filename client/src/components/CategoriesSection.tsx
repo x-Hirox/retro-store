@@ -1,85 +1,75 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../i18n/LanguageContext";
-import { getSiteSettings } from "../services/contentService";
+import { getPageMedia } from "../services/contentService";
 import type { MessageKey } from "../i18n/messages";
-import type { ISiteSettings } from "../types";
+import type { IPageMedia } from "../types";
 import HoloCard from "./HoloCard";
+import { onPageMediaError, pageMediaUrl } from "../utils/pageMedia";
 
-const DEFAULTS = {
-  catImageHome: "/images/console-home.png",
-  catImageHand: "/images/handhelds.png",
-  catImageGames: "/images/games.png",
-  catImageAcc: "/images/accessories.png",
-  catImageBundles: "/images/bundles.jpg",
-};
+const CATEGORIES: {
+  title: MessageKey;
+  desc: MessageKey;
+  path: string;
+  background: string;
+  mediaKey: string;
+  gridSpan: string;
+  wide: boolean;
+}[] = [
+  {
+    title: "catHome",
+    desc: "catHomeDesc",
+    path: "/category/playstation",
+    background: "#2563eb",
+    mediaKey: "home_consoles",
+    gridSpan: "span 6",
+    wide: true,
+  },
+  {
+    title: "catHand",
+    desc: "catHandDesc",
+    path: "/category/nintendo",
+    background: "#7c3aed",
+    mediaKey: "home_handhelds",
+    gridSpan: "span 3",
+    wide: false,
+  },
+  {
+    title: "catGames",
+    desc: "catGamesDesc",
+    path: "/category/games",
+    background: "#059669",
+    mediaKey: "home_games",
+    gridSpan: "span 3",
+    wide: false,
+  },
+  {
+    title: "catAcc",
+    desc: "catAccDesc",
+    path: "/category/accessories",
+    background: "#dc2626",
+    mediaKey: "home_accessories",
+    gridSpan: "span 12",
+    wide: true,
+  },
+];
 
 export default function CategoriesSection() {
   const navigate = useNavigate();
   const { t } = useLang();
-  const [settings, setSettings] = useState<Partial<ISiteSettings>>({});
+  const [media, setMedia] = useState<IPageMedia[]>([]);
 
   useEffect(() => {
-    getSiteSettings()
-      .then(setSettings)
-      .catch(() => setSettings({}));
+    getPageMedia()
+      .then(setMedia)
+      .catch(() => setMedia([]));
   }, []);
-
-  const img = (key: keyof typeof DEFAULTS) =>
-    settings[key] || DEFAULTS[key];
-
-  const categories: {
-    title: MessageKey;
-    desc: MessageKey;
-    path: string;
-    background: string;
-    imageKey: keyof typeof DEFAULTS;
-    gridSpan: string;
-    wide: boolean;
-  }[] = [
-    {
-      title: "catHome",
-      desc: "catHomeDesc",
-      path: "/category/playstation",
-      background: "#2563eb",
-      imageKey: "catImageHome",
-      gridSpan: "span 6",
-      wide: true,
-    },
-    {
-      title: "catHand",
-      desc: "catHandDesc",
-      path: "/category/nintendo",
-      background: "#7c3aed",
-      imageKey: "catImageHand",
-      gridSpan: "span 3",
-      wide: false,
-    },
-    {
-      title: "catGames",
-      desc: "catGamesDesc",
-      path: "/category/games",
-      background: "#059669",
-      imageKey: "catImageGames",
-      gridSpan: "span 3",
-      wide: false,
-    },
-    {
-      title: "catAcc",
-      desc: "catAccDesc",
-      path: "/category/accessories",
-      background: "#dc2626",
-      imageKey: "catImageAcc",
-      gridSpan: "span 12",
-      wide: true,
-    },
-  ];
 
   return (
     <div className="cats-wrap">
       <h2 className="section-title cats-title">{t("shopByCategory")}</h2>
       <div className="category-mosaic">
-        {categories.map((cat) => (
+        {CATEGORIES.map((cat) => (
           <HoloCard
             key={cat.title}
             className={`category-card crt-frame ${cat.wide ? "is-wide" : ""}`}
@@ -90,7 +80,12 @@ export default function CategoriesSection() {
               <h3>{t(cat.title)}</h3>
               <p>{t(cat.desc)}</p>
             </div>
-            <img className="cat-art" src={img(cat.imageKey)} alt={t(cat.title)} />
+            <img
+              className="cat-art"
+              src={pageMediaUrl(media, cat.mediaKey)}
+              alt={t(cat.title)}
+              onError={(event) => onPageMediaError(event.currentTarget, cat.mediaKey)}
+            />
           </HoloCard>
         ))}
       </div>

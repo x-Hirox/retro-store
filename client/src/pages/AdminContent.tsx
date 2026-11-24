@@ -6,6 +6,7 @@ import {
   getChatReplies,
   getCollections,
   getFaqs,
+  getPageMedia,
   getPlatformCards,
   getReviews,
   getSiteSettings,
@@ -20,6 +21,7 @@ import type {
   ICollectionPage,
   IFaq,
   INewsletterSubscriber,
+  IPageMedia,
   IPlatformCard,
   IReview,
   ISiteSettings,
@@ -30,6 +32,7 @@ type Tab =
   | "faqs"
   | "chat"
   | "platforms"
+  | "page-media"
   | "collections"
   | "settings"
   | "inbox"
@@ -58,6 +61,7 @@ export default function AdminContent() {
             ["chat", "💬 ჩატის პასუხები"],
             ["inbox", "📥 ჩატის შემოსულები"],
             ["platforms", "🖼️ კონსოლების ბარათები"],
+            ["page-media", "🏠 სექციების სურათები"],
             ["collections", "📂 კოლექციები"],
             ["settings", "⚙️ საიტის ტექსტები"],
             ["newsletter", "✉️ გამოწერები"],
@@ -85,6 +89,7 @@ export default function AdminContent() {
       {tab === "chat" && <ChatAdmin />}
       {tab === "inbox" && <InboxAdmin />}
       {tab === "platforms" && <PlatformsAdmin />}
+      {tab === "page-media" && <PageMediaAdmin />}
       {tab === "collections" && <CollectionsAdmin />}
       {tab === "settings" && <SettingsAdmin />}
       {tab === "newsletter" && <NewsletterAdmin />}
@@ -319,6 +324,73 @@ function PlatformsAdmin() {
   );
 }
 
+function PageMediaAdmin() {
+  const [items, setItems] = useState<IPageMedia[]>([]);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [hint, setHint] = useState("");
+  const load = () => getPageMedia().then(setItems).catch(() => setItems([]));
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (item: IPageMedia, imageUrl: string) => {
+    if (imageUrl === item.imageUrl) return;
+    setSavingId(item._id);
+    setHint("");
+    try {
+      await updateContent("page-media", item._id, { imageUrl });
+      await load();
+      setHint(`${item.title} — შეინახა`);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      setHint(axiosErr.response?.data?.message || "შენახვა ვერ მოხერხდა");
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  return (
+    <div className="admin-page-media">
+      <h3>მთავარი გვერდი და /sell სურათები</h3>
+      <p className="admin-muted" style={{ marginTop: 0 }}>
+        PNG, JPG, WebP, SVG ან GIF — ატვირთე კომპიუტერიდან (Cloudinary) ან ჩასვი
+        ლინკი. ცარიელი რომ დატოვო, საიტზე ძველი ლოკალური სურათი დარჩება.
+      </p>
+      {hint && <p className="admin-muted">{hint}</p>}
+      <div className="admin-product-list">
+        {items.map((item) => (
+          <div key={item._id} className="admin-product-row admin-page-media-row">
+            <div className="admin-product-info">
+              {item.imageUrl ? (
+                <img src={item.imageUrl} alt="" />
+              ) : null}
+              <div>
+                <h4>{item.title}</h4>
+                <p>{item.key}</p>
+              </div>
+            </div>
+            <div className="admin-page-media-upload">
+              <ImageUrlField
+                required={false}
+                allowUrl
+                value={item.imageUrl}
+                onChange={(imageUrl) => save(item, imageUrl)}
+                hint={
+                  savingId === item._id
+                    ? "ინახება..."
+                    : "ატვირთე ან ჩასვი Cloudinary ლინკი — ავტომატურად შეინახება."
+                }
+                placeholder="https://res.cloudinary.com/..."
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CollectionsAdmin() {
   const [items, setItems] = useState<ICollectionPage[]>([]);
   const [form, setForm] = useState({
@@ -446,30 +518,6 @@ function SettingsAdmin() {
           value={String(form[key] || "")}
           onChange={(e) => setForm({ ...form, [key]: e.target.value })}
         />
-      ))}
-      <h3>კატეგორიების სურათები (მთავარი mosaic)</h3>
-      <p style={{ margin: 0, fontSize: 13, color: "#94a3b8" }}>
-        PNG cutout ატვირთე Cloudinary-ზე — გამჭვირვალე ფონი, კონსოლები მარჯვნივ.
-        ცარიელი რომ დატოვო, ლოკალური სურათი დარჩება.
-      </p>
-      {(
-        [
-          ["catImageHome", "კონსოლები"],
-          ["catImageHand", "ხელის კონსოლები"],
-          ["catImageGames", "თამაშები (კარტრიჯები)"],
-          ["catImageAcc", "აქსესუარები"],
-          ["catImageBundles", "ნაკრებები"],
-        ] as [keyof ISiteSettings, string][]
-      ).map(([key, label]) => (
-        <div key={key}>
-          <label style={{ fontSize: 13, color: "#cbd5e1" }}>{label}</label>
-          <ImageUrlField
-            required={false}
-            placeholder={`${label} — Cloudinary PNG`}
-            value={String(form[key] || "")}
-            onChange={(imageUrl) => setForm({ ...form, [key]: imageUrl })}
-          />
-        </div>
       ))}
       <button type="submit" style={{ ...smallBtn("#10b981"), padding: "12px" }}>
         შენახვა
