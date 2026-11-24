@@ -22,6 +22,7 @@ export interface IProduct {
   platform?: string;
   genre?: string;
   tags?: string[];
+  condition?: "new" | "used" | "refurbished" | "";
   isBestSeller?: boolean;
 }
 

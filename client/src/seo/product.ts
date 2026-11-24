@@ -5,6 +5,7 @@ import {
   productPhotos,
   totalStock,
 } from "../utils/productColors";
+import { productCondition } from "../utils/productCondition";
 import { productKeywords } from "../utils/tags";
 import {
   SITE_URL,
@@ -18,12 +19,12 @@ import { productPath } from "./productUrl";
 export { parseProductParam, productPath, slugifyProductTitle } from "./productUrl";
 
 export function isNewProduct(product: {
+  condition?: string;
   title?: string;
   description?: string;
   tags?: string[];
 }) {
-  const hay = `${product.title || ""} ${product.description || ""} ${(product.tags || []).join(" ")}`.toLowerCase();
-  return /ახალი|\bnew\b|sealed|unopened/.test(hay);
+  return productCondition(product) === "new";
 }
 
 export function productSeoTitle(product: { title?: string }, price: number) {
@@ -44,9 +45,10 @@ export function productSeoDescription(
 }
 
 function itemCondition(product: IProduct) {
-  return isNewProduct(product)
-    ? "https://schema.org/NewCondition"
-    : "https://schema.org/UsedCondition";
+  const value = productCondition(product);
+  if (value === "new") return "https://schema.org/NewCondition";
+  if (value === "refurbished") return "https://schema.org/RefurbishedCondition";
+  return "https://schema.org/UsedCondition";
 }
 
 function productOffers(product: IProduct, url: string) {

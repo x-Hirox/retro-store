@@ -23,6 +23,7 @@ export interface IProduct extends Document {
   platform?: string;
   genre?: string;
   tags?: string[];
+  condition?: "new" | "used" | "refurbished";
   isBestSeller?: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -57,6 +58,7 @@ const ProductSchema = new Schema<IProduct>({
   platform: { type: String, default: "" },
   genre: { type: String, default: "" },
   tags: { type: [String], default: [] },
+  condition: { type: String, default: "" },
   isBestSeller: { type: Boolean, default: false },
 }, { timestamps: true });
 

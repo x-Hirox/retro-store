@@ -17,6 +17,13 @@ import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
 import SeoHead from "../components/SeoHead";
 import { parseTags, productSearchText } from "../utils/tags";
+import {
+  CONDITION_OPTIONS,
+  conditionLabel,
+  parseCondition,
+  productCondition,
+  type ProductCondition,
+} from "../utils/productCondition";
 import { totalStock } from "../utils/productColors";
 
 type Tab = "overview" | "orders" | "products" | "customers" | "content";
@@ -88,6 +95,7 @@ export default function Admin() {
   const [genre, setGenre] = useState("");
   const [tags, setTags] = useState("");
   const [isBestSeller, setIsBestSeller] = useState(false);
+  const [condition, setCondition] = useState<ProductCondition | "">("");
   const [colors, setColors] = useState<IProductColor[]>([]);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -117,6 +125,8 @@ export default function Admin() {
           ? "მთავარი ფოტო აკლია — ატვირთე ფაილი ან ჩასვი Cloudinary ლინკი."
           : !isHeroBanner && !platform
             ? "აირჩიე პლატფორმა."
+          : !isHeroBanner && !parseCondition(condition)
+            ? "აირჩიე მდგომარეობა: ახალი, მეორადი ან შეკეთებული."
           : !isHeroBanner && !price
             ? "ჩაწერე ფასი."
             : !isHeroBanner &&
@@ -156,6 +166,7 @@ export default function Admin() {
         platform: isHeroBanner ? "" : platform,
         genre: isHeroBanner ? "" : genre,
         tags: isHeroBanner ? [] : parseTags(tags),
+        condition: isHeroBanner ? "" : parseCondition(condition),
         isBestSeller: isHeroBanner ? false : isBestSeller,
       };
 
@@ -195,6 +206,7 @@ export default function Admin() {
     setGenre(p.genre || "");
     setTags((p.tags || []).join(", "));
     setIsBestSeller(!!p.isBestSeller);
+    setCondition(p.isHeroBanner ? "" : productCondition(p));
     setColors(p.colors || []);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -214,6 +226,7 @@ export default function Admin() {
     setGenre("");
     setTags("");
     setIsBestSeller(false);
+    setCondition("");
     setColors([]);
     setFormError("");
     setSaving(false);
@@ -456,6 +469,24 @@ export default function Admin() {
                     onChange={(e) => setTags(e.target.value)}
                     style={inputStyle}
                   />
+                  <select
+                    value={condition}
+                    onChange={(e) =>
+                      setCondition(parseCondition(e.target.value))
+                    }
+                    required
+                    style={inputStyle}
+                  >
+                    <option value="">მდგომარეობა</option>
+                    {CONDITION_OPTIONS.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="admin-muted" style={{ margin: 0 }}>
+                    ახალი = ახალი, ყუთით. დალუქული საიტზე არ იწერება.
+                  </p>
                   <label className="admin-check">
                     <input
                       type="checkbox"
@@ -525,7 +556,7 @@ export default function Admin() {
                               totalStock(p) <= 0
                                 ? "SOLD"
                                 : `მარაგი ${totalStock(p)}`
-                            }${p.platform ? ` · ${p.platform}` : ""}${
+                            }${p.platform ? ` · ${p.platform}` : ""} · ${conditionLabel(productCondition(p))}${
                               p.colors?.length
                                 ? ` · ${p.colors
                                     .map((c) => {

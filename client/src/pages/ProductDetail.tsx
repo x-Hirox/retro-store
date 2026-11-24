@@ -13,7 +13,6 @@ import ProductCard from "../components/ProductCard";
 import SeoHead from "../components/SeoHead";
 import { productImageAlt } from "../utils/imageAlt";
 import {
-  isNewProduct,
   productJsonLd,
   productPath,
   productSeoDescription,
@@ -32,6 +31,10 @@ import {
   withSelectedColor,
 } from "../utils/productColors";
 import { specGroups, splitProductCopy } from "../utils/productSpecs";
+import {
+  conditionLabel,
+  productCondition,
+} from "../utils/productCondition";
 
 type ShopTab = "accessories" | "similar" | "specs";
 
@@ -121,11 +124,16 @@ export default function ProductDetail() {
       product.platform ? { label: "პლატფორმა", value: product.platform } : null,
       product.category ? { label: "კატეგორია", value: product.category } : null,
       product.genre ? { label: "ჟანრი", value: product.genre } : null,
-      { label: "მდგომარეობა", value: isNewProduct(product) ? "ახალი" : "მეორადი" },
+      { label: "მდგომარეობა", value: conditionLabel(productCondition(product)) },
     ].filter(Boolean) as { label: string; value: string }[];
     const merged = [...copy.specs];
     for (const row of extra) {
-      if (!merged.some((item) => item.label === row.label)) merged.push(row);
+      const idx = merged.findIndex((item) => item.label === row.label);
+      if (row.label === "მდგომარეობა" && idx >= 0) {
+        merged[idx] = row;
+      } else if (idx < 0) {
+        merged.push(row);
+      }
     }
     return merged;
   }, [copy.specs, product]);

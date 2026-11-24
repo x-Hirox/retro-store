@@ -1,4 +1,5 @@
 import { productKeywords } from "../utils/tags.js";
+import { productCondition } from "./productCondition.js";
 import { SITE_URL, absUrl, sitePath } from "./config.js";
 import { breadcrumbGraph, jsonLdGraph } from "./html.js";
 import { productPath } from "./productUrl.js";
@@ -24,6 +25,7 @@ export type LeanProduct = {
   platform?: string;
   genre?: string;
   tags?: string[];
+  condition?: string;
 };
 
 function colorsOf(product: LeanProduct) {
@@ -92,12 +94,12 @@ export function productPhotos(product: LeanProduct) {
 }
 
 export function isNewProduct(product: {
+  condition?: string;
   title?: string;
   description?: string;
   tags?: string[];
 }) {
-  const hay = `${product.title || ""} ${product.description || ""} ${(product.tags || []).join(" ")}`.toLowerCase();
-  return /ახალი|\bnew\b|sealed|unopened/.test(hay);
+  return productCondition(product) === "new";
 }
 
 export function productSeoTitle(product: { title?: string }, price: number) {
@@ -118,9 +120,10 @@ export function productSeoDescription(
 }
 
 function itemCondition(product: LeanProduct) {
-  return isNewProduct(product)
-    ? "https://schema.org/NewCondition"
-    : "https://schema.org/UsedCondition";
+  const value = productCondition(product);
+  if (value === "new") return "https://schema.org/NewCondition";
+  if (value === "refurbished") return "https://schema.org/RefurbishedCondition";
+  return "https://schema.org/UsedCondition";
 }
 
 function productOffers(product: LeanProduct, url: string) {

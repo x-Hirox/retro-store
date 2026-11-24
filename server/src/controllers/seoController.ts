@@ -22,8 +22,8 @@ import {
   jsonLdGraph,
 } from "../seo/html.js";
 import { matchProduct, productPath, requestProductPath } from "../seo/productUrl.js";
+import { productCondition } from "../seo/productCondition.js";
 import {
-  isNewProduct,
   productCrawlerPayload,
   productPhotos,
   saleRange,
@@ -172,7 +172,7 @@ export async function googleMerchantXml(_req: Request, res: Response) {
       const photos = productPhotos(product);
       const link = sitePath(productPath(product));
       const availability = totalStock(product) > 0 ? "in_stock" : "out_of_stock";
-      const condition = isNewProduct(product) ? "new" : "used";
+      const condition = productCondition(product);
       const image = photos[0] ? absUrl(photos[0]) : "";
       const extra = photos
         .slice(1, 8)
