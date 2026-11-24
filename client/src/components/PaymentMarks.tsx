@@ -98,7 +98,7 @@ export default function PaymentMarks() {
   return (
     <div className="pay-marks" aria-label="გადახდის მეთოდები">
       {MARKS.map((mark) => (
-        <span key={mark.id} className={`pay-logo ${mark.id}`} title={mark.label}>
+        <span key={mark.id} className={`pay-logo is-hot ${mark.id}`} title={mark.label}>
           {mark.node}
         </span>
       ))}

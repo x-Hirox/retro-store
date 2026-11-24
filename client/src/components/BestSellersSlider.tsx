@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import type { IProduct } from "../types";
 import { productPath } from "../seo/productUrl";
 import { formatGel, getSalePrice, isBannerProduct, saleRange } from "../utils/pricing";
@@ -22,7 +22,6 @@ export default function BestSellersSlider({
   searchQuery,
   selectedCategory,
 }: Props) {
-  const navigate = useNavigate();
   const sliderRef = useRef<HTMLDivElement>(null);
   const paused = useRef(false);
   const drag = useRef({
@@ -101,17 +100,9 @@ export default function BestSellersSlider({
               ? `📂 ${selectedCategory}`
               : t("bestsellers")}
         </h2>
-        <span
-          style={{
-            color: "var(--text)",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontSize: "0.95rem",
-          }}
-          onClick={() => navigate("/category/playstation")}
-        >
+        <Link to="/category/playstation" className="see-all-link is-hot">
           {t("seeAll")}
-        </span>
+        </Link>
       </div>
 
       {loading ? (

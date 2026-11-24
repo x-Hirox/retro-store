@@ -36,8 +36,8 @@ const KA: Record<string, string> = {
 
 const OBJECT_ID_RE = /^[a-f0-9]{24}$/i;
 const LEGACY_ID_RE = /^(.*)-([a-f0-9]{24})$/i;
-const SHORT_ID_RE = /^(.*)-([a-f0-9]{4})$/i;
-const SHORT_ID_LEN = 4;
+const SHORT_ID_RE = /^(.*)-([a-f0-9]{4,8})$/i;
+const SHORT_ID_LEN = 6;
 const SLUG_WORDS = 4;
 
 const STOP = new Set([
@@ -105,7 +105,14 @@ export function idHex(id: unknown): string {
 }
 
 export function shortProductId(id: unknown): string {
-  return idHex(id).slice(0, SHORT_ID_LEN);
+  return idHex(id).slice(-SHORT_ID_LEN);
+}
+
+function idMatchesPrefix(id: unknown, prefix: string) {
+  const hex = idHex(id);
+  const want = String(prefix || "").toLowerCase();
+  if (!hex || !want) return false;
+  return hex.slice(-SHORT_ID_LEN) === want || hex.startsWith(want);
 }
 
 export function productPath(product: { _id: unknown; title?: string }): string {
@@ -146,12 +153,15 @@ export function matchProduct<T extends { _id: unknown; title?: string }>(
   }
   if (parsed.prefix) {
     const hits = products.filter((item) =>
-      idHex(item._id).startsWith(parsed.prefix || ""),
+      idMatchesPrefix(item._id, parsed.prefix || ""),
     );
     if (hits.length === 1) return hits[0];
-    return (
-      hits.find((item) => slugifyProductTitle(item.title || "") === parsed.slug) ||
-      hits[0]
+    const byShort = hits.find(
+      (item) => shortProductId(item._id) === parsed.prefix,
+    );
+    if (byShort) return byShort;
+    return hits.find(
+      (item) => slugifyProductTitle(item.title || "") === parsed.slug,
     );
   }
   if (parsed.slug) {

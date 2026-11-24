@@ -75,6 +75,7 @@ export default function SiteFooter() {
                 href={httpUrl(item.href)}
                 icon={item.icon}
                 label={item.label}
+                hot
               />
             ))}
           </div>
@@ -96,7 +97,7 @@ export default function SiteFooter() {
 
       <div className="footer-pay" aria-label="გადახდის მეთოდები">
         {PAYMENTS.map((label) => (
-          <span key={label} className="pay-badge">
+          <span key={label} className="pay-badge is-hot">
             {label}
           </span>
         ))}
@@ -117,11 +118,14 @@ function FooterRow({
   href,
   icon,
   label,
+  hot,
 }: {
   href?: string;
   icon: ReactNode;
   label: string;
+  hot?: boolean;
 }) {
+  const className = `footer-row${href || hot ? " is-hot" : ""}`;
   const inner = (
     <>
       <span className="footer-ico">{icon}</span>
@@ -132,7 +136,7 @@ function FooterRow({
     const external = href.startsWith("http");
     return (
       <a
-        className="footer-row"
+        className={className}
         href={href}
         {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
       >
@@ -140,12 +144,12 @@ function FooterRow({
       </a>
     );
   }
-  return <span className="footer-row">{inner}</span>;
+  return <span className={className}>{inner}</span>;
 }
 
 function FooterLink({ to, children }: { to: string; children: string }) {
   return (
-    <Link to={to} className="footer-link">
+    <Link to={to} className="footer-link is-hot">
       {children}
     </Link>
   );

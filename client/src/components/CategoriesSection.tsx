@@ -58,7 +58,7 @@ export default function CategoriesSection() {
     {
       title: "catGames",
       desc: "catGamesDesc",
-      path: "/category/sega",
+      path: "/category/games",
       background: "#059669",
       imageKey: "catImageGames",
       gridSpan: "span 3",
@@ -70,16 +70,7 @@ export default function CategoriesSection() {
       path: "/category/accessories",
       background: "#dc2626",
       imageKey: "catImageAcc",
-      gridSpan: "span 4",
-      wide: false,
-    },
-    {
-      title: "catBundles",
-      desc: "catBundlesDesc",
-      path: "/category/bundles",
-      background: "#b45309",
-      imageKey: "catImageBundles",
-      gridSpan: "span 8",
+      gridSpan: "span 12",
       wide: true,
     },
   ];

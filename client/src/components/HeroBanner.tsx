@@ -28,8 +28,16 @@ export default function HeroBanner({ heroBanner, searchQuery, onReady }: Props) 
 
   return (
     <div
-      className="hero-banner"
+      className="hero-banner is-hot"
+      role="button"
+      tabIndex={0}
       onClick={() => navigate("/category/playstation")}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate("/category/playstation");
+        }
+      }}
     >
       <img
         src={src}

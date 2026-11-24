@@ -9,7 +9,6 @@ import RetroStage from "../components/RetroStage";
 import BestSellersSlider from "../components/BestSellersSlider";
 import BrandsSection from "../components/BrandsSection";
 import CategoriesSection from "../components/CategoriesSection";
-import PopularBundlesSlider from "../components/.PopularBundlesSlider"; // 👈 პოპულარული ბუნდლების სლაიდერი
 import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
@@ -51,7 +50,7 @@ export default function Home() {
   const newest = [...(products || [])]
     .filter((item) => !isBannerProduct(item))
     .sort((a, b) => String(b._id).localeCompare(String(a._id)))
-    .slice(0, 4);
+    .slice(0, 8);
 
   const homeTitle = searchQuery
     ? `ძებნა: ${searchQuery}`
@@ -127,14 +126,20 @@ export default function Home() {
         <CategoriesSection />
       )}
 
-      {/* 6. SHOP BY POPULAR BUNDLES */}
-      {!searchQuery && <PopularBundlesSlider products={products} />}
-
       {/* შუა ბანერი */}
       {middleBanner && middleBanner.imageUrl && !searchQuery && (
         <div
-          style={{ width: "100%", marginTop: "50px", cursor: "pointer" }}
+          className="is-hot"
+          role="button"
+          tabIndex={0}
+          style={{ width: "100%", marginTop: "50px" }}
           onClick={() => navigate("/category/playstation")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              navigate("/category/playstation");
+            }
+          }}
         >
           <img
             src={middleBanner.imageUrl}
@@ -152,8 +157,17 @@ export default function Home() {
       {/* ქვედა ბანერი */}
       {bottomBanner && bottomBanner.imageUrl && !searchQuery && (
         <div
-          style={{ width: "100%", marginTop: "50px", cursor: "pointer" }}
+          className="is-hot"
+          role="button"
+          tabIndex={0}
+          style={{ width: "100%", marginTop: "50px" }}
           onClick={() => navigate("/category/playstation")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              navigate("/category/playstation");
+            }
+          }}
         >
           <img
             src={bottomBanner.imageUrl}

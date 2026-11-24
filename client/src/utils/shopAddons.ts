@@ -1,22 +1,23 @@
 import type { IProduct } from "../types";
 import { matchesBrand } from "./brandMatch";
 import { isBannerProduct } from "./pricing";
+import {
+  isAccessoryProduct,
+  isConsoleProduct,
+  isGameProduct,
+  productKind,
+} from "./productKind";
 import { totalStock } from "./productColors";
 
-function hay(product: IProduct) {
-  return `${product.category} ${product.title} ${product.platform} ${product.description} ${product.genre}`.toLowerCase();
-}
+export { isAccessoryProduct, isConsoleProduct, isGameProduct } from "./productKind";
 
-export function isAccessoryProduct(product: IProduct) {
-  return /accessor|აქსესუარ|controller|ჯოისტიკ|charger|დამტენ|cable|კაბელ|hdmi|memory|memory card/.test(
-    hay(product),
-  );
-}
-
-export function isGameProduct(product: IProduct) {
+function samePlatform(current: IProduct, item: IProduct) {
+  const a = String(current.platform || "").trim().toLowerCase();
+  const b = String(item.platform || "").trim().toLowerCase();
+  if (a && b && a === b) return true;
   return (
-    /game|თამაშ|cartridge|კარტრიჯ|disc|დისკ/.test(hay(product)) &&
-    !isAccessoryProduct(product)
+    matchesBrand(item, current.platform || current.category) ||
+    matchesBrand(current, item.platform || item.category)
   );
 }
 
@@ -24,26 +25,23 @@ export function suggestAddons(
   current: IProduct | null,
   all: IProduct[],
   limit = 8,
+  opts?: { includeGames?: boolean },
 ): IProduct[] {
+  const includeGames = opts?.includeGames === true;
   const rest = all.filter(
     (item) =>
       (!current || item._id !== current._id) &&
       totalStock(item) > 0 &&
       !isBannerProduct(item),
   );
-  const brand = current?.platform || current?.category;
-  const related = brand
-    ? rest.filter(
-        (item) =>
-          matchesBrand(item, brand) ||
-          matchesBrand(current || {}, item.platform || item.category),
-      )
-    : rest;
+  const related = current ? rest.filter((item) => samePlatform(current, item)) : rest;
+  const accessoriesOf = (list: IProduct[]) =>
+    list.filter((item) => isAccessoryProduct(item) && !isConsoleProduct(item));
   const ranked = [
-    ...related.filter(isAccessoryProduct),
-    ...related.filter(isGameProduct),
-    ...rest.filter(isAccessoryProduct),
-    ...rest.filter(isGameProduct),
+    ...accessoriesOf(related),
+    ...(includeGames ? related.filter(isGameProduct) : []),
+    ...(includeGames ? accessoriesOf(rest) : []),
+    ...(includeGames ? rest.filter(isGameProduct) : []),
   ];
   const unique: IProduct[] = [];
   for (const item of ranked) {
@@ -61,13 +59,14 @@ export function suggestSimilar(
   const rest = all.filter(
     (item) =>
       (!current || item._id !== current._id) &&
-      !isBannerProduct(item),
+      !isBannerProduct(item) &&
+      (!current || productKind(item) === productKind(current)),
   );
   const same = rest.filter(
     (item) =>
       current &&
-      (item.category === current.category ||
-        item.platform === current.platform),
+      (item.platform === current.platform ||
+        item.category === current.category),
   );
   const unique: IProduct[] = [];
   for (const item of [...same, ...rest]) {

@@ -6,8 +6,9 @@ import {
   getPlatformCards,
 } from "../services/contentService";
 import type { ICollectionPage, IPlatformCard, IProduct } from "../types";
-import { isBannerProduct } from "../utils/pricing";
+import { getSalePrice, isBannerProduct } from "../utils/pricing";
 import ProductCard from "../components/ProductCard";
+import ShopFilters from "../components/ShopFilters";
 import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
@@ -17,6 +18,11 @@ import PlatformCarousel from "../components/PlatformCarousel";
 import GameCovers from "../components/GameCovers";
 import { brandKey, matchesBrand } from "../utils/brandMatch";
 import { platformArtUrl } from "../utils/platformArt";
+import {
+  KIND_ROUTES,
+  productKind,
+  type ProductKind,
+} from "../utils/productKind";
 import SeoHead from "../components/SeoHead";
 import { breadcrumbGraph, jsonLdGraph } from "../seo/site";
 
@@ -135,6 +141,8 @@ const bannerColors: Record<string, string> = {
   bundles: "#b45309",
   "atari & more": "#6b21a8",
   "chinese consoles": "#334155",
+  accessories: "#dc2626",
+  games: "#059669",
 };
 
 const PAGE_SIZE = 8;
@@ -215,6 +223,36 @@ function matchesPlatformCard(
   return false;
 }
 
+function artForPlatform(name: string) {
+  const want = name.toLowerCase();
+  for (const list of Object.values(fallbackCards)) {
+    const hit = list.find((item) => item.name.toLowerCase() === want);
+    if (hit) return hit.image;
+  }
+  return platformArtUrl(name.toLowerCase().replace(/\s+/g, "-"));
+}
+
+function cardsFromProducts(list: IProduct[], brand: string): IPlatformCard[] {
+  const seen = new Set<string>();
+  const out: IPlatformCard[] = [];
+  for (const product of list) {
+    const name = String(product.platform || "").trim();
+    if (!name) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({
+      _id: name,
+      brand,
+      name,
+      slug: name,
+      imageUrl: artForPlatform(name),
+      order: out.length,
+    });
+  }
+  return out;
+}
+
 function matchesSub(
   product: IProduct,
   sub?: string,
@@ -236,14 +274,22 @@ export default function CategoryView() {
   const [cards, setCards] = useState<IPlatformCard[]>([]);
   const [collection, setCollection] = useState<ICollectionPage | null>(null);
   const [loading, setLoading] = useState(true);
-  const [maxPrice, setMaxPrice] = useState(2000);
+  const [priceMin, setPriceMin] = useState(0);
+  const [priceMax, setPriceMax] = useState(2000);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedKinds, setSelectedKinds] = useState<ProductKind[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const kindRoute = KIND_ROUTES[brand];
 
   useEffect(() => {
     setLoading(true);
     setVisibleCount(PAGE_SIZE);
+    setSelectedKinds([]);
+    setSelectedPlatforms([]);
+    setSelectedGenres([]);
+    setSelectedBrands([]);
     Promise.all([
       getProducts(),
       getPlatformCards(brand).catch(() => [] as IPlatformCard[]),
@@ -258,7 +304,15 @@ export default function CategoryView() {
       .finally(() => setLoading(false));
   }, [brand]);
 
+  const catalogProducts = products.filter((p) => !isBannerProduct(p));
+  const brandProducts = catalogProducts.filter((p) =>
+    kindRoute
+      ? productKind(p) === kindRoute
+      : matchesBrand(p, platform),
+  );
+
   const currentCards: IPlatformCard[] = useMemo(() => {
+    if (kindRoute) return cardsFromProducts(brandProducts, brand);
     const fallback = (fallbackCards[brand] || []).map((item, index) => ({
       _id: item.slug,
       brand,
@@ -298,13 +352,7 @@ export default function CategoryView() {
     return Array.from(bySlug.values()).sort(
       (a, b) => (a.order ?? 0) - (b.order ?? 0),
     );
-  }, [brand, cards]);
-
-  const catalogProducts = products.filter((p) => !isBannerProduct(p));
-
-  const brandProducts = catalogProducts.filter((p) =>
-    matchesBrand(p, platform),
-  );
+  }, [brand, brandProducts, cards, kindRoute]);
 
   const genres = useMemo(() => {
     const set = new Set<string>();
@@ -314,10 +362,36 @@ export default function CategoryView() {
     return Array.from(set);
   }, [brandProducts]);
 
+  const brands = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of brandProducts) {
+      const name = String(p.category || "").trim();
+      if (!name) continue;
+      counts.set(name, (counts.get(name) || 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [brandProducts]);
+
+  const priceBounds = useMemo(() => {
+    const vals = brandProducts.map((p) => getSalePrice(p).final);
+    const hi = vals.length ? Math.max(...vals) : 2000;
+    return { min: 0, max: Math.max(50, hi) };
+  }, [brandProducts]);
+
+  useEffect(() => {
+    setPriceMin(priceBounds.min);
+    setPriceMax(priceBounds.max);
+  }, [brand, priceBounds.min, priceBounds.max]);
+
   const filteredProducts = brandProducts.filter((p) => {
     if (!matchesSub(p, sub, currentCards)) return false;
-    const price = Number(p.price) || 0;
-    if (price > maxPrice) return false;
+    const price = getSalePrice(p).final;
+    if (price < priceMin || price > priceMax) return false;
+    if (selectedBrands.length && !selectedBrands.includes(p.category)) {
+      return false;
+    }
     if (selectedPlatforms.length) {
       const hit = selectedPlatforms.some((item) => {
         const card = currentCards.find(
@@ -332,14 +406,24 @@ export default function CategoryView() {
     if (selectedGenres.length && !selectedGenres.includes(p.genre || "")) {
       return false;
     }
+    if (
+      !kindRoute &&
+      selectedKinds.length &&
+      !selectedKinds.includes(productKind(p))
+    ) {
+      return false;
+    }
     return true;
   });
 
   const visible = filteredProducts.slice(0, visibleCount);
   const bannerColor =
     bannerColors[brand] || collection?.bannerColor || "#7c3aed";
-  const categoryTitle =
-    collection?.title || decodeURIComponent(platform || "Nintendo");
+  const categoryTitle = kindRoute
+    ? kindRoute === "accessory"
+      ? "აქსესუარები"
+      : "თამაშები"
+    : collection?.title || decodeURIComponent(platform || "Nintendo");
   const subCard = currentCards.find(
     (card) =>
       normalize(card.slug) === normalize(sub) ||
@@ -371,6 +455,37 @@ export default function CategoryView() {
     setVisibleCount(PAGE_SIZE);
   };
 
+  const toggleKind = (kind: ProductKind) => {
+    setSelectedKinds((prev) =>
+      prev.includes(kind) ? prev.filter((item) => item !== kind) : [...prev, kind],
+    );
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const bumpPrice = (min: number, max: number) => {
+    setPriceMin(min);
+    setPriceMax(max);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const canClear =
+    selectedBrands.length > 0 ||
+    selectedPlatforms.length > 0 ||
+    selectedGenres.length > 0 ||
+    selectedKinds.length > 0 ||
+    priceMin !== priceBounds.min ||
+    priceMax !== priceBounds.max;
+
+  const clearFilters = () => {
+    setSelectedBrands([]);
+    setSelectedPlatforms([]);
+    setSelectedGenres([]);
+    setSelectedKinds([]);
+    setPriceMin(priceBounds.min);
+    setPriceMax(priceBounds.max);
+    setVisibleCount(PAGE_SIZE);
+  };
+
   return (
     <div
       className="shop-page"
@@ -391,11 +506,13 @@ export default function CategoryView() {
         className="collection-banner"
         style={{ ["--banner" as string]: bannerColor }}
       >
-        <PlatformCarousel
-          cards={currentCards}
-          brandPath={platform || ""}
-          activeSub={sub}
-        />
+        {currentCards.length > 0 && (
+          <PlatformCarousel
+            cards={currentCards}
+            brandPath={platform || ""}
+            activeSub={sub}
+          />
+        )}
       </div>
 
       <div className="shop-title-row">
@@ -414,79 +531,34 @@ export default function CategoryView() {
       {brand.includes("atari") && <GameCovers mode="play" />}
 
       <div className="shop-layout" style={{ marginTop: "20px" }}>
-        <aside className="filter-sidebar">
-          <div className="filter-group">
-            <div className="filter-title">
-              ფასი <span>⌄</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="2000"
-              value={maxPrice}
-              onChange={(e) => {
-                setMaxPrice(Number(e.target.value));
-                setVisibleCount(PAGE_SIZE);
-              }}
-              style={{ width: "100%", accentColor: "var(--accent)" }}
-            />
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: "0.85rem",
-                marginTop: 5,
-              }}
-            >
-              <span>0 ₾</span>
-              <span>{maxPrice} ₾</span>
-            </div>
-          </div>
-
-          {currentCards.length > 0 && (
-            <div className="filter-group">
-              <div className="filter-title">
-                პლატფორმა <span>⌄</span>
-              </div>
-              {currentCards.map((item) => (
-                <label key={item.slug} className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={selectedPlatforms.includes(item.name)}
-                    onChange={() =>
-                      toggleValue(
-                        selectedPlatforms,
-                        item.name,
-                        setSelectedPlatforms,
-                      )
-                    }
-                  />
-                  {item.name}
-                </label>
-              ))}
-            </div>
-          )}
-
-          {genres.length > 0 && (
-            <div className="filter-group">
-              <div className="filter-title">
-                ჟანრი <span>⌄</span>
-              </div>
-              {genres.map((genre) => (
-                <label key={genre} className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={selectedGenres.includes(genre)}
-                    onChange={() =>
-                      toggleValue(selectedGenres, genre, setSelectedGenres)
-                    }
-                  />
-                  {genre}
-                </label>
-              ))}
-            </div>
-          )}
-        </aside>
+        <ShopFilters
+          priceMin={priceMin}
+          priceMax={priceMax}
+          boundMin={priceBounds.min}
+          boundMax={priceBounds.max}
+          onPriceMin={(n) => bumpPrice(n, priceMax)}
+          onPriceMax={(n) => bumpPrice(priceMin, n)}
+          brands={brands}
+          selectedBrands={selectedBrands}
+          onToggleBrand={(name) =>
+            toggleValue(selectedBrands, name, setSelectedBrands)
+          }
+          platforms={currentCards}
+          selectedPlatforms={selectedPlatforms}
+          onTogglePlatform={(name) =>
+            toggleValue(selectedPlatforms, name, setSelectedPlatforms)
+          }
+          showKind={!kindRoute}
+          selectedKinds={selectedKinds}
+          onToggleKind={toggleKind}
+          genres={genres}
+          selectedGenres={selectedGenres}
+          onToggleGenre={(name) =>
+            toggleValue(selectedGenres, name, setSelectedGenres)
+          }
+          onClear={clearFilters}
+          canClear={canClear}
+        />
 
         <div style={{ flex: 1, padding: "0 12px" }}>
           <p style={{ marginBottom: 18, color: "var(--text)" }}>

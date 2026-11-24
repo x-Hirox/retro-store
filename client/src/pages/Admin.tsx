@@ -24,6 +24,13 @@ import {
   productCondition,
   type ProductCondition,
 } from "../utils/productCondition";
+import {
+  KIND_OPTIONS,
+  kindLabel,
+  parseKind,
+  productKind,
+  type ProductKind,
+} from "../utils/productKind";
 import { totalStock } from "../utils/productColors";
 
 type Tab = "overview" | "orders" | "products" | "customers" | "content";
@@ -34,7 +41,6 @@ const CATEGORY_OPTIONS = [
   "Xbox",
   "Sega",
   "Chinese Consoles",
-  "Bundles",
   "Atari & More",
 ];
 
@@ -96,6 +102,7 @@ export default function Admin() {
   const [tags, setTags] = useState("");
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [condition, setCondition] = useState<ProductCondition | "">("");
+  const [kind, setKind] = useState<ProductKind | "">("");
   const [colors, setColors] = useState<IProductColor[]>([]);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -123,6 +130,8 @@ export default function Admin() {
         ? "აღწერა აკლია."
         : !imageUrl.trim()
           ? "მთავარი ფოტო აკლია — ატვირთე ფაილი ან ჩასვი Cloudinary ლინკი."
+          : !isHeroBanner && !parseKind(kind)
+            ? "აირჩიე ტიპი: კონსოლი, თამაში ან აქსესუარი."
           : !isHeroBanner && !platform
             ? "აირჩიე პლატფორმა."
           : !isHeroBanner && !parseCondition(condition)
@@ -167,6 +176,7 @@ export default function Admin() {
         genre: isHeroBanner ? "" : genre,
         tags: isHeroBanner ? [] : parseTags(tags),
         condition: isHeroBanner ? "" : parseCondition(condition),
+        kind: isHeroBanner ? "" : parseKind(kind),
         isBestSeller: isHeroBanner ? false : isBestSeller,
       };
 
@@ -207,6 +217,7 @@ export default function Admin() {
     setTags((p.tags || []).join(", "));
     setIsBestSeller(!!p.isBestSeller);
     setCondition(p.isHeroBanner ? "" : productCondition(p));
+    setKind(p.isHeroBanner ? "" : productKind(p));
     setColors(p.colors || []);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -227,6 +238,7 @@ export default function Admin() {
     setTags("");
     setIsBestSeller(false);
     setCondition("");
+    setKind("");
     setColors([]);
     setFormError("");
     setSaving(false);
@@ -423,6 +435,23 @@ export default function Admin() {
               {!isHeroBanner && (
                 <>
                   <select
+                    value={kind}
+                    onChange={(e) => setKind(parseKind(e.target.value))}
+                    required
+                    style={inputStyle}
+                  >
+                    <option value="">ტიპი: კონსოლი, თამაში, აქსესუარი</option>
+                    {KIND_OPTIONS.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="admin-muted" style={{ margin: 0 }}>
+                    ტიპი ცალკეა პლატფორმისგან. PS2 მეხსიერება = აქსესუარი +
+                    PlayStation 2. დისკი = თამაში + PlayStation 2.
+                  </p>
+                  <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     required
@@ -556,7 +585,7 @@ export default function Admin() {
                               totalStock(p) <= 0
                                 ? "SOLD"
                                 : `მარაგი ${totalStock(p)}`
-                            }${p.platform ? ` · ${p.platform}` : ""} · ${conditionLabel(productCondition(p))}${
+                            }${p.platform ? ` · ${p.platform}` : ""} · ${kindLabel(productKind(p))} · ${conditionLabel(productCondition(p))}${
                               p.colors?.length
                                 ? ` · ${p.colors
                                     .map((c) => {

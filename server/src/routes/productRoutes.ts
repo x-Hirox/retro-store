@@ -5,6 +5,7 @@ import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { escapeRegex } from "../utils/security.js";
 import { parseTags } from "../utils/tags.js";
 import { parseCondition } from "../seo/productCondition.js";
+import { parseKind } from "../seo/productKind.js";
 import { matchProduct } from "../seo/productUrl.js";
 
 const router = Router();
@@ -176,6 +177,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       isBestSeller,
       colors,
       condition,
+      kind,
     } = req.body;
 
     const nextColors = cleanColors(colors);
@@ -198,6 +200,7 @@ router.post("/", protect, adminOnly, async (req: Request, res: Response) => {
       genre: genre || "",
       tags: parseTags(tags),
       condition: isHeroBanner ? "" : parseCondition(condition),
+      kind: isHeroBanner ? "" : parseKind(kind),
       isBestSeller: !!isBestSeller,
     });
 
@@ -229,6 +232,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
       isBestSeller,
       colors,
       condition,
+      kind,
     } = req.body;
     const nextColors = cleanColors(colors);
     const nextStock = nextColors.length
@@ -251,6 +255,7 @@ router.put("/:id", protect, adminOnly, async (req: Request, res: Response) => {
         genre: genre || "",
         tags: parseTags(tags),
         condition: isHeroBanner ? "" : parseCondition(condition),
+        kind: isHeroBanner ? "" : parseKind(kind),
         isBestSeller: !!isBestSeller,
       },
       { new: true, runValidators: true },

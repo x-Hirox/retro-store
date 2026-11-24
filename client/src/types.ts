@@ -23,6 +23,7 @@ export interface IProduct {
   genre?: string;
   tags?: string[];
   condition?: "new" | "used" | "refurbished" | "";
+  kind?: "console" | "game" | "accessory" | "";
   isBestSeller?: boolean;
 }
 

@@ -109,7 +109,6 @@ export const CATEGORY_BRANDS = [
   "Xbox",
   "Sega",
   "Chinese Consoles",
-  "Bundles",
-  "Atari & More",
   "accessories",
+  "games",
 ];

@@ -34,6 +34,9 @@ export default function FaqSection() {
           return (
             <div
               key={item._id}
+              className="is-hot"
+              role="button"
+              tabIndex={0}
               style={{
                 backgroundColor: "var(--code-bg)",
                 border: "1px solid var(--border)",
@@ -42,6 +45,12 @@ export default function FaqSection() {
                 cursor: "pointer",
               }}
               onClick={() => setOpenFaq(open ? null : item._id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setOpenFaq(open ? null : item._id);
+                }
+              }}
             >
               <div
                 style={{

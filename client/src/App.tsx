@@ -62,14 +62,6 @@ const categoriesData = [
     name: "Chinese Consoles",
     sub: ["R36S", "M15 Pro", "SUP", "Anbernic", "Miyoo Mini", "PowKiddy", "Retroid Pocket"],
   },
-  {
-    name: "Bundles",
-    sub: ["Console + Games Bundle", "Starter Pack", "Collector's Bundle"],
-  },
-  {
-    name: "Atari & More",
-    sub: ["Atari 2600", "ColecoVision", "TurboGrafx-16"],
-  },
 ];
 
 export default function App() {

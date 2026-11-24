@@ -24,7 +24,7 @@ export default function CartDrawer() {
     getProducts()
       .then((list) => {
         const main = cart[0] || null;
-        setAddons(suggestAddons(main, list, 8));
+        setAddons(suggestAddons(main, list, 8, { includeGames: true }));
       })
       .catch(() => setAddons([]));
   }, [drawerOpen, cart]);

@@ -11,7 +11,6 @@ export default function BrandsSection() {
     { name: "PlayStation", src: "/playstation.svg", height: "40px" },
     { name: "Xbox", src: "/xbox.svg", height: "36px" },
     { name: "Sega", src: "/sega.svg", height: "35px" },
-    { name: "Atari & More", src: "/atari.svg", height: "38px" },
   ];
 
   return (

@@ -36,14 +36,9 @@ export default function RecentlyViewed() {
           ბოლოს ნანახი
         </h2>
         <button
+          type="button"
+          className="see-all-link is-hot"
           onClick={() => navigate("/category/playstation")}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text)",
-            cursor: "pointer",
-            fontWeight: 700,
-          }}
         >
           მეტის ნახვა
         </button>

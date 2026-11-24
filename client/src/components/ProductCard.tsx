@@ -5,20 +5,36 @@ import { formatGel, getSalePrice, saleRange } from "../utils/pricing";
 import HoloCard from "./HoloCard";
 import { productImageAlt } from "../utils/imageAlt";
 import { colorStock, totalStock } from "../utils/productColors";
+import { useCart } from "../context/CartContext";
+
+function CartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 6h15l-1.5 9h-12z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M6 6 5 3H2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="9" cy="20" r="1.4" fill="currentColor" />
+      <circle cx="18" cy="20" r="1.4" fill="currentColor" />
+    </svg>
+  );
+}
 
 export default function ProductCard({ product }: { product: IProduct }) {
+  const { cart, addToCart } = useCart();
   const { original, final, discount } = getSalePrice(product);
   const range = saleRange(product);
   const left = totalStock(product);
   const sold = left <= 0;
   const low = !sold && left <= 3;
   const fromPrice = range.min !== range.max;
+  const added = cart.some((row) => row._id === product._id);
 
-  const card = (
-    <HoloCard
-      className={`product-card glass-card${sold ? " is-sold" : ""}`}
-      disabled={sold}
-    >
+  const body = (
+    <>
       {sold && <span className="sold-badge">SOLD</span>}
       {low && <span className="left-badge">დარჩა {left}</span>}
       {discount > 0 && !sold && (
@@ -60,14 +76,33 @@ export default function ProductCard({ product }: { product: IProduct }) {
           <span className="card-price-was">{formatGel(original)}</span>
         )}
       </div>
-    </HoloCard>
+    </>
   );
 
-  if (sold) return card;
-
   return (
-    <Link to={productPath(product)} className="product-card-link" draggable={false}>
-      {card}
-    </Link>
+    <HoloCard className={`product-card glass-card${sold ? " is-sold" : ""}`}>
+      {sold ? (
+        body
+      ) : (
+        <Link to={productPath(product)} className="card-main" draggable={false}>
+          {body}
+        </Link>
+      )}
+      {!sold && (
+        <button
+          type="button"
+          className="card-add"
+          disabled={added}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            addToCart({ ...product, stock: left });
+          }}
+        >
+          <CartIcon />
+          {added ? "კალათაშია" : "დამატება"}
+        </button>
+      )}
+    </HoloCard>
   );
 }

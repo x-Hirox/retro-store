@@ -65,7 +65,7 @@ export default function HomeExtraSections() {
           <button
             className="arcade-btn"
             style={{ width: "fit-content", marginTop: "20px" }}
-            onClick={() => navigate("/category/playstation")}
+            onClick={() => navigate("/category/accessories")}
           >
             ნახვა
           </button>
@@ -85,18 +85,18 @@ export default function HomeExtraSections() {
         >
           <div>
             <h3 style={{ fontSize: "1.8rem", margin: "0 0 10px 0" }}>
-              სპეციალური ნაკრებები (BUNDLES)
+              თამაშები
             </h3>
             <p style={{ opacity: 0.9 }}>
-              დაზოგეთ მეტი! კონსოლი + თამაშები + ჯოისტიკები ერთ სრულ პაკეტში.
+              დისკები და კარტრიჯები — PS1, PS2, Nintendo და სხვა.
             </p>
           </div>
           <button
             className="arcade-btn"
             style={{ width: "fit-content", marginTop: "20px" }}
-            onClick={() => navigate("/category/playstation")}
+            onClick={() => navigate("/category/games")}
           >
-            ნაკრებების ნახვა
+            თამაშების ნახვა
           </button>
         </div>
       </div>
@@ -202,6 +202,9 @@ export default function HomeExtraSections() {
           {faqData.map((item, idx) => (
             <div
               key={idx}
+              className="is-hot"
+              role="button"
+              tabIndex={0}
               style={{
                 backgroundColor: "var(--code-bg)",
                 border: "1px solid var(--border)",
@@ -210,6 +213,12 @@ export default function HomeExtraSections() {
                 cursor: "pointer",
               }}
               onClick={() => toggleFaq(idx)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggleFaq(idx);
+                }
+              }}
             >
               <div
                 style={{

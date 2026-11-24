@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { getProductById, getProducts } from "../services/productService";
@@ -18,7 +18,7 @@ import {
   productSeoDescription,
   productSeoTitle,
 } from "../seo/product";
-import { shortProductId } from "../seo/productUrl";
+import { matchProduct, shortProductId } from "../seo/productUrl";
 import { productKeywords } from "../utils/tags";
 import {
   availableStock,
@@ -54,7 +54,7 @@ export default function ProductDetail() {
   const [colorName, setColorName] = useState("");
   const [sticky, setSticky] = useState(false);
   const [bundleOn, setBundleOn] = useState(true);
-  const [tab, setTab] = useState<ShopTab>("accessories");
+  const [tab, setTab] = useState<ShopTab>("similar");
   const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,6 +64,10 @@ export default function ProductDetail() {
       setLoading(false);
       return;
     }
+    let cancelled = false;
+    setProduct(null);
+    setAddons([]);
+    setSimilar([]);
     setLoading(true);
     setError(null);
     setPhoto(0);
@@ -71,37 +75,48 @@ export default function ProductDetail() {
     setColorName("");
     setSticky(false);
     setBundleOn(true);
-    setTab("accessories");
+    setTab("similar");
     getProductById(slugId)
       .then((data) => {
+        if (cancelled) return;
         setProduct(data);
         setColorName(productColors(data)[0]?.name || "");
         trackRecentlyViewed(data);
         setLoading(false);
         getProducts()
           .then((list) => {
-            setAddons(suggestAddons(data, list, 8));
-            setSimilar(suggestSimilar(data, list, 8));
+            if (cancelled) return;
+            const nextAddons = suggestAddons(data, list, 8);
+            const nextSimilar = suggestSimilar(data, list, 8);
+            setAddons(nextAddons);
+            setSimilar(nextSimilar);
+            setTab(nextAddons.length ? "accessories" : "similar");
           })
           .catch(() => {
+            if (cancelled) return;
             setAddons([]);
             setSimilar([]);
           });
       })
       .catch(() => {
+        if (cancelled) return;
         setProduct(null);
         setError("პროდუქტი ვერ მოიძებნა.");
         setLoading(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [slugId]);
 
   useEffect(() => {
-    if (!product) return;
+    if (loading || !product) return;
+    if (!matchProduct([product], slugId)) return;
     const canonical = productPath(product);
     if (location.pathname !== canonical) {
       navigate(canonical, { replace: true });
     }
-  }, [product, location.pathname, navigate]);
+  }, [product, loading, slugId, location.pathname, navigate]);
 
   useEffect(() => {
     const el = ctaRef.current;
@@ -171,7 +186,8 @@ export default function ProductDetail() {
   const maxQty = Math.max(1, stock);
   const photos = productPhotos(product, colorName);
   const categoryPath = `/category/${encodeURIComponent(product.category || "Nintendo")}`;
-  const bundleMate = addons[0] || null;
+  const bundleMate =
+    similar.find((item) => totalStock(item) > 0) || addons[0] || null;
   const bundleSale = bundleMate ? getSalePrice(bundleMate) : null;
   const bundleDeal =
     bundleSale && bundleOn
@@ -422,15 +438,17 @@ export default function ProductDetail() {
 
       <section className="pd-tabs">
         <div className="pd-tab-bar" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "accessories"}
-            className={tab === "accessories" ? "is-on" : ""}
-            onClick={() => setTab("accessories")}
-          >
-            აქსესუარები
-          </button>
+          {addons.length > 0 && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === "accessories"}
+              className={tab === "accessories" ? "is-on" : ""}
+              onClick={() => setTab("accessories")}
+            >
+              აქსესუარები
+            </button>
+          )}
           <button
             type="button"
             role="tab"
@@ -451,40 +469,17 @@ export default function ProductDetail() {
           </button>
         </div>
 
-        {tab === "accessories" && (
+        {tab === "accessories" && addons.length > 0 && (
           <div className="pd-addons">
             <div className="pd-section-head">
               <h2>აქსესუარები</h2>
               <Link to="/category/accessories">მეტის ნახვა</Link>
             </div>
-            {addons.length === 0 ? (
-              <p className="pd-empty">აქსესუარი ჯერ არ არის.</p>
-            ) : (
-              <div className="pd-addon-grid">
-                {addons.map((item) => {
-                  const itemSale = getSalePrice(item);
-                  const added = cart.some((row) => row._id === item._id);
-                  return (
-                    <article key={item._id} className="pd-addon">
-                      <Link to={productPath(item)}>
-                        <img src={item.imageUrl || ""} alt={productImageAlt(item)} />
-                        <h3>{item.title}</h3>
-                      </Link>
-                      <div className="pd-addon-row">
-                        <strong>{formatGel(itemSale.final)}</strong>
-                        <button
-                          type="button"
-                          disabled={added || totalStock(item) <= 0}
-                          onClick={() => addToCart(item)}
-                        >
-                          {added ? "კალათაშია" : "დამატება"}
-                        </button>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
+            <div className="pd-similar-grid">
+              {addons.map((item) => (
+                <ProductCard key={item._id} product={item} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -507,12 +502,13 @@ export default function ProductDetail() {
         )}
 
         {tab === "specs" && (
-          <div className="pd-accordion">
+          <div className="pd-specs">
             {groups.length === 0 && copy.intro ? (
               <p className="pd-desc">{copy.intro}</p>
             ) : null}
-            {groups.map((group, index) => (
-              <AccordionItem key={group.title} title={group.title} startOpen={index === 0}>
+            {groups.map((group) => (
+              <section key={group.title} className="pd-spec-block">
+                <h3>{group.title}</h3>
                 <dl className="pd-spec-table">
                   {group.items.map((row) => (
                     <div key={row.label}>
@@ -521,13 +517,14 @@ export default function ProductDetail() {
                     </div>
                   ))}
                 </dl>
-              </AccordionItem>
+              </section>
             ))}
-            <AccordionItem title="მიწოდება">
+            <section className="pd-spec-block">
+              <h3>მიწოდება</h3>
               <p className="pd-desc">
                 მიწოდების პირობები მალე დაემატება. ამ ეტაპზე გარანტია არ არის.
               </p>
-            </AccordionItem>
+            </section>
           </div>
         )}
       </section>
@@ -552,30 +549,6 @@ export default function ProductDetail() {
         </div>
       )}
     </div>
-  );
-}
-
-function AccordionItem({
-  title,
-  startOpen = false,
-  children,
-}: {
-  title: string;
-  startOpen?: boolean;
-  children: ReactNode;
-}) {
-  const [open, setOpen] = useState(startOpen);
-  return (
-    <details
-      open={open}
-      onToggle={(event) => {
-        const next = (event.currentTarget as HTMLDetailsElement).open;
-        if (next !== open) setOpen(next);
-      }}
-    >
-      <summary>{title}</summary>
-      {children}
-    </details>
   );
 }
 
