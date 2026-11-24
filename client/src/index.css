@@ -4666,6 +4666,16 @@ html.fx-cursor select {
 .admin-product-info p { margin: 0; }
 .admin-product-info p { color: #94a3b8; font-size: 0.82rem; }
 .admin-row-actions { display: flex; gap: 8px; }
+.admin-platform-group { margin-top: 18px; }
+.admin-platform-group-title {
+  margin: 0 0 8px;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+.admin-platform-group .admin-product-info img {
+  object-fit: contain;
+  background: #0b1220;
+}
 .admin-table-wrap { overflow-x: auto; }
 .admin-table {
   width: 100%;

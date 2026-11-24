@@ -259,9 +259,9 @@ function PlatformsAdmin() {
       }}
     >
       <p style={{ margin: 0, fontSize: 13, color: "#94a3b8" }}>
-        კონსოლის ბარათის სურათი ჩააგდე აქ: client/public/images/platforms/
-        ფაილის სახელი = slug, მაგ. dsl.png, ndsi.png, 3ds.png (ან .jpg / .svg).
-        სანამ ფაილი არაა, ბარათზე გატეხილი სურათი ჩანს. ან აქ ატვირთე Cloudinary-ზე.
+        პლატფორმის ქარდები იგივეა, რაც პროდუქტების ტაბში „კატეგორიის ქარდი /
+        პლატფორმა“. სურათი ატვირთე Cloudinary-ზე (PNG, JPG, WebP, SVG, GIF)
+        ან ჩასვი ლინკი. URL რჩება /category/PlayStation/ps4.
       </p>
       <input style={inputStyle} placeholder="ბრენდი: nintendo / playstation / xbox" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} required />
       <input style={inputStyle} placeholder="სახელი, მაგ: Nintendo 64" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />

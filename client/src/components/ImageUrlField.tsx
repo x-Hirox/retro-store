@@ -1,6 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
 import type { IProductColor } from "../types";
+import { setPlatformImageFallback } from "../utils/platformPlaceholder";
 
 export default function ImageUrlField({
   value,
@@ -56,7 +57,7 @@ export default function ImageUrlField({
             : "ფოტოს ატვირთვა კომპიუტერიდან"}
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.svg"
+          accept="image/*,.png,.jpg,.jpeg,.webp,.svg,.gif,.heic,.heif"
           hidden
           disabled={busy}
           onChange={(e) => {
@@ -67,7 +68,12 @@ export default function ImageUrlField({
       </label>
       {value && (
         <div className="image-url-preview-wrap">
-          <img src={value} alt="" className="image-url-preview" />
+          <img
+            src={value}
+            alt=""
+            className="image-url-preview"
+            onError={(event) => setPlatformImageFallback(event.currentTarget)}
+          />
           <button type="button" className="image-url-clear" onClick={() => onChange("")}>
             წაშლა
           </button>
@@ -155,7 +161,7 @@ export function GalleryImagesField({
         {busy ? "იტვირთება..." : "კიდევ სურათის დამატება"}
         <input
           type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif"
+          accept="image/*,.png,.jpg,.jpeg,.webp,.svg,.gif,.heic,.heif"
           hidden
           disabled={busy || images.length >= 8}
           onChange={(e) => {

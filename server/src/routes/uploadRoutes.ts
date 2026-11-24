@@ -10,15 +10,13 @@ const upload = multer({
     const type = String(file.mimetype || "").toLowerCase();
     const name = String(file.originalname || "").toLowerCase();
     if (
-      /^image\/(jpeg|jpg|pjpeg|png|webp|gif|svg\+xml|heic|heif|avif)$/.test(
-        type,
-      ) ||
+      type.startsWith("image/") ||
       /\.(jpe?g|png|webp|gif|svg|heic|heif|avif)$/.test(name)
     ) {
       cb(null, true);
       return;
     }
-    cb(new Error("მხოლოდ JPG, PNG, WEBP, GIF ან SVG"));
+    cb(new Error("მხოლოდ PNG, JPG, JPEG, WebP, SVG ან GIF"));
   },
 });
 

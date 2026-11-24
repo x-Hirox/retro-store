@@ -43,13 +43,21 @@ function configureCloudinary(): boolean {
   return false;
 }
 
-function uploadBuffer(file: { buffer: Buffer }): Promise<string> {
+function uploadBuffer(file: {
+  buffer: Buffer;
+  mimetype?: string;
+  originalname?: string;
+}): Promise<string> {
+  const isSvg =
+    /svg/i.test(String(file.mimetype || "")) ||
+    /\.svg$/i.test(String(file.originalname || ""));
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: "retrobit",
-        resource_type: "image",
+        resource_type: "auto",
         overwrite: false,
+        ...(isSvg ? { format: "svg" } : {}),
       },
       (error, result) => {
         if (error || !result?.secure_url) {
@@ -76,7 +84,7 @@ function publicUploadError(error: unknown): string {
   if (/timeout|econnreset|enotfound|network/i.test(msg)) {
     return "Cloudinary-სთან კავშირი ვერ დამყარდა. ცოტა ხანში სცადე.";
   }
-  return "სურათის ატვირთვა ვერ მოხერხდა. JPG/PNG/WEBP, მაქსიმუმ 10MB.";
+  return "სურათის ატვირთვა ვერ მოხერხდა. PNG, JPG, WebP, SVG ან GIF, მაქსიმუმ 10MB.";
 }
 
 export const uploadImage = async (

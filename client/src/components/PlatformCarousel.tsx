@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { IPlatformCard } from "../types";
 import { nextPlatformArtUrl, platformArtUrl } from "../utils/platformArt";
+import { setPlatformImageFallback } from "../utils/platformPlaceholder";
 
 const AUTO_MS = 4500;
 const CARD_W = 164;
@@ -127,13 +128,18 @@ export default function PlatformCarousel({
                       draggable={false}
                       onError={(event) => {
                         const img = event.currentTarget;
+                        if (img.dataset.ph === "1") return;
                         if (/^https?:/i.test(img.src) && !img.dataset.local) {
                           img.dataset.local = "1";
                           img.src = platformArtUrl(item.slug);
                           return;
                         }
                         const next = nextPlatformArtUrl(item.slug, img.src);
-                        if (next) img.src = next;
+                        if (next) {
+                          img.src = next;
+                          return;
+                        }
+                        setPlatformImageFallback(img);
                       }}
                     />
                     <span>{item.name}</span>

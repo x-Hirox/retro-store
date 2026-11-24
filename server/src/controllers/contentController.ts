@@ -9,11 +9,19 @@ import SiteSettings from "../models/SiteSettings.js";
 import ChatMessage from "../models/ChatMessage.js";
 import SellQuote from "../models/SellQuote.js";
 import { inboxMail, sendEmail } from "../utils/sendEmail.js";
+import { ensurePlatformCatalog } from "../utils/seedContent.js";
+
+function duplicateError(error: unknown) {
+  return (error as { code?: number }).code === 11000;
+}
 
 function crud(Model: any) {
   return {
     list: async (_req: Request, res: Response) => {
       try {
+        if (Model.modelName === "PlatformCard") {
+          await ensurePlatformCatalog();
+        }
         const sort = Model.schema.path("order") ? { order: 1 } : { createdAt: -1 };
         const items = await Model.find().sort(sort);
         res.json(items);
@@ -23,22 +31,51 @@ function crud(Model: any) {
     },
     create: async (req: Request, res: Response) => {
       try {
+        if (Model.modelName === "PlatformCard") {
+          const brand = String(req.body?.brand || "").trim().toLowerCase();
+          const slug = String(req.body?.slug || "").trim().toLowerCase();
+          const exists = await Model.findOne({ brand, slug });
+          if (exists) {
+            res.status(409).json({
+              message: "ეს პლატფორმა უკვე არსებობს ამ კატეგორიაში.",
+            });
+            return;
+          }
+          req.body.brand = brand;
+          req.body.slug = slug;
+        }
         const item = await Model.create(req.body);
         res.status(201).json(item);
       } catch (error) {
-        res.status(400).json({ message: "არასწორი მონაცემები" });
+        res.status(400).json({
+          message: duplicateError(error)
+            ? "ეს პლატფორმა უკვე არსებობს ამ კატეგორიაში."
+            : "არასწორი მონაცემები",
+        });
       }
     },
     update: async (req: Request, res: Response) => {
       try {
+        if (Model.modelName === "PlatformCard") {
+          if (req.body?.brand != null) {
+            req.body.brand = String(req.body.brand).trim().toLowerCase();
+          }
+          if (req.body?.slug != null) {
+            req.body.slug = String(req.body.slug).trim().toLowerCase();
+          }
+        }
         const item = await Model.findByIdAndUpdate(req.params.id, req.body, {
           new: true,
           runValidators: true,
         });
         if (!item) return res.status(404).json({ message: "ვერ მოიძებნა" });
         res.json(item);
-      } catch {
-        res.status(400).json({ message: "განახლება ვერ მოხერხდა" });
+      } catch (error) {
+        res.status(400).json({
+          message: duplicateError(error)
+            ? "ეს პლატფორმა უკვე არსებობს ამ კატეგორიაში."
+            : "განახლება ვერ მოხერხდა",
+        });
       }
     },
     remove: async (req: Request, res: Response) => {
@@ -62,10 +99,11 @@ export const chatMessages = crud(ChatMessage);
 
 export const listPlatformCardsByBrand = async (req: Request, res: Response) => {
   try {
-    const brand = String(req.params.brand || "").toLowerCase();
-    const cards = await PlatformCard.find({
-      brand: { $regex: new RegExp(`^${brand}$`, "i") },
-    }).sort({ order: 1 });
+    await ensurePlatformCatalog();
+    const brand = decodeURIComponent(String(req.params.brand || ""))
+      .toLowerCase()
+      .trim();
+    const cards = await PlatformCard.find({ brand }).sort({ order: 1 });
     res.json(cards);
   } catch {
     res.status(500).json({ message: "სერვერის შეცდომა" });
@@ -74,10 +112,10 @@ export const listPlatformCardsByBrand = async (req: Request, res: Response) => {
 
 export const getCollectionByBrand = async (req: Request, res: Response) => {
   try {
-    const brand = String(req.params.brand || "").toLowerCase();
-    const page = await CollectionPage.findOne({
-      brand: { $regex: new RegExp(`^${brand}$`, "i") },
-    });
+    const brand = decodeURIComponent(String(req.params.brand || ""))
+      .toLowerCase()
+      .trim();
+    const page = await CollectionPage.findOne({ brand });
     res.json(page || null);
   } catch {
     res.status(500).json({ message: "სერვერის შეცდომა" });

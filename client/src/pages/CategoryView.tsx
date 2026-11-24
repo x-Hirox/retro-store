@@ -108,10 +108,10 @@ const fallbackCards: Record<
     { name: "R36S", slug: "r36s", image: platformArtUrl("r36s"), year: "2023" },
     { name: "M15 Pro", slug: "m15-pro", image: platformArtUrl("m15-pro"), year: "2024" },
     { name: "SUP", slug: "sup", image: platformArtUrl("sup"), year: "2018" },
-    { name: "Anbernic", slug: "anbernic", image: "/anbernic.svg" },
-    { name: "Miyoo Mini", slug: "miyoo-mini", image: "/miyoo.svg" },
-    { name: "Powkiddy", slug: "powkiddy", image: "/powkiddy.svg" },
-    { name: "Retroid Pocket", slug: "retroid-pocket", image: "/retroid.svg" },
+    { name: "Anbernic", slug: "anbernic", image: platformArtUrl("anbernic") },
+    { name: "Miyoo Mini", slug: "miyoo-mini", image: platformArtUrl("miyoo-mini") },
+    { name: "Powkiddy", slug: "powkiddy", image: platformArtUrl("powkiddy") },
+    { name: "Retroid Pocket", slug: "retroid-pocket", image: platformArtUrl("retroid-pocket") },
   ],
   bundles: [
     {
@@ -151,14 +151,6 @@ function normalize(value?: string) {
   return decodeURIComponent(value || "")
     .toLowerCase()
     .trim();
-}
-
-function isGenericPlatformArt(url?: string) {
-  const path = decodeURIComponent(url || "")
-    .split("?")[0]
-    .toLowerCase()
-    .trim();
-  return !path || /\/(nintendo|playstation|xbox|sega)\.svg$/.test(path);
 }
 
 function matchesPlatformCard(
@@ -291,12 +283,16 @@ export default function CategoryView() {
     setSelectedBrands([]);
     Promise.all([
       getProducts(),
-      getPlatformCards(brand).catch(() => [] as IPlatformCard[]),
+      getPlatformCards().catch(() => [] as IPlatformCard[]),
       getCollectionPage(brand).catch(() => null),
     ])
       .then(([data, platformCards, page]) => {
         setProducts(data);
-        setCards(platformCards);
+        setCards(
+          platformCards.filter(
+            (card) => brandKey(card.brand) === brand,
+          ),
+        );
         setCollection(page);
       })
       .catch((err) => console.error("Error fetching products:", err))
@@ -312,7 +308,11 @@ export default function CategoryView() {
 
   const currentCards: IPlatformCard[] = useMemo(() => {
     if (kindRoute) return cardsFromProducts(brandProducts, brand);
-    const fallback = (fallbackCards[brand] || []).map((item, index) => ({
+    const fromApi = [...cards].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
+    if (fromApi.length) return fromApi;
+    return (fallbackCards[brand] || []).map((item, index) => ({
       _id: item.slug,
       brand,
       name: item.name,
@@ -321,36 +321,6 @@ export default function CategoryView() {
       year: item.year,
       order: index,
     }));
-    const bySlug = new Map<string, IPlatformCard>();
-    for (const card of fallback) {
-      bySlug.set(normalize(card.slug), card);
-    }
-    for (const card of cards) {
-      const key = normalize(card.slug);
-      const existing = bySlug.get(key);
-      if (existing) {
-        bySlug.set(key, {
-          ...existing,
-          ...card,
-          name: existing.name,
-          slug: existing.slug,
-          order: existing.order,
-          imageUrl:
-            /^https?:\/\//i.test(card.imageUrl || "") &&
-            !isGenericPlatformArt(card.imageUrl)
-              ? card.imageUrl
-              : existing.imageUrl,
-        });
-      } else {
-        bySlug.set(key, {
-          ...card,
-          order: fallback.length + bySlug.size,
-        });
-      }
-    }
-    return Array.from(bySlug.values()).sort(
-      (a, b) => (a.order ?? 0) - (b.order ?? 0),
-    );
   }, [brand, brandProducts, cards, kindRoute]);
 
   const genres = useMemo(() => {

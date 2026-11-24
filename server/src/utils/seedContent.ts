@@ -4,6 +4,7 @@ import ChatQuickReply from "../models/ChatQuickReply.js";
 import PlatformCard from "../models/PlatformCard.js";
 import CollectionPage from "../models/CollectionPage.js";
 import SiteSettings from "../models/SiteSettings.js";
+import { PLATFORM_SEED, isGenericBrandLogo } from "./platformSeed.js";
 
 export async function seedContentIfEmpty() {
   if ((await SiteSettings.countDocuments()) === 0) {
@@ -145,285 +146,7 @@ export async function seedContentIfEmpty() {
     ]);
   }
 
-  if ((await PlatformCard.countDocuments()) === 0) {
-    await PlatformCard.insertMany([
-      {
-        brand: "nintendo",
-        name: "Nintendo NES",
-        slug: "nes",
-        year: "1985",
-        imageUrl: "/images/platforms/nes.png",
-        order: 1,
-      },
-      {
-        brand: "nintendo",
-        name: "Super Nintendo (SNES)",
-        slug: "snes",
-        year: "1991",
-        imageUrl: "/images/platforms/snes.png",
-        order: 2,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo 64",
-        slug: "n64",
-        year: "1996",
-        imageUrl: "/images/platforms/n64.png",
-        order: 3,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo GameCube",
-        slug: "gamecube",
-        year: "2001",
-        imageUrl: "/images/platforms/gamecube.png",
-        order: 4,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo Wii",
-        slug: "wii",
-        year: "2006",
-        imageUrl: "/images/platforms/wii.png",
-        order: 5,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo Wii U",
-        slug: "wiiu",
-        year: "2012",
-        imageUrl: "/images/platforms/wii-u.png",
-        order: 6,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo Switch",
-        slug: "switch",
-        year: "2017",
-        imageUrl: "/images/platforms/switch.png",
-        order: 7,
-      },
-      {
-        brand: "nintendo",
-        name: "Game Boy Advance",
-        slug: "gba",
-        year: "2001",
-        imageUrl: "/images/platforms/gba.png",
-        order: 8,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo DS",
-        slug: "nds",
-        year: "2004",
-        imageUrl: "/images/platforms/nds.png",
-        order: 9,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo DS Lite",
-        slug: "dsl",
-        year: "2006",
-        imageUrl: "/images/platforms/dsl.png",
-        order: 10,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo DSi",
-        slug: "ndsi",
-        year: "2008",
-        imageUrl: "/images/platforms/ndsi.png",
-        order: 11,
-      },
-      {
-        brand: "nintendo",
-        name: "Nintendo 3DS",
-        slug: "3ds",
-        year: "2011",
-        imageUrl: "/images/platforms/3ds.png",
-        order: 12,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation 1",
-        slug: "ps1",
-        year: "1995",
-        imageUrl: "/playstation.svg",
-        order: 1,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation 2",
-        slug: "ps2",
-        year: "2000",
-        imageUrl: "/playstation.svg",
-        order: 2,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation 3",
-        slug: "ps3",
-        year: "2006",
-        imageUrl: "/playstation.svg",
-        order: 3,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation 4",
-        slug: "ps4",
-        year: "2013",
-        imageUrl: "/playstation.svg",
-        order: 4,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation 5",
-        slug: "ps5",
-        year: "2020",
-        imageUrl: "/playstation.svg",
-        order: 5,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation Portable",
-        slug: "psp",
-        year: "2005",
-        imageUrl: "/playstation.svg",
-        order: 6,
-      },
-      {
-        brand: "playstation",
-        name: "PlayStation Vita",
-        slug: "psvita",
-        year: "2012",
-        imageUrl: "/playstation.svg",
-        order: 7,
-      },
-      {
-        brand: "xbox",
-        name: "Original Xbox",
-        slug: "xbox",
-        year: "2001",
-        imageUrl: "/xbox.svg",
-        order: 1,
-      },
-      {
-        brand: "xbox",
-        name: "Xbox 360",
-        slug: "xbox360",
-        year: "2005",
-        imageUrl: "/xbox.svg",
-        order: 2,
-      },
-      {
-        brand: "xbox",
-        name: "Xbox One",
-        slug: "xboxone",
-        year: "2013",
-        imageUrl: "/xbox.svg",
-        order: 3,
-      },
-      {
-        brand: "sega",
-        name: "Sega Genesis",
-        slug: "sega-genesis",
-        year: "1988",
-        imageUrl: "/sega.svg",
-        order: 1,
-      },
-    ]);
-  }
-
-  const nintendoHandhelds = [
-    {
-      brand: "nintendo",
-      name: "Game Boy Advance",
-      slug: "gba",
-      year: "2001",
-      imageUrl: "/images/platforms/gba.png",
-      order: 5,
-    },
-    {
-      brand: "nintendo",
-      name: "Nintendo DS",
-      slug: "nds",
-      year: "2004",
-      imageUrl: "/images/platforms/nds.png",
-      order: 4,
-    },
-    {
-      brand: "nintendo",
-      name: "Nintendo DS Lite",
-      slug: "dsl",
-      year: "2006",
-      imageUrl: "/images/platforms/dsl.png",
-      order: 1,
-    },
-    {
-      brand: "nintendo",
-      name: "Nintendo DSi",
-      slug: "ndsi",
-      year: "2008",
-      imageUrl: "/images/platforms/ndsi.png",
-      order: 2,
-    },
-    {
-      brand: "nintendo",
-      name: "Nintendo 3DS",
-      slug: "3ds",
-      year: "2011",
-      imageUrl: "/images/platforms/3ds.png",
-      order: 3,
-    },
-  ];
-  const chineseHandhelds = [
-    {
-      brand: "chinese consoles",
-      name: "R36S",
-      slug: "r36s",
-      year: "2023",
-      imageUrl: "/images/platforms/r36s.png",
-      order: 0,
-    },
-    {
-      brand: "chinese consoles",
-      name: "M15 Pro",
-      slug: "m15-pro",
-      year: "2024",
-      imageUrl: "/images/platforms/m15-pro.png",
-      order: 1,
-    },
-    {
-      brand: "chinese consoles",
-      name: "SUP",
-      slug: "sup",
-      year: "2018",
-      imageUrl: "/images/platforms/sup.png",
-      order: 2,
-    },
-  ];
-  for (const card of [...nintendoHandhelds, ...chineseHandhelds]) {
-    const existing = await PlatformCard.findOne({
-      brand: card.brand,
-      slug: card.slug,
-    });
-    const $set: Record<string, unknown> = {
-      name: card.name,
-      year: card.year,
-      order: card.order,
-    };
-    const current = String(existing?.imageUrl || "");
-    const generic =
-      !current ||
-      /\/(nintendo|playstation|xbox|sega)\.svg$/i.test(current) ||
-      /^\/[a-z0-9-]+\.svg$/i.test(current);
-    if (generic) $set.imageUrl = card.imageUrl;
-    await PlatformCard.findOneAndUpdate(
-      { brand: card.brand, slug: card.slug },
-      { $set },
-      { upsert: true },
-    );
-  }
+  await ensurePlatformCatalog();
 
   if ((await CollectionPage.countDocuments()) === 0) {
     await CollectionPage.insertMany([
@@ -461,4 +184,55 @@ export async function seedContentIfEmpty() {
       },
     ]);
   }
+}
+
+let platformCatalogReady = false;
+
+export async function ensurePlatformCatalog() {
+  if (platformCatalogReady) return;
+
+  const wiiuCards = await PlatformCard.find({ slug: "wiiu" });
+  for (const doc of wiiuCards) {
+    const existing = await PlatformCard.findOne({
+      brand: doc.brand,
+      slug: "wii-u",
+    });
+    if (existing) {
+      await PlatformCard.deleteOne({ _id: doc._id });
+    } else {
+      doc.slug = "wii-u";
+      await doc.save();
+    }
+  }
+
+  const all = await PlatformCard.find().sort({ _id: 1 });
+  const seen = new Set<string>();
+  for (const doc of all) {
+    const key = `${String(doc.brand).toLowerCase()}::${String(doc.slug).toLowerCase()}`;
+    if (seen.has(key)) {
+      await PlatformCard.deleteOne({ _id: doc._id });
+    } else {
+      seen.add(key);
+    }
+  }
+
+  for (const card of PLATFORM_SEED) {
+    const existing = await PlatformCard.findOne({
+      brand: card.brand,
+      slug: card.slug,
+    });
+    if (!existing) {
+      await PlatformCard.create(card);
+      continue;
+    }
+    const $set: Record<string, unknown> = {};
+    if (isGenericBrandLogo(existing.imageUrl) && card.imageUrl) {
+      $set.imageUrl = card.imageUrl;
+    }
+    if (Object.keys($set).length) {
+      await PlatformCard.updateOne({ _id: existing._id }, { $set });
+    }
+  }
+
+  platformCatalogReady = true;
 }

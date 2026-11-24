@@ -6,7 +6,7 @@ import {
   deleteProduct,
   updateProduct,
 } from "../services/productService";
-import type { IProduct, IProductColor } from "../types";
+import type { IPlatformCard, IProduct, IProductColor } from "../types";
 import AdminContent from "./AdminContent";
 import ImageUrlField, {
   GalleryImagesField,
@@ -15,6 +15,9 @@ import ImageUrlField, {
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminOrders from "./admin/AdminOrders";
 import AdminCustomers from "./admin/AdminCustomers";
+import AdminPlatformCards from "./admin/AdminPlatformCards";
+import { getPlatformCards } from "../services/contentService";
+import { PLATFORM_BRANDS } from "../utils/platformCatalog";
 import SeoHead from "../components/SeoHead";
 import { parseTags, productSearchText } from "../utils/tags";
 import {
@@ -36,11 +39,7 @@ import { totalStock } from "../utils/productColors";
 type Tab = "overview" | "orders" | "products" | "customers" | "content";
 
 const CATEGORY_OPTIONS = [
-  "Nintendo",
-  "PlayStation",
-  "Xbox",
-  "Sega",
-  "Chinese Consoles",
+  ...PLATFORM_BRANDS.map((item) => item.label),
   "Atari & More",
 ];
 
@@ -97,6 +96,8 @@ export default function Admin() {
   const [images, setImages] = useState<string[]>([]);
   const [category, setCategory] = useState("PlayStation");
   const [isHeroBanner, setIsHeroBanner] = useState(false);
+  const [isPlatformCard, setIsPlatformCard] = useState(false);
+  const [platformCards, setPlatformCards] = useState<IPlatformCard[]>([]);
   const [platform, setPlatform] = useState("");
   const [genre, setGenre] = useState("");
   const [tags, setTags] = useState("");
@@ -120,7 +121,21 @@ export default function Admin() {
 
   useEffect(() => {
     fetchProducts();
+    getPlatformCards()
+      .then(setPlatformCards)
+      .catch(() => setPlatformCards([]));
   }, []);
+
+  const platformSelectOptions = useMemo(() => {
+    const brand = category.toLowerCase();
+    const fromApi = platformCards
+      .filter((item) => item.brand.toLowerCase() === brand)
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map((item) => item.name);
+    const base = fromApi.length ? fromApi : PLATFORM_OPTIONS;
+    if (platform && !base.includes(platform)) return [platform, ...base];
+    return base;
+  }, [platformCards, category, platform]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,6 +227,7 @@ export default function Admin() {
     setImages(p.images || []);
     setCategory(p.category || "PlayStation");
     setIsHeroBanner(!!p.isHeroBanner);
+    setIsPlatformCard(false);
     setPlatform(p.platform || "");
     setGenre(p.genre || "");
     setTags((p.tags || []).join(", "));
@@ -233,6 +249,7 @@ export default function Admin() {
     setImages([]);
     setCategory("PlayStation");
     setIsHeroBanner(false);
+    setIsPlatformCard(false);
     setPlatform("");
     setGenre("");
     setTags("");
@@ -322,19 +339,21 @@ export default function Admin() {
 
       {activeTab === "products" && (
         <>
-          <form
-            onSubmit={handleSubmit}
-            noValidate
+          <div
             className="admin-form"
-            style={{ borderColor: editingId ? "#f59e0b" : "#334155" }}
+            style={{
+              borderColor: editingId && !isPlatformCard ? "#f59e0b" : "#334155",
+            }}
           >
             <div className="admin-form-head">
               <h3 style={{ color: editingId ? "#f59e0b" : "#38bdf8" }}>
-                {editingId
-                  ? "პროდუქტის რედაქტირება"
-                  : "ახალი პროდუქტი ან მთავარი ბანერი"}
+                {isPlatformCard
+                  ? "კატეგორიის ქარდი / პლატფორმა"
+                  : editingId
+                    ? "პროდუქტის რედაქტირება"
+                    : "ახალი პროდუქტი ან მთავარი ბანერი"}
               </h3>
-              {editingId && (
+              {editingId && !isPlatformCard && (
                 <button type="button" className="admin-btn ghost" onClick={resetForm}>
                   გაუქმება
                 </button>
@@ -342,6 +361,37 @@ export default function Admin() {
             </div>
 
             <div className="admin-form-grid">
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={isHeroBanner}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    setIsHeroBanner(on);
+                    if (on) setIsPlatformCard(false);
+                  }}
+                  disabled={isPlatformCard}
+                />
+                ეს არის მთავარი საიტის ბანერი (Hero Banner)
+              </label>
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={isPlatformCard}
+                  onChange={(e) => {
+                    const on = e.target.checked;
+                    setIsPlatformCard(on);
+                    if (on) setIsHeroBanner(false);
+                  }}
+                />
+                კატეგორიის ქარდი / პლატფორმა (Platform Card)
+              </label>
+            </div>
+
+            {isPlatformCard ? (
+              <AdminPlatformCards />
+            ) : (
+            <form onSubmit={handleSubmit} noValidate className="admin-form-grid">
               <input
                 type="text"
                 placeholder="სათაური"
@@ -362,15 +412,6 @@ export default function Admin() {
                 სპეცები ცალკე ხაზზე წერდი, ზუსტად როგორც R36S-ზე: წერტილი, სახელი, ორწერტილი. მაგ:
                 მეხსიერება: 64 GB. უბრალო აბზაცი ცხრილში არ იშლება.
               </p>
-
-              <label className="admin-check">
-                <input
-                  type="checkbox"
-                  checked={isHeroBanner}
-                  onChange={(e) => setIsHeroBanner(e.target.checked)}
-                />
-                ეს არის მთავარი საიტის ბანერი (Hero Banner)
-              </label>
 
               {!isHeroBanner && (
                 <div className="admin-grid-3">
@@ -473,12 +514,7 @@ export default function Admin() {
                     style={inputStyle}
                   >
                     <option value="">პლატფორმა (DS Lite, DSi, 3DS, PS2...)</option>
-                    {(PLATFORM_OPTIONS.includes(platform)
-                      ? PLATFORM_OPTIONS
-                      : platform
-                        ? [platform, ...PLATFORM_OPTIONS]
-                        : PLATFORM_OPTIONS
-                    ).map((item) => (
+                    {platformSelectOptions.map((item) => (
                       <option key={item} value={item}>
                         {item}
                       </option>
@@ -535,9 +571,12 @@ export default function Admin() {
                     ? "ცვლილებების შენახვა"
                     : "დამატება"}
               </button>
-            </div>
-          </form>
+            </form>
+            )}
+          </div>
 
+          {!isPlatformCard && (
+          <>
           <div className="admin-toolbar">
             <h3 style={{ margin: 0 }}>პროდუქტები ({visibleProducts.length})</h3>
             <input
@@ -623,6 +662,8 @@ export default function Admin() {
                 </div>
               ))}
             </div>
+          )}
+          </>
           )}
         </>
       )}

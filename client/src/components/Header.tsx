@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
 import { useAuthModal } from "../context/AuthModalContext";
+import { getPlatformCards } from "../services/contentService";
+import { groupPlatformNav } from "../utils/platformCatalog";
 
 interface HeaderProps {
   categoriesData: Array<{
@@ -58,6 +60,15 @@ export default function Header({
   const authModal = useAuthModal();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [navCats, setNavCats] = useState(() =>
+    groupPlatformNav([], categoriesData),
+  );
+
+  useEffect(() => {
+    getPlatformCards()
+      .then((cards) => setNavCats(groupPlatformNav(cards, categoriesData)))
+      .catch(() => setNavCats(groupPlatformNav([], categoriesData)));
+  }, [categoriesData]);
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -194,7 +205,7 @@ export default function Header({
       </div>
 
       <nav className="main-nav-bar">
-        {categoriesData.map((cat, index) => (
+        {navCats.map((cat, index) => (
           <div key={index} className="dropdown-parent">
             <Link
               to={
@@ -207,12 +218,12 @@ export default function Header({
             </Link>
             {cat.sub.length > 0 && (
               <div className="dropdown-content">
-                {cat.sub.map((subItem, subIndex) => (
+                {cat.sub.map((subItem) => (
                   <Link
-                    key={subIndex}
-                    to={`/category/${encodeURIComponent(cat.name)}/${encodeURIComponent(subItem)}`}
+                    key={subItem.slug}
+                    to={`/category/${encodeURIComponent(cat.name)}/${encodeURIComponent(subItem.slug)}`}
                   >
-                    {subItem}
+                    {subItem.name}
                   </Link>
                 ))}
               </div>

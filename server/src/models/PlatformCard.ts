@@ -10,9 +10,9 @@ export interface IPlatformCard extends Document {
 }
 
 const PlatformCardSchema = new Schema<IPlatformCard>({
-  brand: { type: String, required: true },
+  brand: { type: String, required: true, index: true },
   name: { type: String, required: true },
-  slug: { type: String, required: true },
+  slug: { type: String, required: true, index: true },
   imageUrl: { type: String, required: true },
   year: { type: String, default: "" },
   order: { type: Number, default: 0 },
