@@ -454,11 +454,11 @@ function SettingsAdmin() {
       </p>
       {(
         [
-          ["catImageHome", "სტაციონარული კონსოლები"],
+          ["catImageHome", "კონსოლები"],
           ["catImageHand", "ხელის კონსოლები"],
           ["catImageGames", "თამაშები (კარტრიჯები)"],
           ["catImageAcc", "აქსესუარები"],
-          ["catImageBundles", "ბუნდლები"],
+          ["catImageBundles", "ნაკრებები"],
         ] as [keyof ISiteSettings, string][]
       ).map(([key, label]) => (
         <div key={key}>

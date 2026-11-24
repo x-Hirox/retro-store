@@ -27,9 +27,8 @@ function googleClient() {
   return new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 }
 
-function resolveRole(email: string, role?: string): "admin" | "customer" {
-  if (isAdminEmail(email) || role === "admin") return "admin";
-  return "customer";
+function resolveRole(email: string, _role?: string): "admin" | "customer" {
+  return isAdminEmail(email) ? "admin" : "customer";
 }
 
 // JWT ტოკენი (7 დღიანი სესია)

@@ -55,10 +55,7 @@ export const adminOnly = async (
     }
 
     const user = await User.findById(req.user.id).select("email role");
-    if (
-      user &&
-      (user.role === "admin" || isAdminEmail(user.email))
-    ) {
+    if (user && isAdminEmail(user.email)) {
       if (user.role !== "admin") {
         user.role = "admin";
         await user.save();
@@ -66,6 +63,10 @@ export const adminOnly = async (
       req.user.role = "admin";
       next();
       return;
+    }
+    if (user && user.role === "admin") {
+      user.role = "customer";
+      await user.save();
     }
 
     res.status(403).json({

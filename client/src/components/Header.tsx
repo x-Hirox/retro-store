@@ -25,14 +25,6 @@ export default function Header({
   const authModal = useAuthModal();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const isAdmin = (() => {
-    try {
-      const raw = localStorage.getItem("user");
-      return raw ? JSON.parse(raw)?.role === "admin" : false;
-    } catch {
-      return false;
-    }
-  })();
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -128,12 +120,6 @@ export default function Header({
 
           {token ? (
             <>
-              {isAdmin ? (
-                <Link to="/admin" className="neon-btn icon-btn" title={t("admin")}>
-                  ⚙️
-                  <span className="btn-label">{t("admin")}</span>
-                </Link>
-              ) : null}
               <Link to="/profile" className="neon-btn icon-btn" title={t("profile")}>
                 👤
                 <span className="btn-label">{t("profile")}</span>

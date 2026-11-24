@@ -59,6 +59,7 @@ const PLATFORM_OPTIONS = [
   "Sega Dreamcast",
   "R36S",
   "M15 Pro",
+  "SUP",
   "Anbernic",
   "Miyoo Mini",
   "PowKiddy",

@@ -291,9 +291,7 @@ export const getOrderById = async (
     const ownerId = String(order.user);
     const isOwner = ownerId === req.user?.id;
     const dbUser = await User.findById(req.user?.id).select("email role");
-    const isAdmin = Boolean(
-      dbUser && (dbUser.role === "admin" || isAdminEmail(dbUser.email)),
-    );
+    const isAdmin = Boolean(dbUser && isAdminEmail(dbUser.email));
     if (!isOwner && !isAdmin) {
       res.status(403).json({ message: "წვდომა აკრძალულია" });
       return;

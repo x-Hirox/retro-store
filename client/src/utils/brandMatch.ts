@@ -36,7 +36,7 @@ const ALIASES: Record<string, string[]> = {
   ],
   xbox: ["xbox"],
   sega: ["sega", "genesis", "mega drive", "dreamcast", "saturn", "master system"],
-  bundles: ["bundle", "ბუნდლ", "კომპლექტ"],
+  bundles: ["bundle", "ბუნდლ", "კომპლექტ", "ნაკრებ"],
   accessories: ["accessor", "აქსესუარ", "controller", "ჯოისტიკ", "charger"],
   "chinese consoles": [
     "anbernic",
@@ -49,6 +49,8 @@ const ALIASES: Record<string, string[]> = {
     "m15-pro",
     "game stick",
     "gamestick",
+    "sup",
+    "sup game box",
     "chinese",
   ],
   "atari & more": ["atari", "coleco", "turbografx", "turbo grafx"],

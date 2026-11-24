@@ -101,6 +101,7 @@ const fallbackCards: Record<
   "chinese consoles": [
     { name: "R36S", slug: "r36s", image: platformArtUrl("r36s"), year: "2023" },
     { name: "M15 Pro", slug: "m15-pro", image: platformArtUrl("m15-pro"), year: "2024" },
+    { name: "SUP", slug: "sup", image: platformArtUrl("sup"), year: "2018" },
     { name: "Anbernic", slug: "anbernic", image: "/anbernic.svg" },
     { name: "Miyoo Mini", slug: "miyoo-mini", image: "/miyoo.svg" },
     { name: "Powkiddy", slug: "powkiddy", image: "/powkiddy.svg" },
@@ -196,6 +197,13 @@ function matchesPlatformCard(
       platform === "m15-pro" ||
       platform === "m15pro" ||
       /m15[\s-]*pro|\bm15pro\b|game\s*stick/i.test(hay)
+    );
+  }
+  const isSup = slug === "sup" || name === "sup";
+  if (isSup) {
+    return (
+      platform === "sup" ||
+      /\bsup\b|sup\s*game\s*box|საპ\b/i.test(hay)
     );
   }
   if (platform && (platform === slug || platform === name)) return true;

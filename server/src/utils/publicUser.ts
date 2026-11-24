@@ -22,8 +22,7 @@ export function displayName(user: {
 }
 
 export function publicUser(user: IUser) {
-  const role =
-    user.role === "admin" || isAdminEmail(user.email) ? "admin" : "customer";
+  const role = isAdminEmail(user.email) ? "admin" : "customer";
   const fromName = splitName(user.name);
   return {
     id: user._id,
