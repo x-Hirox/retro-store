@@ -5,6 +5,7 @@ import type {
   ICollectionPage,
   IFaq,
   INewsletterSubscriber,
+  IBrand,
   IPageMedia,
   IPlatformCard,
   IReview,
@@ -37,6 +38,9 @@ export const getSiteSettings = async (): Promise<ISiteSettings> =>
 
 export const getPageMedia = async (): Promise<IPageMedia[]> =>
   (await API.get("/content/page-media")).data;
+
+export const getBrands = async (): Promise<IBrand[]> =>
+  (await API.get("/content/brands")).data;
 
 export const subscribeNewsletter = async (email: string) =>
   (await API.post("/content/newsletter", { email })).data;

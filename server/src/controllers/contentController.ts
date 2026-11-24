@@ -10,10 +10,23 @@ import ChatMessage from "../models/ChatMessage.js";
 import SellQuote from "../models/SellQuote.js";
 import { inboxMail, sendEmail } from "../utils/sendEmail.js";
 import PageMedia from "../models/PageMedia.js";
-import { ensurePlatformCatalog, ensurePageMedia } from "../utils/seedContent.js";
+import Brand from "../models/Brand.js";
+import {
+  ensurePlatformCatalog,
+  ensurePageMedia,
+  ensureBrandLogos,
+} from "../utils/seedContent.js";
 
 function duplicateError(error: unknown) {
   return (error as { code?: number }).code === 11000;
+}
+
+function normalizeBrandSlug(raw: unknown) {
+  return String(raw || "")
+    .trim()
+    .replace(/^\/category\//i, "")
+    .replace(/^\/+/, "")
+    .trim();
 }
 
 function crud(Model: any) {
@@ -25,6 +38,9 @@ function crud(Model: any) {
         }
         if (Model.modelName === "PageMedia") {
           await ensurePageMedia();
+        }
+        if (Model.modelName === "Brand") {
+          await ensureBrandLogos();
         }
         const sort = Model.schema.path("order") ? { order: 1 } : { createdAt: -1 };
         const items = await Model.find().sort(sort);
@@ -48,6 +64,16 @@ function crud(Model: any) {
           req.body.brand = brand;
           req.body.slug = slug;
         }
+        if (Model.modelName === "Brand") {
+          const slug = normalizeBrandSlug(req.body?.slug || req.body?.name);
+          const exists = await Model.findOne({ slug });
+          if (exists) {
+            res.status(409).json({ message: "ეს ბრენდი უკვე არსებობს." });
+            return;
+          }
+          req.body.slug = slug;
+          req.body.name = String(req.body?.name || "").trim();
+        }
         const item = await Model.create(req.body);
         res.status(201).json(item);
       } catch (error) {
@@ -66,6 +92,16 @@ function crud(Model: any) {
           }
           if (req.body?.slug != null) {
             req.body.slug = String(req.body.slug).trim().toLowerCase();
+          }
+        }
+        if (Model.modelName === "Brand") {
+          if (req.body?.name != null) {
+            req.body.name = String(req.body.name).trim();
+          }
+          if (req.body?.slug != null || req.body?.name != null) {
+            req.body.slug = normalizeBrandSlug(
+              req.body?.slug || req.body?.name,
+            );
           }
         }
         const item = await Model.findByIdAndUpdate(req.params.id, req.body, {
@@ -99,6 +135,7 @@ export const faqs = crud(Faq);
 export const chatReplies = crud(ChatQuickReply);
 export const platformCards = crud(PlatformCard);
 export const pageMedia = crud(PageMedia);
+export const brands = crud(Brand);
 export const collections = crud(CollectionPage);
 export const chatMessages = crud(ChatMessage);
 

@@ -1,17 +1,42 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../i18n/LanguageContext";
+import { getBrands } from "../services/contentService";
+import type { IBrand } from "../types";
 import HoloCard from "./HoloCard";
+
+const FALLBACK_BRANDS: IBrand[] = [
+  { _id: "nintendo", name: "Nintendo", slug: "Nintendo", imageUrl: "/nintendo.svg", order: 0 },
+  {
+    _id: "playstation",
+    name: "PlayStation",
+    slug: "PlayStation",
+    imageUrl: "/playstation.svg",
+    order: 1,
+  },
+  { _id: "xbox", name: "Xbox", slug: "Xbox", imageUrl: "/xbox.svg", order: 2 },
+  { _id: "sega", name: "Sega", slug: "Sega", imageUrl: "/sega.svg", order: 3 },
+];
+
+function brandPath(slug: string) {
+  const value = String(slug || "").trim();
+  if (!value) return "/";
+  if (value.startsWith("/")) return value;
+  return `/category/${encodeURIComponent(value)}`;
+}
 
 export default function BrandsSection() {
   const navigate = useNavigate();
   const { t } = useLang();
+  const [brands, setBrands] = useState<IBrand[]>(FALLBACK_BRANDS);
 
-  const brands = [
-    { name: "Nintendo", src: "/nintendo.svg", height: "46px" },
-    { name: "PlayStation", src: "/playstation.svg", height: "40px" },
-    { name: "Xbox", src: "/xbox.svg", height: "36px" },
-    { name: "Sega", src: "/sega.svg", height: "35px" },
-  ];
+  useEffect(() => {
+    getBrands()
+      .then((data) => {
+        if (data?.length) setBrands(data);
+      })
+      .catch(() => setBrands(FALLBACK_BRANDS));
+  }, []);
 
   return (
     <div
@@ -58,18 +83,17 @@ export default function BrandsSection() {
       >
         {brands.map((brand) => (
           <HoloCard
-            key={brand.name}
+            key={brand._id || brand.slug}
             className="brand-crt"
-            onClick={() =>
-              navigate(`/category/${encodeURIComponent(brand.name)}`)
-            }
+            onClick={() => navigate(brandPath(brand.slug || brand.name))}
           >
             <img
-              src={brand.src}
+              src={brand.imageUrl}
               alt={brand.name}
               style={{
-                height: brand.height,
+                height: 40,
                 width: "auto",
+                maxWidth: 160,
                 objectFit: "contain",
                 display: "block",
               }}

@@ -7,6 +7,7 @@ import {
   chatReplies,
   platformCards,
   pageMedia,
+  brands,
   collections,
   chatMessages,
   listPlatformCardsByBrand,
@@ -29,6 +30,7 @@ router.get("/chat-replies", chatReplies.list);
 router.get("/platform-cards", platformCards.list);
 router.get("/platform-cards/brand/:brand", listPlatformCardsByBrand);
 router.get("/page-media", pageMedia.list);
+router.get("/brands", brands.list);
 router.get("/collections", collections.list);
 router.get("/collections/brand/:brand", getCollectionByBrand);
 router.get("/settings", getSettings);
@@ -57,6 +59,10 @@ router.put("/platform-cards/:id", protect, adminOnly, platformCards.update);
 router.delete("/platform-cards/:id", protect, adminOnly, platformCards.remove);
 
 router.put("/page-media/:id", protect, adminOnly, updatePageMedia);
+
+router.post("/brands", protect, adminOnly, brands.create);
+router.put("/brands/:id", protect, adminOnly, brands.update);
+router.delete("/brands/:id", protect, adminOnly, brands.remove);
 
 router.post("/collections", protect, adminOnly, collections.create);
 router.put("/collections/:id", protect, adminOnly, collections.update);

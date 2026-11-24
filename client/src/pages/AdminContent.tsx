@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import {
   createContent,
   deleteContent,
+  getBrands,
   getChatMessages,
   getChatReplies,
   getCollections,
@@ -15,6 +16,7 @@ import {
 } from "../services/contentService";
 import ImageUrlField from "../components/ImageUrlField";
 import type {
+  IBrand,
   IChatMessage,
   IChatQuickReply,
   ICollectionPage,
@@ -30,6 +32,7 @@ type Tab =
   | "faqs"
   | "chat"
   | "platforms"
+  | "brands"
   | "collections"
   | "settings"
   | "inbox"
@@ -55,6 +58,7 @@ export default function AdminContent() {
           [
             ["reviews", "⭐ შეფასებები"],
             ["platforms", "🖼️ კონსოლების ბარათები"],
+            ["brands", "🏷️ ბრენდები (ლოგოები)"],
             ["faqs", "❓ კითხვები"],
             ["chat", "💬 ჩატის პასუხები"],
             ["inbox", "📥 ჩატის შემოსულები"],
@@ -85,6 +89,7 @@ export default function AdminContent() {
       {tab === "chat" && <ChatAdmin />}
       {tab === "inbox" && <InboxAdmin />}
       {tab === "platforms" && <PlatformsAdmin />}
+      {tab === "brands" && <BrandsAdmin />}
       {tab === "collections" && <CollectionsAdmin />}
       {tab === "settings" && <SettingsAdmin />}
       {tab === "newsletter" && <NewsletterAdmin />}
@@ -312,6 +317,124 @@ function PlatformsAdmin() {
         }))}
         onDelete={async (id) => {
           await deleteContent("platform-cards", id);
+          load();
+        }}
+      />
+    </CrudBlock>
+  );
+}
+
+function BrandsAdmin() {
+  const emptyForm = { name: "", slug: "", imageUrl: "" };
+  const [items, setItems] = useState<IBrand[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(emptyForm);
+  const load = () => getBrands().then(setItems).catch(() => setItems([]));
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <CrudBlock
+      title="ბრენდები (ლოგოები)"
+      submitLabel={editingId ? "შენახვა" : "დამატება"}
+      onSubmit={async () => {
+        const payload = {
+          name: form.name.trim(),
+          slug: form.slug.trim() || form.name.trim(),
+          imageUrl: form.imageUrl.trim(),
+          order: editingId
+            ? items.find((item) => item._id === editingId)?.order ?? 0
+            : items.length,
+        };
+        if (editingId) {
+          await updateContent("brands", editingId, payload);
+          setEditingId(null);
+        } else {
+          await createContent("brands", payload);
+        }
+        setForm(emptyForm);
+        load();
+      }}
+    >
+      <p style={{ margin: 0, fontSize: 13, color: "#94a3b8" }}>
+        მთავარი გვერდის „მოძებნე ბრენდის მიხედვით“ ზოლი. PNG, JPG, WebP, SVG ან
+        GIF — ატვირთე Cloudinary-ზე ან ჩასვი ლინკი. ბმული: /category/Nintendo.
+      </p>
+      <input
+        style={inputStyle}
+        placeholder="დასახელება, მაგ: Nintendo"
+        value={form.name}
+        onChange={(e) => {
+          const name = e.target.value;
+          setForm((prev) => ({
+            ...prev,
+            name,
+            slug: prev.slug && prev.slug !== prev.name ? prev.slug : name,
+          }));
+        }}
+        required
+      />
+      <input
+        style={inputStyle}
+        placeholder="ბმული / სლაგი, მაგ: Nintendo ან /category/Nintendo"
+        value={form.slug}
+        onChange={(e) => setForm({ ...form, slug: e.target.value })}
+        required
+      />
+      <ImageUrlField
+        value={form.imageUrl}
+        onChange={(imageUrl) => setForm({ ...form, imageUrl })}
+        allowUrl
+        placeholder="https://res.cloudinary.com/... ან /nintendo.svg"
+        hint="ლოგო Cloudinary-ზე ადის, ან ჩასვი ლინკი."
+      />
+      {editingId && (
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(null);
+            setForm(emptyForm);
+          }}
+          style={smallBtn("#475569")}
+        >
+          გაუქმება
+        </button>
+      )}
+      <List
+        items={items.map((item) => ({
+          id: item._id,
+          title: item.name,
+          subtitle: `/category/${item.slug}`,
+          extra: (
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt=""
+                  style={{ height: 28, width: "auto", maxWidth: 80, objectFit: "contain" }}
+                />
+              ) : null}
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(item._id);
+                  setForm({
+                    name: item.name,
+                    slug: item.slug,
+                    imageUrl: item.imageUrl,
+                  });
+                }}
+                style={smallBtn("#f59e0b")}
+              >
+                რედაქტირება
+              </button>
+            </div>
+          ),
+        }))}
+        onDelete={async (id) => {
+          await deleteContent("brands", id);
           load();
         }}
       />

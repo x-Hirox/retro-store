@@ -5,8 +5,10 @@ import PlatformCard from "../models/PlatformCard.js";
 import CollectionPage from "../models/CollectionPage.js";
 import SiteSettings from "../models/SiteSettings.js";
 import PageMedia from "../models/PageMedia.js";
+import Brand from "../models/Brand.js";
 import { PLATFORM_SEED, isGenericBrandLogo } from "./platformSeed.js";
 import { HOME_PAGE_MEDIA_KEYS, PAGE_MEDIA_SEED } from "./pageMediaSeed.js";
+import { BRAND_SEED } from "./brandSeed.js";
 
 export async function seedContentIfEmpty() {
   if ((await SiteSettings.countDocuments()) === 0) {
@@ -150,6 +152,7 @@ export async function seedContentIfEmpty() {
 
   await ensurePlatformCatalog();
   await ensurePageMedia();
+  await ensureBrandLogos();
 
   if ((await CollectionPage.countDocuments()) === 0) {
     await CollectionPage.insertMany([
@@ -266,4 +269,24 @@ export async function ensurePageMedia() {
   }
 
   pageMediaReady = true;
+}
+
+let brandLogosReady = false;
+
+export async function ensureBrandLogos() {
+  if (brandLogosReady) return;
+
+  for (const item of BRAND_SEED) {
+    const existing = await Brand.findOne({ slug: item.slug });
+    if (!existing) {
+      await Brand.create(item);
+      continue;
+    }
+    const $set: Record<string, unknown> = { name: item.name, order: item.order };
+    const current = String(existing.imageUrl || "").trim();
+    if (!current) $set.imageUrl = item.imageUrl;
+    await Brand.updateOne({ _id: existing._id }, { $set });
+  }
+
+  brandLogosReady = true;
 }

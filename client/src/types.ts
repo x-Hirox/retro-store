@@ -75,6 +75,14 @@ export interface ICollectionPage {
   bannerColor: string;
 }
 
+export interface IBrand {
+  _id: string;
+  name: string;
+  slug: string;
+  imageUrl: string;
+  order: number;
+}
+
 export interface IPageMedia {
   _id: string;
   key: string;
