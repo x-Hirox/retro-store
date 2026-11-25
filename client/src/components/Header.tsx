@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
@@ -49,6 +49,17 @@ function UsFlag() {
   );
 }
 
+function blurNavFocus() {
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && active.closest(".main-nav-bar")) {
+    active.blur();
+  }
+}
+
+function isCoarsePointer() {
+  return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+}
+
 export default function Header({
   categoriesData,
   totalItems,
@@ -60,6 +71,7 @@ export default function Header({
   const authModal = useAuthModal();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [openNav, setOpenNav] = useState<string | null>(null);
   const [navCats, setNavCats] = useState(() =>
     groupPlatformNav([], categoriesData),
   );
@@ -69,6 +81,31 @@ export default function Header({
       .then((cards) => setNavCats(groupPlatformNav(cards, categoriesData)))
       .catch(() => setNavCats(groupPlatformNav([], categoriesData)));
   }, [categoriesData]);
+
+  useEffect(() => {
+    setOpenNav(null);
+    blurNavFocus();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element) || target.closest(".dropdown-parent")) return;
+      setOpenNav(null);
+      blurNavFocus();
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpenNav(null);
+      blurNavFocus();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, []);
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
@@ -205,14 +242,57 @@ export default function Header({
       </div>
 
       <nav className="main-nav-bar">
-        {navCats.map((cat, index) => (
-          <div key={index} className="dropdown-parent">
+        {navCats.map((cat, index) => {
+          const isOpen = openNav === cat.name;
+          return (
+          <div
+            key={index}
+            className={`dropdown-parent${isOpen ? " is-open" : ""}`}
+            onMouseLeave={() => {
+              if (isCoarsePointer()) return;
+              setOpenNav((current) => (current === cat.name ? null : current));
+              blurNavFocus();
+            }}
+          >
             <Link
               to={
                 cat.name === "All"
                   ? "/"
                   : `/category/${encodeURIComponent(cat.name)}`
               }
+              aria-expanded={cat.sub.length > 0 ? isOpen : undefined}
+              aria-haspopup={cat.sub.length > 0 ? "menu" : undefined}
+              onClick={(event) => {
+                if (!cat.sub.length) {
+                  setOpenNav(null);
+                  return;
+                }
+                if (isCoarsePointer()) {
+                  if (!isOpen) {
+                    event.preventDefault();
+                    setOpenNav(cat.name);
+                    return;
+                  }
+                  setOpenNav(null);
+                  return;
+                }
+                if (isOpen) {
+                  event.preventDefault();
+                  setOpenNav(null);
+                  blurNavFocus();
+                  return;
+                }
+                setOpenNav(null);
+                requestAnimationFrame(blurNavFocus);
+              }}
+              onFocus={(event) => {
+                if (
+                  cat.sub.length &&
+                  event.currentTarget.matches(":focus-visible")
+                ) {
+                  setOpenNav(cat.name);
+                }
+              }}
             >
               {cat.name} {cat.sub.length > 0 && "▾"}
             </Link>
@@ -222,6 +302,10 @@ export default function Header({
                   <Link
                     key={subItem.slug}
                     to={`/category/${encodeURIComponent(cat.name)}/${encodeURIComponent(subItem.slug)}`}
+                    onClick={() => {
+                      setOpenNav(null);
+                      requestAnimationFrame(blurNavFocus);
+                    }}
                   >
                     {subItem.name}
                   </Link>
@@ -229,7 +313,8 @@ export default function Header({
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
         <Link to="/category/games">{t("catGames")}</Link>
         <Link to="/category/accessories">{t("catAcc")}</Link>
         <Link to="/gifts" className="gifts-nav-link">

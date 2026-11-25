@@ -289,8 +289,13 @@ body.dark div[style*="background-color: var(--code-bg)"]:hover {
 /* ==========================================
    👾 5. Dropdown & Auth
    ========================================== */
-.dropdown-parent:hover .dropdown-content {
-  display: block !important;
+@media (hover: hover) and (pointer: fine) {
+  .dropdown-parent:hover .dropdown-content {
+    display: block;
+  }
+}
+.dropdown-parent.is-open .dropdown-content {
+  display: block;
 }
 
 .dropdown-content a:hover {
@@ -1574,7 +1579,7 @@ body:not(.dark) .site-header {
 }
 
 .main-nav-bar .dropdown-parent:hover,
-.main-nav-bar .dropdown-parent:focus-within {
+.main-nav-bar .dropdown-parent.is-open {
   z-index: 30;
 }
 
@@ -1592,8 +1597,12 @@ body:not(.dark) .site-header {
   border: 1px solid var(--border);
 }
 
-.dropdown-parent:hover .dropdown-content,
-.dropdown-parent:focus-within .dropdown-content {
+@media (hover: hover) and (pointer: fine) {
+  .main-nav-bar .dropdown-parent:hover .dropdown-content {
+    display: block;
+  }
+}
+.main-nav-bar .dropdown-parent.is-open .dropdown-content {
   display: block;
 }
 

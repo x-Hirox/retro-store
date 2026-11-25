@@ -111,9 +111,6 @@ export default function App() {
       >
         <style>
           {`
-            .dropdown-parent:hover .dropdown-content {
-              display: block !important;
-            }
             .neon-btn {
               transition: transform 0.28s ease, box-shadow 0.28s ease;
             }
