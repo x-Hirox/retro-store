@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { IProduct } from "../types";
+import { optimizedImage } from "../utils/optimizedImage";
 
 const HERO_CACHE = "rb-hero-url";
 
@@ -12,7 +13,8 @@ interface Props {
 
 export default function HeroBanner({ heroBanner, searchQuery, onReady }: Props) {
   const navigate = useNavigate();
-  const src = heroBanner?.imageUrl || readCachedHero();
+  const raw = heroBanner?.imageUrl || readCachedHero();
+  const src = raw ? optimizedImage(raw, 1400) : "";
 
   useEffect(() => {
     if (heroBanner?.imageUrl) {

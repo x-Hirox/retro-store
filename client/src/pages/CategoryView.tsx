@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProducts } from "../services/productService";
+import { getProducts, peekProducts } from "../services/productService";
 import {
   getCollectionPage,
   getPlatformCards,
+  peekCollection,
+  peekPlatformCards,
 } from "../services/contentService";
+import LazyMount from "../components/LazyMount";
 import type { ICollectionPage, IPlatformCard, IProduct } from "../types";
 import { getSalePrice, isBannerProduct } from "../utils/pricing";
 import ProductCard from "../components/ProductCard";
@@ -274,29 +277,52 @@ export default function CategoryView() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const kindRoute = KIND_ROUTES[brand];
 
-  useEffect(() => {
-    setLoading(true);
+  useLayoutEffect(() => {
     setVisibleCount(PAGE_SIZE);
     setSelectedKinds([]);
     setSelectedPlatforms([]);
     setSelectedGenres([]);
     setSelectedBrands([]);
+
+    const cachedProducts = peekProducts();
+    const cachedCards = peekPlatformCards();
+    const cachedPage = peekCollection(brand);
+    if (cachedProducts) {
+      setProducts(cachedProducts);
+      setCards(
+        (cachedCards || []).filter((card) => brandKey(card.brand) === brand),
+      );
+      setLoading(false);
+    } else {
+      setLoading(true);
+      setCards([]);
+    }
+    setCollection(cachedPage === undefined ? null : cachedPage);
+  }, [brand]);
+
+  useEffect(() => {
+    let cancelled = false;
     Promise.all([
       getProducts(),
       getPlatformCards().catch(() => [] as IPlatformCard[]),
       getCollectionPage(brand).catch(() => null),
     ])
       .then(([data, platformCards, page]) => {
+        if (cancelled) return;
         setProducts(data);
         setCards(
-          platformCards.filter(
-            (card) => brandKey(card.brand) === brand,
-          ),
+          platformCards.filter((card) => brandKey(card.brand) === brand),
         );
         setCollection(page);
       })
       .catch((err) => console.error("Error fetching products:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [brand]);
 
   const catalogProducts = products.filter((p) => !isBannerProduct(p));
@@ -391,8 +417,8 @@ export default function CategoryView() {
   const categoryTitle = kindRoute
     ? kindRoute === "accessory"
       ? "აქსესუარები"
-      : "თამაშები"
-    : collection?.title || decodeURIComponent(platform || "Nintendo");
+      : "დისკები"
+    : decodeURIComponent(platform || "Nintendo");
   const subCard = currentCards.find(
     (card) =>
       normalize(card.slug) === normalize(sub) ||
@@ -590,16 +616,18 @@ export default function CategoryView() {
         </div>
       </div>
 
-      <ReviewsSection />
-      <BestSellersSlider
-        products={catalogProducts}
-        loading={loading}
-        searchQuery=""
-        selectedCategory=""
-      />
-      <FaqSection />
-      <RecentlyViewed />
-      <NewsletterSignup />
+      <LazyMount>
+        <ReviewsSection />
+        <BestSellersSlider
+          products={catalogProducts}
+          loading={loading}
+          searchQuery=""
+          selectedCategory=""
+        />
+        <FaqSection />
+        <RecentlyViewed />
+        <NewsletterSignup />
+      </LazyMount>
     </div>
   );
 }

@@ -2,7 +2,7 @@ export type ProductKind = "console" | "game" | "accessory";
 
 export const KIND_OPTIONS: { value: ProductKind; label: string }[] = [
   { value: "console", label: "კონსოლი" },
-  { value: "game", label: "თამაში" },
+  { value: "game", label: "დისკი" },
   { value: "accessory", label: "აქსესუარი" },
 ];
 

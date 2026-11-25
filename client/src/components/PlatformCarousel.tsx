@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { IPlatformCard } from "../types";
 import { nextPlatformArtUrl, platformArtUrl } from "../utils/platformArt";
+import { optimizedImage } from "../utils/optimizedImage";
 import { setPlatformImageFallback } from "../utils/platformPlaceholder";
 
 const AUTO_MS = 4500;
@@ -124,7 +125,10 @@ export default function PlatformCarousel({
                   >
                     <div className="collection-console-art">
                       <img
-                        src={item.imageUrl || platformArtUrl(item.slug)}
+                        src={optimizedImage(
+                          item.imageUrl || platformArtUrl(item.slug),
+                          360,
+                        )}
                         alt={item.name}
                         draggable={false}
                         onError={(event) => {

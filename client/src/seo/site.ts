@@ -1,7 +1,7 @@
 export const SITE_URL = "https://www.retrobit.ge";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/retrobit.png`;
 export const DEFAULT_TITLE =
-  "RetroBit — რეტრო კონსოლები და თამაშები საქართველოში";
+  "RetroBit.ge — რეტრო კონსოლები და თამაშები თბილისში";
 export const CONTACT = {
   name: "RetroBit",
   phoneDisplay: "+995 595 95 00 39",

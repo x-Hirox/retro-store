@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useLang } from "../i18n/LanguageContext";
 import { useAuthModal } from "../context/AuthModalContext";
 import { getPlatformCards } from "../services/contentService";
+import { getProducts } from "../services/productService";
 import { groupPlatformNav } from "../utils/platformCatalog";
 
 interface HeaderProps {
@@ -80,6 +81,7 @@ export default function Header({
     getPlatformCards()
       .then((cards) => setNavCats(groupPlatformNav(cards, categoriesData)))
       .catch(() => setNavCats(groupPlatformNav([], categoriesData)));
+    getProducts().catch(() => undefined);
   }, [categoriesData]);
 
   useEffect(() => {

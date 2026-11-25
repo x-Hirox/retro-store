@@ -12,6 +12,7 @@ import ReviewsSection from "../components/ReviewsSection";
 import FaqSection from "../components/FaqSection";
 import RecentlyViewed from "../components/RecentlyViewed";
 import NewsletterSignup from "../components/NewsletterSignup";
+import LazyMount from "../components/LazyMount";
 import ProductCard from "../components/ProductCard";
 import SeoHead from "../components/SeoHead";
 import {
@@ -117,7 +118,9 @@ export default function Home() {
 
       {/* 3. პოპულარული ბრენდები */}
       {!searchQuery && (
-        <BrandsSection />
+        <LazyMount>
+          <BrandsSection />
+        </LazyMount>
       )}
 
       {/* შუა ბანერი */}
@@ -177,12 +180,12 @@ export default function Home() {
       )}
 
       {!searchQuery && (
-        <>
+        <LazyMount>
           <ReviewsSection />
           <FaqSection />
           <RecentlyViewed />
           <NewsletterSignup />
-        </>
+        </LazyMount>
       )}
     </div>
   );

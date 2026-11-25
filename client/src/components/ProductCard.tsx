@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import type { IProduct } from "../types";
 import { productPath } from "../seo/productUrl";
@@ -6,6 +7,7 @@ import HoloCard from "./HoloCard";
 import { productImageAlt } from "../utils/imageAlt";
 import { colorStock, totalStock } from "../utils/productColors";
 import { useCart } from "../context/CartContext";
+import { optimizedImage } from "../utils/optimizedImage";
 
 function CartIcon() {
   return (
@@ -23,15 +25,34 @@ function CartIcon() {
   );
 }
 
-export default function ProductCard({ product }: { product: IProduct }) {
+function AddToCartBtn({ product, left }: { product: IProduct; left: number }) {
   const { cart, addToCart } = useCart();
+  const added = cart.some((row) => row._id === product._id);
+  return (
+    <button
+      type="button"
+      className="card-add"
+      disabled={added}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addToCart({ ...product, stock: left });
+      }}
+    >
+      <CartIcon />
+      {added ? "კალათაშია" : "დამატება"}
+    </button>
+  );
+}
+
+function ProductCard({ product }: { product: IProduct }) {
   const { original, final, discount } = getSalePrice(product);
   const range = saleRange(product);
   const left = totalStock(product);
   const sold = left <= 0;
   const low = !sold && left <= 3;
   const fromPrice = range.min !== range.max;
-  const added = cart.some((row) => row._id === product._id);
+  const thumb = product.imageUrl ? optimizedImage(product.imageUrl, 480) : "";
 
   const body = (
     <>
@@ -42,10 +63,12 @@ export default function ProductCard({ product }: { product: IProduct }) {
       )}
 
       <div className="card-photo">
-        {product.imageUrl ? (
+        {thumb ? (
           <img
-            src={product.imageUrl}
+            src={thumb}
             alt={productImageAlt(product)}
+            width={480}
+            height={480}
             loading="lazy"
             decoding="async"
             draggable={false}
@@ -88,21 +111,9 @@ export default function ProductCard({ product }: { product: IProduct }) {
           {body}
         </Link>
       )}
-      {!sold && (
-        <button
-          type="button"
-          className="card-add"
-          disabled={added}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            addToCart({ ...product, stock: left });
-          }}
-        >
-          <CartIcon />
-          {added ? "კალათაშია" : "დამატება"}
-        </button>
-      )}
+      {!sold && <AddToCartBtn product={product} left={left} />}
     </HoloCard>
   );
 }
+
+export default memo(ProductCard);

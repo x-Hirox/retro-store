@@ -31,6 +31,7 @@ import {
   withSelectedColor,
 } from "../utils/productColors";
 import { specGroups, splitProductCopy } from "../utils/productSpecs";
+import { optimizedImage } from "../utils/optimizedImage";
 import {
   conditionLabel,
   productCondition,
@@ -655,7 +656,7 @@ function ProductPhotos({
         )}
         {current ? (
           <img
-            src={current}
+            src={optimizedImage(current, 900)}
             alt={productImageAlt({ title })}
             draggable={false}
             style={{

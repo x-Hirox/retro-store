@@ -85,7 +85,7 @@ export default function HomeExtraSections() {
         >
           <div>
             <h3 style={{ fontSize: "1.8rem", margin: "0 0 10px 0" }}>
-              თამაშები
+              დისკები
             </h3>
             <p style={{ opacity: 0.9 }}>
               დისკები და კარტრიჯები — PS1, PS2, Nintendo და სხვა.
@@ -96,7 +96,7 @@ export default function HomeExtraSections() {
             style={{ width: "fit-content", marginTop: "20px" }}
             onClick={() => navigate("/category/games")}
           >
-            თამაშების ნახვა
+            დისკების ნახვა
           </button>
         </div>
       </div>

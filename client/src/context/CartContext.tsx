@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { IProduct } from "../types";
 import { cartLineKey } from "../utils/productColors";
@@ -41,7 +41,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (
+  const addToCart = useCallback((
     product: IProduct & { selectedColor?: string; selectedColorHex?: string },
     qty = 1,
     opts?: { drawer?: boolean },
@@ -72,9 +72,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       ];
     });
     if (opts?.drawer !== false) setDrawerOpen(true);
-  };
+  }, []);
 
-  const updateQuantity = (lineKey: string, quantity: number) => {
+  const updateQuantity = useCallback((lineKey: string, quantity: number) => {
     setCart((prevCart) => {
       const current = prevCart.find((item) => cartLineKey(item) === lineKey);
       if (!current) return prevCart;
@@ -88,31 +88,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cartLineKey(item) === lineKey ? { ...item, quantity: nextQty } : item,
       );
     });
-  };
+  }, []);
 
-  const removeFromCart = (lineKey: string) => {
+  const removeFromCart = useCallback((lineKey: string) => {
     setCart((prevCart) =>
       prevCart.filter((item) => cartLineKey(item) !== lineKey),
     );
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
+
+  const openCartDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeCartDrawer = useCallback(() => setDrawerOpen(false), []);
+
+  const value = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      clearCart,
+      drawerOpen,
+      openCartDrawer,
+      closeCartDrawer,
+    }),
+    [
+      cart,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      clearCart,
+      drawerOpen,
+      openCartDrawer,
+      closeCartDrawer,
+    ],
+  );
 
   return (
-    <CartContext.Provider
-      value={{
-        cart,
-        addToCart,
-        updateQuantity,
-        removeFromCart,
-        clearCart,
-        drawerOpen,
-        openCartDrawer: () => setDrawerOpen(true),
-        closeCartDrawer: () => setDrawerOpen(false),
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

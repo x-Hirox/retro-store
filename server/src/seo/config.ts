@@ -18,7 +18,7 @@ export const SITE_URL = publicSiteUrl(
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/retrobit.png`;
 
 export const DEFAULT_TITLE =
-  "RetroBit — რეტრო კონსოლები და თამაშები საქართველოში";
+  "RetroBit.ge — რეტრო კონსოლები და თამაშები თბილისში";
 
 export const CONTACT = {
   name: "RetroBit",

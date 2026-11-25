@@ -6,6 +6,7 @@ import { formatGel, getSalePrice, isBannerProduct, saleRange } from "../utils/pr
 import HoloCard from "./HoloCard";
 import { useLang } from "../i18n/LanguageContext";
 import { colorStock, totalStock } from "../utils/productColors";
+import { optimizedImage } from "../utils/optimizedImage";
 
 const DRAG_THRESHOLD = 8;
 
@@ -229,8 +230,10 @@ export default function BestSellersSlider({
                 <div className="card-photo">
                   {product.imageUrl ? (
                     <img
-                      src={product.imageUrl}
+                      src={optimizedImage(product.imageUrl, 400)}
                       alt={`${product.title}${product.platform ? ` — ${product.platform}` : ""} | RetroBit`}
+                      width={400}
+                      height={400}
                       loading="lazy"
                       decoding="async"
                       draggable={false}

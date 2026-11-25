@@ -194,10 +194,10 @@ svg {
    🎮 ნავიგაციის მენიუს შრიფტი (Orbitron)
    ========================================== */
 .main-nav-bar a {
-  font-family: var(--nav-font) !important;
-  font-size: 0.82rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
+  font-family: "Noto Sans Georgian", "Noto Serif Georgian", var(--nav-font), sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
   color: var(--text-h) !important;
   display: inline-block;
@@ -2857,10 +2857,11 @@ body.dark .profile-chip.is-ok {
   text-align: center;
   margin: 28px 0 8px;
   font-family: var(--heading);
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(2.15rem, 4.6vw, 3.05rem);
+  font-weight: 800;
   letter-spacing: 0;
   text-transform: none;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .site-footer {
@@ -3739,6 +3740,8 @@ html.fx-cursor select {
   border: 1px solid rgba(0, 243, 255, 0.28);
   padding: 10px;
   position: relative;
+  content-visibility: auto;
+  contain-intrinsic-size: 340px;
 }
 .product-card h3 {
   font-family: var(--heading);
@@ -5085,8 +5088,7 @@ html.fx-cursor select {
 .rab-nebula {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
-  will-change: transform;
+  filter: blur(64px);
   pointer-events: none;
 }
 .rab-a {
@@ -5452,27 +5454,35 @@ body:not(.dark) .collection-console span {
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
-    filter 0.18s ease,
-    text-shadow 0.18s ease,
     color 0.18s ease,
     border-color 0.18s ease,
     outline-color 0.18s ease;
 }
 
-:where(
-  a:not(.card-main):not(.product-card-link),
-  button:not(:disabled):not(.pd-photo-nav):not(.pd-thumbs-nav),
-  summary,
-  select,
-  [role="button"]:not(.pd-photo):not(.is-grabbing):not(.hero-banner),
-  [role="link"],
-  [role="menuitem"],
-  [role="tab"],
-  .is-hot,
-  .pay-logo,
-  .pay-badge,
-  .checkbox-label
-):hover,
+@media (hover: hover) and (pointer: fine) {
+  :where(
+    a:not(.card-main):not(.product-card-link),
+    button:not(:disabled):not(.pd-photo-nav):not(.pd-thumbs-nav),
+    summary,
+    select,
+    [role="button"]:not(.pd-photo):not(.is-grabbing):not(.hero-banner),
+    [role="link"],
+    [role="menuitem"],
+    [role="tab"],
+    .is-hot,
+    .pay-logo,
+    .pay-badge,
+    .checkbox-label
+  ):hover {
+    transform: translate3d(0, -3px, 0);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    box-shadow:
+      0 0 16px color-mix(in srgb, var(--accent) 55%, transparent),
+      0 8px 18px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+}
+
 :where(
   a:not(.card-main):not(.product-card-link),
   button:not(:disabled):not(.pd-photo-nav):not(.pd-thumbs-nav),
@@ -5488,13 +5498,18 @@ body:not(.dark) .collection-console span {
   .checkbox-label
 ):focus-visible {
   transform: translate3d(0, -3px, 0);
-  filter: brightness(1.08);
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   box-shadow:
     0 0 16px color-mix(in srgb, var(--accent) 55%, transparent),
     0 8px 18px color-mix(in srgb, var(--accent) 35%, transparent);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.dropdown-content a:hover,
+.dropdown-content a:focus-visible {
+  transform: none;
+  outline: none;
+  box-shadow: none;
 }
 
 .pd-photo:hover:not(.is-grabbing) {
