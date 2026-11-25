@@ -14,6 +14,7 @@ import {
   updateContent,
   updateSettings,
 } from "../services/contentService";
+import AdminImageThumb from "../components/AdminImageThumb";
 import ImageUrlField from "../components/ImageUrlField";
 import type {
   IBrand,
@@ -140,6 +141,7 @@ function ReviewsAdmin() {
           id: item._id,
           title: `${item.name} — ${item.stars}★`,
           subtitle: item.text,
+          imageUrl: item.productImageUrl || item.avatarUrl,
         }))}
         onDelete={async (id) => {
           await deleteContent("reviews", id);
@@ -295,7 +297,8 @@ function PlatformsAdmin() {
         items={items.map((item) => ({
           id: item._id,
           title: `${item.brand} — ${item.name}`,
-          subtitle: item.imageUrl,
+          subtitle: item.slug,
+          imageUrl: item.imageUrl,
           extra: (
             <button
               type="button"
@@ -407,15 +410,8 @@ function BrandsAdmin() {
           id: item._id,
           title: item.name,
           subtitle: `/category/${item.slug}`,
+          imageUrl: item.imageUrl,
           extra: (
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {item.imageUrl ? (
-                <img
-                  src={item.imageUrl}
-                  alt=""
-                  style={{ height: 28, width: "auto", maxWidth: 80, objectFit: "contain" }}
-                />
-              ) : null}
               <button
                 type="button"
                 onClick={() => {
@@ -430,7 +426,6 @@ function BrandsAdmin() {
               >
                 რედაქტირება
               </button>
-            </div>
           ),
         }))}
         onDelete={async (id) => {
@@ -626,30 +621,27 @@ function List({
   items,
   onDelete,
 }: {
-  items: { id: string; title: string; subtitle?: string; extra?: ReactNode }[];
+  items: {
+    id: string;
+    title: string;
+    subtitle?: string;
+    imageUrl?: string;
+    extra?: ReactNode;
+  }[];
   onDelete: (id: string) => Promise<void>;
 }) {
   return (
-    <div style={{ marginTop: 16, display: "grid", gap: 8 }}>
+    <div className="admin-product-list" style={{ marginTop: 16 }}>
       {items.map((item) => (
-        <div
-          key={item.id}
-          style={{
-            background: "#1e293b",
-            padding: 12,
-            borderRadius: 8,
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          <div>
-            <strong>{item.title}</strong>
-            {item.subtitle && (
-              <p style={{ margin: "4px 0 0", fontSize: 13, color: "#94a3b8" }}>{item.subtitle}</p>
-            )}
+        <div key={item.id} className="admin-product-row admin-content-row">
+          <div className="admin-product-info">
+            <AdminImageThumb src={item.imageUrl} />
+            <div>
+              <h4>{item.title}</h4>
+              {item.subtitle ? <p>{item.subtitle}</p> : null}
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div className="admin-row-actions">
             {item.extra}
             <button type="button" onClick={() => onDelete(item.id)} style={smallBtn("#ef4444")}>
               წაშლა

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import API from "../services/api";
 import type { IProductColor } from "../types";
-import { setPlatformImageFallback } from "../utils/platformPlaceholder";
+import AdminImageThumb from "./AdminImageThumb";
 
 export default function ImageUrlField({
   value,
@@ -40,65 +40,62 @@ export default function ImageUrlField({
 
   return (
     <div className="image-url-field">
-      {allowUrl && (
-        <input
-          type="text"
-          placeholder={placeholder || "სურათის ლინკი ან /images/platforms/dsl.png"}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          required={required && !value}
-        />
-      )}
-      <label className="image-file-btn">
-        {busy
-          ? "იტვირთება..."
-          : value
-            ? "სურათის შეცვლა"
-            : "ფოტოს ატვირთვა კომპიუტერიდან"}
-        <input
-          type="file"
-          accept="image/*,.png,.jpg,.jpeg,.webp,.svg,.gif,.heic,.heif"
-          hidden
-          disabled={busy}
-          onChange={(e) => {
-            onFile(e.target.files?.[0]);
-            e.currentTarget.value = "";
-          }}
-        />
-      </label>
-      {value && (
-        <div className="image-url-preview-wrap">
-          <img
-            src={value}
-            alt=""
-            className="image-url-preview"
-            onError={(event) => setPlatformImageFallback(event.currentTarget)}
-          />
-          <button type="button" className="image-url-clear" onClick={() => onChange("")}>
-            წაშლა
-          </button>
+      <div className="image-url-field-row">
+        <AdminImageThumb src={value} />
+        <div className="image-url-controls">
+          {allowUrl && (
+            <input
+              type="text"
+              placeholder={placeholder || "სურათის ლინკი ან /images/platforms/dsl.png"}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              required={required && !value}
+            />
+          )}
+          <label className="image-file-btn">
+            {busy
+              ? "იტვირთება..."
+              : value
+                ? "სურათის შეცვლა"
+                : "ფოტოს ატვირთვა კომპიუტერიდან"}
+            <input
+              type="file"
+              accept="image/*,.png,.jpg,.jpeg,.webp,.svg,.gif,.heic,.heif"
+              hidden
+              disabled={busy}
+              onChange={(e) => {
+                onFile(e.target.files?.[0]);
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
+          {value && (
+            <button type="button" className="image-url-clear" onClick={() => onChange("")}>
+              წაშლა
+            </button>
+          )}
+          {required && !value && (
+            <p className="image-url-hint is-warn">საჭიროა ფოტო — ატვირთე ან ჩასვი ლინკი.</p>
+          )}
+          <details
+            className="image-url-more"
+            open={allowUrl || (required && !value) || hint.includes("ვერ")}
+          >
+            <summary>ან Cloudinary ლინკის ჩასმა</summary>
+            <input
+              type="text"
+              placeholder={placeholder || "https://res.cloudinary.com/..."}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+            />
+          </details>
+          <p className={`image-url-hint${hint.includes("ვერ") ? " is-warn" : ""}`}>
+            {hint ||
+              fallbackHint ||
+              "ფაილი ადის Cloudinary-ზე. თუ ატვირთვა ვერ მოხდა, ჩასვი ლინკი."}
+          </p>
         </div>
-      )}
-      {required && !value && (
-        <p className="image-url-hint is-warn">საჭიროა ფოტო — ატვირთე ან ჩასვი ლინკი.</p>
-      )}
-      <details
-        className="image-url-more"
-        open={allowUrl || (required && !value) || hint.includes("ვერ")}
-      >
-        <summary>ან Cloudinary ლინკის ჩასმა</summary>
-        <input
-          type="text"
-          placeholder={placeholder || "https://res.cloudinary.com/..."}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </details>
-      <p className={`image-url-hint${hint.includes("ვერ") ? " is-warn" : ""}`}>
-        {hint ||
-          fallbackHint ||
-          "ფაილი ადის Cloudinary-ზე. თუ ატვირთვა ვერ მოხდა, ჩასვი ლინკი."}
-      </p>
+      </div>
     </div>
   );
 }

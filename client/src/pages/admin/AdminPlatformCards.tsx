@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import AdminImageThumb from "../../components/AdminImageThumb";
 import ImageUrlField from "../../components/ImageUrlField";
 import {
   createContent,
@@ -12,7 +13,6 @@ import {
   brandLabel,
   slugFromName,
 } from "../../utils/platformCatalog";
-import { setPlatformImageFallback } from "../../utils/platformPlaceholder";
 
 const inputStyle: CSSProperties = {
   padding: "10px",
@@ -259,13 +259,7 @@ export default function AdminPlatformCards() {
                 .map((item) => (
                   <div key={item._id} className="admin-product-row">
                     <div className="admin-product-info">
-                      <img
-                        src={item.imageUrl}
-                        alt=""
-                        onError={(event) =>
-                          setPlatformImageFallback(event.currentTarget)
-                        }
-                      />
+                      <AdminImageThumb src={item.imageUrl} />
                       <div>
                         <h4>{item.name}</h4>
                         <p>

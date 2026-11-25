@@ -122,26 +122,28 @@ export default function PlatformCarousel({
                       }
                     }}
                   >
-                    <img
-                      src={item.imageUrl || platformArtUrl(item.slug)}
-                      alt={item.name}
-                      draggable={false}
-                      onError={(event) => {
-                        const img = event.currentTarget;
-                        if (img.dataset.ph === "1") return;
-                        if (/^https?:/i.test(img.src) && !img.dataset.local) {
-                          img.dataset.local = "1";
-                          img.src = platformArtUrl(item.slug);
-                          return;
-                        }
-                        const next = nextPlatformArtUrl(item.slug, img.src);
-                        if (next) {
-                          img.src = next;
-                          return;
-                        }
-                        setPlatformImageFallback(img);
-                      }}
-                    />
+                    <div className="collection-console-art">
+                      <img
+                        src={item.imageUrl || platformArtUrl(item.slug)}
+                        alt={item.name}
+                        draggable={false}
+                        onError={(event) => {
+                          const img = event.currentTarget;
+                          if (img.dataset.ph === "1") return;
+                          if (/^https?:/i.test(img.src) && !img.dataset.local) {
+                            img.dataset.local = "1";
+                            img.src = platformArtUrl(item.slug);
+                            return;
+                          }
+                          const next = nextPlatformArtUrl(item.slug, img.src);
+                          if (next) {
+                            img.src = next;
+                            return;
+                          }
+                          setPlatformImageFallback(img);
+                        }}
+                      />
+                    </div>
                     <span>{item.name}</span>
                   </Link>
                 );
